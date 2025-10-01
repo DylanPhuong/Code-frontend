@@ -1,0 +1,415 @@
+import {
+    Modal,
+    Box,
+    Typography,
+    TextField,
+    Button,
+    MenuItem,
+    IconButton,
+    FormControlLabel
+} from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
+import { useState, useEffect } from 'react';
+import { createNewChannel, updateCurrentChannel } from '../../Services/APIDevice';
+import _ from 'lodash';
+import toast from 'react-hot-toast';
+import { Android12Switch } from '../Switch/IconSwitch'
+import useValidator from '../Valiedate/Validation'
+
+function ModalChannel(props) {
+    const style = {
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        width: '90vw', // dùng % thay vì fix px, tự scale theo màn hình
+        maxWidth: 600, // không vượt quá 600px trên màn hình lớn
+        bgcolor: '#fff',
+        borderRadius: 2,
+        boxShadow: 24,
+        p: 4,
+        maxHeight: '90vh', // chiều cao tối đa theo viewport
+        overflowY: 'auto', // bật scroll dọc khi vượt quá maxHeight
+    };
+
+
+    const defaultData = {
+        channel: '',
+        name: '',
+        device: null,
+        symbol: '',
+        unit: '',
+        offset: '',
+        gain: '',
+        lowSet: '',
+        highSet: '',
+        slaveId: '',
+        functionCode: null,
+        address: '',
+        dataFormat: null,
+        dataType: null,
+        selectFTP: false,
+    };
+
+    const [dataChannels, setDataChannels] = useState(defaultData);
+    const [errors, setErrors] = useState({});
+    const { validate } = useValidator();
+    const { action, isShowModalChannel, handleCloseModalChannel, dataModalChannel,
+        listDevices, listDataFormat, listDataType, listFunctionCode } = props;
+
+    useEffect(() => {
+        if (isShowModalChannel) {
+            setErrors({});
+            if (action === 'EDIT' && dataModalChannel) {
+                const func = listFunctionCode.find(f => f.id === dataModalChannel.functionCodeId);
+                const format = listDataFormat.find(d => d.id === dataModalChannel.dataFormatId);
+                const type = listDataType.find(t => t.id === dataModalChannel.dataTypeId);
+                const device = listDevices.find(d => d.name === dataModalChannel.deviceName);
+
+                setDataChannels({
+                    id: dataModalChannel.id,
+                    channel: dataModalChannel.channel,
+                    name: dataModalChannel.name,
+                    device: device ? { _id: device.id, name: device.name } : null,
+                    symbol: dataModalChannel.symbol,
+                    unit: dataModalChannel.unit,
+                    offset: dataModalChannel.offset,
+                    gain: dataModalChannel.gain,
+                    lowSet: dataModalChannel.lowSet,
+                    highSet: dataModalChannel.highSet,
+                    slaveId: dataModalChannel.slaveId,
+                    functionCode: func ? func.id : null,
+                    address: dataModalChannel.address,
+                    dataFormat: format ? format.id : null,
+                    dataType: type ? type.id : null,
+                    selectFTP: dataModalChannel.selectFTP
+                });
+            }
+        }
+    }, [isShowModalChannel, action, dataModalChannel]);
+
+    const handleClose = () => {
+        handleCloseModalChannel();
+        setDataChannels(defaultData);
+        setErrors({});
+    };
+
+    const handleInputChange = (value, name) => {
+        // Cập nhật giá trị dataChannels
+        setDataChannels((prev) => ({
+            ...prev,
+            [name]: value,
+        }));
+
+        // Validate ngay khi người dùng nhập và cập nhật errors theo field
+        const errorMessage = validate(name, value);
+        setErrors((prev) => ({
+            ...prev,
+            [name]: errorMessage,
+        }));
+    };
+
+    const validateAll = () => {
+        const newErrors = {};
+        Object.entries(dataChannels).forEach(([key, value]) => {
+            if (key === "dataType" && Number(dataChannels.dataFormat) <= 2) {
+                newErrors[key] = "";
+            } else {
+                newErrors[key] = validate(key, value);
+            }
+        });
+        setErrors(newErrors);
+
+        // Kiểm tra xem có lỗi nào không
+        return Object.values(newErrors).every((err) => err === "");
+    };
+
+    const handleConfirmChannel = async () => {
+        if (!validateAll()) {
+            alert('Check Validate again')
+            return;
+        }
+        const dataToSave = { ...dataChannels };
+        // console.log('check data Save channel: ', dataToSave)
+        if (dataToSave.dataFormat === 1) {
+            dataToSave.dataType = 1;
+        } else if (dataToSave.dataFormat === 2) {
+            dataToSave.dataType = 2;
+        }
+
+        let res = action === 'CREATE'
+            ? await createNewChannel(dataChannels)
+            : await updateCurrentChannel(dataToSave)
+        if (res && res.EC === 0) {
+            toast.success(res.EM);
+            handleClose();
+        } else {
+            toast.error(res.EM);
+        }
+    };
+
+    const getDataTypeOptionsByFormat = () => {
+        const formatId = Number(dataChannels.dataFormat);
+        // console.log('Check formatId: ', formatId)
+        // console.log('Check listDataType: ', listDataType)
+        switch (formatId) {
+            case 3: // 32-bit Signed
+                return listDataType.filter(item => [7, 8, 9, 10].includes(Number(item._id || item.id)));
+            case 4: // 32-bit Unsigned
+                return listDataType.filter(item => [11, 12, 13, 14].includes(Number(item._id || item.id)));
+            case 5: // 32-bit Float
+                return listDataType.filter(item => [3, 4, 5, 6].includes(Number(item._id || item.id)));
+            case 6: // 64-bit Signed
+                return listDataType.filter(item => [15, 16, 17, 18].includes(Number(item._id || item.id)));
+            case 7: // 64-bit Unsigned
+                return listDataType.filter(item => [19, 20, 21, 22].includes(Number(item._id || item.id)));
+            case 8: // 64-bit Double
+                return listDataType.filter(item => [23, 24, 25, 26].includes(Number(item._id || item.id)));
+            default:
+                return [];
+        }
+    };
+
+    return (
+        <Modal open={isShowModalChannel} onClose={handleClose} onKeyDown={(e) => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                handleConfirmChannel();
+            }
+        }}>
+            <Box sx={style}>
+                {/* Header */}
+                <Typography
+                    variant="h6"
+                    align="center"
+                    sx={{ mb: 2 }}
+                >
+                    {action === 'CREATE' ? 'Thêm mới' : 'Chỉnh sửa'}
+                </Typography>
+
+                <IconButton
+                    onClick={handleClose}
+                    sx={{
+                        position: "absolute",
+                        right: 20,
+                        top: "8%",
+                        transform: "translateY(-50%)"
+                    }}
+                >
+                    <CloseIcon />
+                </IconButton>
+                {/* Form */}
+                <Box
+                    component="form"
+                    display="grid"
+                    gridTemplateColumns="1fr 1fr"
+                    gap={2}
+                    onSubmit={(e) => {
+                        e.preventDefault(); // chặn reload trang
+                        handleConfirmChannel();
+                    }}
+                >
+                    {/* Channel */}
+                    <TextField
+                        label="Channel"
+                        value={dataChannels.channel}
+                        variant="standard"
+                        onChange={(e) => handleInputChange(e.target.value, 'channel')}
+                        error={!!errors.channel}
+                        helperText={errors.channel}
+                    />
+                    {/* Name */}
+                    <TextField
+                        label="Name"
+                        value={dataChannels.name}
+                        variant="standard"
+                        onChange={(e) => handleInputChange(e.target.value, 'name')}
+                        error={!!errors.name}
+                        helperText={errors.name}
+                    />
+                    {/* Device */}
+                    <TextField
+                        select
+                        fullWidth
+                        label="Device"
+                        variant="standard"
+                        value={dataChannels.device?._id || ""}
+                        onChange={(e) => {
+                            const device = listDevices.find(d => d.id === e.target.value);
+                            if (device) {
+                                handleInputChange({ _id: device.id, name: device.name }, "device");
+                            }
+                        }}
+                        error={!!errors.device}
+                        helperText={errors.device}
+                    >
+                        {listDevices.map((item) => (
+                            <MenuItem key={item.id} value={item.id}>
+                                {item.name}
+                            </MenuItem>
+                        ))}
+                    </TextField>
+                    {/* Function */}
+                    <TextField
+                        select
+                        fullWidth
+                        label="Function"
+                        variant="standard"
+                        value={dataChannels.functionCode || ""}
+                        onChange={(e) => {
+                            const func = listFunctionCode.find(f => f.id === Number(e.target.value));
+                            if (func) {
+                                handleInputChange(func.id, "functionCode");
+                            }
+                        }}
+                        error={!!errors.functionCode}
+                        helperText={errors.functionCode}
+                    >
+                        {listFunctionCode.map((item) => (
+                            <MenuItem key={item.id} value={item.id}>
+                                {item.name}
+                            </MenuItem>
+                        ))}
+                    </TextField>
+                    {/* Slave Id */}
+                    <TextField
+                        label="Slave Id"
+                        value={dataChannels.slaveId}
+                        variant="standard"
+                        onChange={(e) => handleInputChange(e.target.value, 'slaveId')}
+                        error={!!errors.slaveId}
+                        helperText={errors.slaveId}
+                    />
+                    {/* Address */}
+                    <TextField
+                        label="Address"
+                        value={dataChannels.address}
+                        variant="standard"
+                        onChange={(e) => handleInputChange(e.target.value, 'address')}
+                        error={!!errors.address}
+                        helperText={errors.address}
+                    />
+                    {/* Data Format */}
+                    <TextField
+                        select
+                        fullWidth
+                        label="Data Format"
+                        value={dataChannels.dataFormat || ""}
+                        variant="standard"
+                        onChange={(e) => {
+                            const format = listDataFormat.find(d => d.id === Number(e.target.value));
+                            if (format) {
+                                handleInputChange(format.id, "dataFormat");
+                            }
+                        }}
+                        error={!!errors.dataFormat}
+                        helperText={errors.dataFormat}
+                    >
+                        {listDataFormat.map((item) => (
+                            <MenuItem key={item.id} value={item.id}>
+                                {item.name}
+                            </MenuItem>
+                        ))}
+                    </TextField>
+                    {/* Data Type */}
+                    {Number(dataChannels.dataFormat) > 2 && (
+                        <TextField
+                            select
+                            fullWidth
+                            label="Data Type"
+                            value={dataChannels.dataType || ""}
+                            variant="standard"
+                            onChange={(e) => handleInputChange(Number(e.target.value), "dataType")}
+                            error={!!errors.dataType}
+                            helperText={errors.dataType}
+                        >
+                            {getDataTypeOptionsByFormat().map(item => (
+                                <MenuItem key={item._id || item.id} value={item._id || item.id}>
+                                    {item.name}
+                                </MenuItem>
+                            ))}
+
+                        </TextField>
+                    )}
+
+                    {/* Symbol */}
+                    <TextField
+                        label="Symbol"
+                        value={dataChannels.symbol}
+                        variant="standard"
+                        onChange={(e) => handleInputChange(e.target.value, 'symbol')}
+                        error={!!errors.symbol}
+                        helperText={errors.symbol}
+                    />
+                    {/* Unit */}
+                    <TextField
+                        label="Unit"
+                        value={dataChannels.unit}
+                        variant="standard"
+                        onChange={(e) => handleInputChange(e.target.value, 'unit')}
+                    />
+                    {/* Offser */}
+                    <TextField
+                        label="Offset"
+                        value={dataChannels.offset}
+                        variant="standard"
+                        onChange={(e) => handleInputChange(e.target.value, 'offset')}
+                        error={!!errors.offset}
+                        helperText={errors.offset}
+                    />
+                    {/* Gain */}
+                    <TextField
+                        label="Gain"
+                        value={dataChannels.gain}
+                        variant="standard"
+                        onChange={(e) => handleInputChange(e.target.value, 'gain')}
+                        error={!!errors.gain}
+                        helperText={errors.gain}
+                    />
+                    {/* Low Set */}
+                    <TextField
+                        label="Low Set"
+                        value={dataChannels.lowSet}
+                        variant="standard"
+                        onChange={(e) => handleInputChange(e.target.value, 'lowSet')}
+                        error={!!errors.lowSet}
+                        helperText={errors.lowSet}
+                    />
+                    {/* High Set */}
+                    <TextField
+                        label="High Set"
+                        value={dataChannels.highSet}
+                        variant="standard"
+                        onChange={(e) => handleInputChange(e.target.value, 'highSet')}
+                        error={!!errors.highSet}
+                        helperText={errors.highSet}
+                    />
+                    {/* Switch chọn FTP */}
+                    <FormControlLabel
+                        label="Select FTP"
+                        control={
+                            <Android12Switch
+                                checked={dataChannels.selectFTP}
+                                onChange={(e) => handleInputChange(e.target.checked, "selectFTP")}
+                            />
+                        }
+                    />
+                    {/* Footer */}
+                    <Box mt={3}
+                        sx={{ gridColumn: 'span 2', display: 'flex', justifyContent: 'center' }}>
+                        <Button
+                            type="submit"
+                            variant="contained"
+                            color="success"
+                            sx={{ width: '150px' }}
+                        >
+                            {action === 'CREATE' ? 'Lưu' : 'Cập nhật'}
+                        </Button>
+                    </Box>
+                </Box>
+            </Box>
+        </Modal >
+    );
+}
+
+export default ModalChannel;

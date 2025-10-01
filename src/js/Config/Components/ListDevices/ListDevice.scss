@@ -1,0 +1,32 @@
+.container {
+    padding-top: 50px;
+
+    .refresh {
+        margin-bottom: 10px;
+    }
+
+    .MuiTablePagination-toolbar {
+        flex-direction: row !important;
+        align-items: center !important;
+    }
+
+    .MuiTablePagination-displayedRows,
+    .MuiTablePagination-selectLabel {
+        margin: 0 !important;
+    }
+
+    .MuiDataGrid-columnHeaders {
+        background-color: #968d8d; // màu nền
+    }
+
+    // căn giữa text trong header
+    .MuiDataGrid-columnHeaderTitle {
+        text-align: center !important;
+        width: 100%;
+        font-family: 'Roboto', sans-serif; // đổi font
+        font-weight: 600; // đậm hơn nếu cần
+        font-size: 16px; // chỉnh kích thước chữ
+        color: #fff; // đổi màu chữ
+    }
+
+}

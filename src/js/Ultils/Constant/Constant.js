@@ -1,0 +1,1 @@
+export const CONNECTTION_PORT = `http://${window.location.hostname}:8080`
