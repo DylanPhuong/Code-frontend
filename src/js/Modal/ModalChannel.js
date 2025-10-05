@@ -11,7 +11,7 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import { useState, useEffect } from 'react';
 import { createNewChannel, updateCurrentChannel } from '../../Services/APIDevice';
-import _ from 'lodash';
+// import _ from 'lodash';
 import toast from 'react-hot-toast';
 import { Android12Switch } from '../Switch/IconSwitch'
 import useValidator from '../Valiedate/Validation'
@@ -48,6 +48,7 @@ function ModalChannel(props) {
         address: '',
         dataFormat: null,
         dataType: null,
+        functionText: '',
         selectFTP: false,
     };
 
@@ -59,6 +60,7 @@ function ModalChannel(props) {
 
     useEffect(() => {
         if (isShowModalChannel) {
+            // console.log('check data tag name from list: ', dataModalChannel)
             setErrors({});
             if (action === 'EDIT' && dataModalChannel) {
                 const func = listFunctionCode.find(f => f.id === dataModalChannel.functionCodeId);
@@ -82,6 +84,7 @@ function ModalChannel(props) {
                     address: dataModalChannel.address,
                     dataFormat: format ? format.id : null,
                     dataType: type ? type.id : null,
+                    functionText: dataModalChannel.functionText,
                     selectFTP: dataModalChannel.selectFTP
                 });
             }
@@ -111,35 +114,61 @@ function ModalChannel(props) {
 
     const validateAll = () => {
         const newErrors = {};
+
         Object.entries(dataChannels).forEach(([key, value]) => {
-            if (key === "dataType" && Number(dataChannels.dataFormat) <= 2) {
+            // Không validate dataType nếu dataFormat <= 2
+            if (key === "functionText") {
+                newErrors[key] = ""; // không kiểm tra
+            }
+            else if (key === "dataType" && Number(dataChannels.dataFormat) <= 2) {
                 newErrors[key] = "";
-            } else {
+            }
+            // Không validate dataFormat nếu functionCode <= 2 hoặc = 5
+            else if (
+                key === "dataFormat" &&
+                !(Number(dataChannels.functionCode) > 2 && Number(dataChannels.functionCode) !== 5)
+            ) {
+                newErrors[key] = "";
+            }
+            // Còn lại validate như bình thường
+            else {
                 newErrors[key] = validate(key, value);
             }
         });
-        setErrors(newErrors);
 
-        // Kiểm tra xem có lỗi nào không
+        setErrors(newErrors);
         return Object.values(newErrors).every((err) => err === "");
     };
 
     const handleConfirmChannel = async () => {
         if (!validateAll()) {
-            alert('Check Validate again')
+            alert('Check Validate again');
             return;
         }
+
+        // Sao chép dữ liệu gốc
         const dataToSave = { ...dataChannels };
-        // console.log('check data Save channel: ', dataToSave)
+
+        // Nếu dataFormat là 1 hoặc 2 -> ép luôn dataType tương ứng
         if (dataToSave.dataFormat === 1) {
             dataToSave.dataType = 1;
         } else if (dataToSave.dataFormat === 2) {
             dataToSave.dataType = 2;
         }
 
-        let res = action === 'CREATE'
-            ? await createNewChannel(dataChannels)
-            : await updateCurrentChannel(dataToSave)
+        // Giá trị mặc định cho functionText nếu đang rỗng
+        let finalFunctionText = dataToSave.functionText?.trim();
+        if (!finalFunctionText) {
+            finalFunctionText = `(x) => {
+    return x
+}`;
+        }
+        dataToSave.functionText = finalFunctionText;
+
+        const res = action === 'CREATE'
+            ? await createNewChannel(dataToSave)
+            : await updateCurrentChannel(dataToSave);
+
         if (res && res.EC === 0) {
             toast.success(res.EM);
             handleClose();
@@ -147,6 +176,7 @@ function ModalChannel(props) {
             toast.error(res.EM);
         }
     };
+
 
     const getDataTypeOptionsByFormat = () => {
         const formatId = Number(dataChannels.dataFormat);
@@ -171,12 +201,18 @@ function ModalChannel(props) {
     };
 
     return (
-        <Modal open={isShowModalChannel} onClose={handleClose} onKeyDown={(e) => {
-            if (e.key === "Enter") {
-                e.preventDefault();
-                handleConfirmChannel();
-            }
-        }}>
+        <Modal open={isShowModalChannel}
+            onClose={handleClose}
+            onKeyDown={(e) => {
+                if (
+                    e.key === "Enter" &&
+                    !["functionText"].includes(e.target.name)
+                ) {
+                    e.preventDefault();
+                    handleConfirmChannel();
+                }
+            }}
+        >
             <Box sx={style}>
                 {/* Header */}
                 <Typography
@@ -257,9 +293,16 @@ function ModalChannel(props) {
                         variant="standard"
                         value={dataChannels.functionCode || ""}
                         onChange={(e) => {
-                            const func = listFunctionCode.find(f => f.id === Number(e.target.value));
+                            const funcId = Number(e.target.value);
+                            const func = listFunctionCode.find(f => f.id === funcId);
                             if (func) {
-                                handleInputChange(func.id, "functionCode");
+                                setDataChannels((prev) => ({
+                                    ...prev,
+                                    functionCode: func.id,
+                                    // Nếu functionCode <= 2 hoặc = 5 thì clear luôn dataFormat và dataType
+                                    dataFormat: (funcId > 2 && funcId !== 5) ? prev.dataFormat : '',
+                                    dataType: (funcId > 2 && funcId !== 5) ? prev.dataType : ''
+                                }));
                             }
                         }}
                         error={!!errors.functionCode}
@@ -271,6 +314,7 @@ function ModalChannel(props) {
                             </MenuItem>
                         ))}
                     </TextField>
+
                     {/* Slave Id */}
                     <TextField
                         label="Slave Id"
@@ -290,27 +334,35 @@ function ModalChannel(props) {
                         helperText={errors.address}
                     />
                     {/* Data Format */}
-                    <TextField
-                        select
-                        fullWidth
-                        label="Data Format"
-                        value={dataChannels.dataFormat || ""}
-                        variant="standard"
-                        onChange={(e) => {
-                            const format = listDataFormat.find(d => d.id === Number(e.target.value));
-                            if (format) {
-                                handleInputChange(format.id, "dataFormat");
-                            }
-                        }}
-                        error={!!errors.dataFormat}
-                        helperText={errors.dataFormat}
-                    >
-                        {listDataFormat.map((item) => (
-                            <MenuItem key={item.id} value={item.id}>
-                                {item.name}
-                            </MenuItem>
-                        ))}
-                    </TextField>
+                    {(Number(dataChannels.functionCode) > 2 && Number(dataChannels.functionCode) !== 5) && (
+                        <TextField
+                            select
+                            fullWidth
+                            label="Data Format"
+                            value={dataChannels.dataFormat || ""}
+                            variant="standard"
+                            onChange={(e) => {
+                                const formatId = Number(e.target.value);
+                                const format = listDataFormat.find(d => d.id === formatId);
+                                if (format) {
+                                    setDataChannels(prev => ({
+                                        ...prev,
+                                        dataFormat: format.id,
+                                        dataType: formatId > 2 ? prev.dataType : ''
+                                    }));
+                                }
+                            }}
+                            error={!!errors.dataFormat}
+                            helperText={errors.dataFormat}
+                        >
+                            {listDataFormat.map((item) => (
+                                <MenuItem key={item.id} value={item.id}>
+                                    {item.name}
+                                </MenuItem>
+                            ))}
+                        </TextField>
+                    )}
+
                     {/* Data Type */}
                     {Number(dataChannels.dataFormat) > 2 && (
                         <TextField
@@ -384,6 +436,29 @@ function ModalChannel(props) {
                         error={!!errors.highSet}
                         helperText={errors.highSet}
                     />
+
+                    {/* Function Text */}
+                    <TextField
+                        name="functionText"
+                        label="Function Text"
+                        value={dataChannels.functionText || ""}
+                        variant="standard"
+                        onChange={(e) => handleInputChange(e.target.value, 'functionText')}
+                        multiline
+                        minRows={5} // số dòng tối thiểu hiển thị
+                        maxRows={5} // số dòng tối đa trước khi hiện thanh cuộn
+                        // fullWidth
+                        sx={{
+                            gridColumn: 'span 2',
+                            '& .MuiInputBase-root': {
+                                maxHeight: 250,
+                                overflowY: 'auto',
+                                // fontFamily: 'monospace',
+                                whiteSpace: 'pre',
+                            }
+                        }}
+                    />
+
                     {/* Switch chọn FTP */}
                     <FormControlLabel
                         label="Select FTP"

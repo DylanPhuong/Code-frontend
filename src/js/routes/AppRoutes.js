@@ -2,6 +2,7 @@ import { Switch, Route } from "react-router-dom";
 import ListChannels from "../TagName/ListChannels/ListChannels";
 import FunctionSettings from "../TagName/FunctionSetting/FunctionSettings";
 import DeviceTab from "../Config/DeviceTab";
+import HomeLayout from "../HomeLayout/HomeLayout";
 
 const AppRoutes = (props) => {
 
@@ -25,8 +26,7 @@ const AppRoutes = (props) => {
                 </Route>
 
                 <Route path="/" exact>
-                    {/* <Root /> */}
-                    Home
+                    <HomeLayout />
                 </Route>
 
                 <Route path="*">

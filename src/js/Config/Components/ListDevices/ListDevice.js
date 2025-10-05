@@ -12,6 +12,7 @@ import { fetchAllDevices, deleteDevice, fetchAllComs, fetchAllProtocol } from ".
 import ModalDelete from '../../../Modal/ModalDelete';
 import ModalProtocol from '../../../Modal/ModalProtocol';
 import ModalDevice from '../../../Modal/ModalDevice';
+import Loading from '../../../Ultils/Loading/Loading';
 
 const ListDevices = (props) => {
     const [pageSize, setPageSize] = useState(5);
@@ -31,7 +32,7 @@ const ListDevices = (props) => {
     const [dataModalDevice, setdataModalDevice] = useState([])
     const [selectionModel, setSelectionModel] = useState([]);
     const [selectedCount, setSelectedCount] = useState([])
-
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         fetchDevices();
@@ -41,6 +42,7 @@ const ListDevices = (props) => {
 
     const fetchDevices = async () => {
         let response = await fetchAllDevices();
+        setLoading(false);
         // console.log('Check Lisst COM: ', response)
         if (response && response.EC === 0 && response.DT?.DT) {
             const rowsWithId = response.DT.DT.map((item, index) => ({
@@ -222,10 +224,9 @@ const ListDevices = (props) => {
 
                         }}
                         sx={{
-                            "& .MuiDataGrid-columnSeparator": {
-                                display: "none",
-                            },
+                            "& .MuiDataGrid-columnSeparator": { display: "none" },
                         }}
+                        loading={loading}
                         localeText={{
                             noRowsLabel: 'Không có dữ liệu',
                             footerRowSelected: (count) => `${count} hàng đã chọn`,
@@ -233,8 +234,11 @@ const ListDevices = (props) => {
                                 labelRowsPerPage: 'Số hàng mỗi trang:',
                             },
                         }}
-
                     />
+
+                    {loading && (
+                        <Loading text="Đang tải dữ liệu..." />
+                    )}
                 </Paper>
             </div>
 

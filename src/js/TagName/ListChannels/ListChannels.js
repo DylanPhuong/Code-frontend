@@ -4,12 +4,12 @@ import Paper from '@mui/material/Paper';
 import IconButton from '@mui/material/IconButton';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import './Listchannels.scss'
 import toast from 'react-hot-toast';
 import { Android12Switch } from '../../Switch/IconSwitch'
 import { fetchAllDevices, fetchAllChannels, fetchAllDataFormat, fetchAllDataType, fetchAllFunctionCode, deleteChannel } from "../../../Services/APIDevice";
 import ModalChannel from '../../Modal/ModalChannel';
 import ModalDelete from '../../Modal/ModalDelete';
+import Loading from "../../Ultils/Loading/Loading";
 
 const ListChannels = (props) => {
     const [pageSize, setPageSize] = useState(5);
@@ -28,6 +28,7 @@ const ListChannels = (props) => {
     const [dataModalDelete, setdataModalDelete] = useState([]);
     const [selectionChannel, setSelectionChannel] = useState([]);
     const [selectedCount, setSelectedCount] = useState([])
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const init = async () => {
@@ -36,12 +37,14 @@ const ListChannels = (props) => {
             const dataTypes = await fetchDataType();
             await fetchDevices();
             await fetchChannel(functionCodes, dataFormats, dataTypes);
+            setLoading(false);
         };
         init();
     }, [isShowModalChannel]);
 
     const fetchChannel = async (functionCodes = [], dataFormats = [], dataTypes = []) => {
         let response = await fetchAllChannels();
+        // console.log('tag name data: ', response)
         if (response && response.EC === 0 && Array.isArray(response.DT?.DT)) {
             const rowsWithId = response.DT.DT.map((item) => {
                 const func = functionCodes.find(f => f.id === item.functionCode);
@@ -68,6 +71,7 @@ const ListChannels = (props) => {
                     dataFormatName: format ? format.name : '',
                     dataTypeId: type ? type.id : item.dataType,
                     dataTypeName: type ? type.name : '',
+                    functionText: item.functionText,
                     selectFTP: item.selectFTP
                 };
             });
@@ -283,12 +287,9 @@ const ListChannels = (props) => {
 
                         }}
                         sx={{
-                            "& .MuiDataGrid-columnSeparator": {
-                                display: "none",
-                            },
-
+                            "& .MuiDataGrid-columnSeparator": { display: "none" },
                         }}
-
+                        loading={loading}
                         localeText={{
                             noRowsLabel: 'Không có dữ liệu',
                             footerRowSelected: (count) => `${count} hàng đã chọn`,
@@ -296,8 +297,11 @@ const ListChannels = (props) => {
                                 labelRowsPerPage: 'Số hàng mỗi trang:',
                             },
                         }}
-
                     />
+
+                    {loading && (
+                        <Loading text="Đang tải dữ liệu..." />
+                    )}
                 </Paper>
             </div>
 

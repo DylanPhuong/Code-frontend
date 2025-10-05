@@ -10,6 +10,7 @@ import { fetchAllDevices, fetchAllChannels, fetchAllDataFormat, fetchAllDataType
 import ModalChannel from '../../Modal/ModalChannel';
 import ModalDelete from '../../Modal/ModalDelete';
 import { socket } from '../../../js/Ultils/Socket/Socket';
+import Loading from "../../Ultils/Loading/Loading";
 
 const FunctionSettings = (props) => {
     const [pageSize, setPageSize] = useState(5);
@@ -29,6 +30,7 @@ const FunctionSettings = (props) => {
     const [dataModalDelete, setdataModalDelete] = useState([]);
     const [selectionChannel, setSelectionChannel] = useState([]);
     const [selectedCount, setSelectedCount] = useState([])
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         socket.connect(); // kết nối khi trang mở
@@ -56,8 +58,8 @@ const FunctionSettings = (props) => {
                     status: string_status,
                 };
             });
-
             setListDataSocket(mapped);
+            setLoading(false);
         });
 
         return () => {
@@ -73,12 +75,14 @@ const FunctionSettings = (props) => {
             const dataTypes = await fetchDataType();
             await fetchDevices();
             await fetchChannel(functionCodes, dataFormats, dataTypes);
+            setLoading(false);
         };
         init();
     }, [isShowModalChannel]);
 
     const fetchChannel = async (functionCodes = [], dataFormats = [], dataTypes = []) => {
         let response = await fetchAllChannels();
+        // console.log('tag name data: ', response)
         if (response && response.EC === 0 && Array.isArray(response.DT?.DT)) {
             const rowsWithId = response.DT.DT.map((item) => {
                 const func = functionCodes.find(f => f.id === item.functionCode);
@@ -105,6 +109,7 @@ const FunctionSettings = (props) => {
                     dataFormatName: format ? format.name : '',
                     dataTypeId: type ? type.id : item.dataType,
                     dataTypeName: type ? type.name : '',
+                    functionText: item.functionText,
                     selectFTP: item.selectFTP
                 };
             });
@@ -226,13 +231,22 @@ const FunctionSettings = (props) => {
                 <>
                     <IconButton
                         color="primary"
-                        onClick={(e) => { e.stopPropagation(); handleEditChannel(params.row); }}
+                        title="Chỉnh sửa"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            handleEditChannel(params.row);
+                        }}
                     >
                         <EditIcon />
                     </IconButton>
+
                     <IconButton
                         color="error"
-                        onClick={(e) => { e.stopPropagation(); handleDeleteDevice(params.row); }}
+                        title="Xóa"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteDevice(params.row);
+                        }}
                     >
                         <DeleteIcon />
                     </IconButton>
@@ -371,12 +385,9 @@ const FunctionSettings = (props) => {
 
                         }}
                         sx={{
-                            "& .MuiDataGrid-columnSeparator": {
-                                display: "none",
-                            },
-
+                            "& .MuiDataGrid-columnSeparator": { display: "none" },
                         }}
-
+                        loading={loading}
                         localeText={{
                             noRowsLabel: 'Không có dữ liệu',
                             footerRowSelected: (count) => `${count} hàng đã chọn`,
@@ -384,8 +395,11 @@ const FunctionSettings = (props) => {
                                 labelRowsPerPage: 'Số hàng mỗi trang:',
                             },
                         }}
-
                     />
+
+                    {loading && (
+                        <Loading text="Đang tải dữ liệu..." />
+                    )}
                 </Box>
 
                 <Box sx={{ mt: 1 }}>
@@ -398,17 +412,14 @@ const FunctionSettings = (props) => {
                             rows={listDataSocket}
                             columns={column_value}
                             pageSize={pageSize}
-                            // checkboxSelection
+                            hideFooterSelectedRowCount={true}
                             onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
                             rowsPerPageOptions={[5, 10, 20]}
                             pagination
                             sx={{
-                                "& .MuiDataGrid-columnSeparator": {
-                                    display: "none",
-                                },
-
+                                "& .MuiDataGrid-columnSeparator": { display: "none" },
                             }}
-
+                            loading={loading}
                             localeText={{
                                 noRowsLabel: 'Không có dữ liệu',
                                 footerRowSelected: (count) => `${count} hàng đã chọn`,
@@ -416,8 +427,11 @@ const FunctionSettings = (props) => {
                                     labelRowsPerPage: 'Số hàng mỗi trang:',
                                 },
                             }}
-
                         />
+
+                        {loading && (
+                            <Loading text="Đang tải dữ liệu..." />
+                        )}
                     </Box>
                 </Box>
             </div>

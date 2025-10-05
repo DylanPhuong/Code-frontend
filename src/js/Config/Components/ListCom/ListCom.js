@@ -6,12 +6,14 @@ import EditIcon from '@mui/icons-material/Edit';
 import toast from 'react-hot-toast';
 import { fetchAllComs } from '../../../../Services/APIDevice'
 import ModalCom from '../../../Modal/ModalCom';
+import Loading from '../../../Ultils/Loading/Loading';
 
 const ListCom = (props) => {
     const [pageSize, setPageSize] = useState(5);
     const [listComs, setListComs] = useState([]);
     const [dataModalCom, setdataModalCom] = useState([]);
     const [isShowModalCom, setisShowModalCom] = useState(false);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         fetchComs();
@@ -19,6 +21,7 @@ const ListCom = (props) => {
 
     const fetchComs = async () => {
         let response = await fetchAllComs();
+        setLoading(false);
         // console.log('check data com read: ', response)
         if (response && response.EC === 0 && response.DT?.DT) {
             const rowsWithId = response.DT.DT.map((item, index) => ({
@@ -85,6 +88,10 @@ const ListCom = (props) => {
                         rowsPerPageOptions={[5, 10, 20]}
                         pagination
                         hideFooterSelectedRowCount={true}
+                        sx={{
+                            "& .MuiDataGrid-columnSeparator": { display: "none" },
+                        }}
+                        loading={loading}
                         localeText={{
                             noRowsLabel: 'Không có dữ liệu',
                             footerRowSelected: (count) => `${count} hàng đã chọn`,
@@ -92,12 +99,11 @@ const ListCom = (props) => {
                                 labelRowsPerPage: 'Số hàng mỗi trang:',
                             },
                         }}
-                        sx={{
-                            "& .MuiDataGrid-columnSeparator": {
-                                display: "none",
-                            },
-                        }}
                     />
+
+                    {loading && (
+                        <Loading text="Đang tải dữ liệu..." />
+                    )}
                 </Paper>
             </div>
 
