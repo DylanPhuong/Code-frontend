@@ -10,7 +10,7 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import { useState, useEffect } from 'react';
 // import _ from 'lodash'
-import useValidator from '../Valiedate/Validation'
+import useValidator from '../../Valiedate/Validation'
 
 function ModalProtocol(props) {
 

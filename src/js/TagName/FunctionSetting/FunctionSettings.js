@@ -7,8 +7,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import toast from 'react-hot-toast';
 import { Android12Switch } from '../../Switch/IconSwitch'
 import { fetchAllDevices, fetchAllChannels, fetchAllDataFormat, fetchAllDataType, fetchAllFunctionCode, deleteChannel } from "../../../Services/APIDevice";
-import ModalChannel from '../../Modal/ModalChannel';
-import ModalDelete from '../../Modal/ModalDelete';
+import ModalChannel from '../../Ultils/Modal/ModalChannel';
+import ModalDelete from '../../Ultils/Modal/ModalDelete';
 import { socket } from '../../../js/Ultils/Socket/Socket';
 import Loading from "../../Ultils/Loading/Loading";
 
@@ -20,6 +20,7 @@ const FunctionSettings = (props) => {
     const [listDataType, setlistDataType] = useState([]);
     const [listFunctionCode, setlistFunctionCode] = useState([]);
     const [listDevices, setListDevices] = useState([])
+    const [actionFuncSetting, setactionactionFuncSetting] = useState('FUNC');
     const [actionModalChannel, setactionModalChannel] = useState('CREATE');
     const [actionDeleteChannel, setactionDeleteChannel] = useState('');
     // State cho các modal
@@ -180,6 +181,7 @@ const FunctionSettings = (props) => {
     const handleCloseModalDelete = () => setisShowModalDelete(false);
 
     const handleAddChannel = () => {
+        setactionactionFuncSetting("FUNC");
         setactionModalChannel("CREATE");
         setisShowModalChannel(true);
     };
@@ -188,6 +190,7 @@ const FunctionSettings = (props) => {
         // console.log('Check channel update: ', device)
         setSelectionChannel([device.id]);
         setactionModalChannel("EDIT");
+        setactionactionFuncSetting("FUNC");
         setdataModalChannel(device);
         setisShowModalChannel(true);
     };
@@ -439,6 +442,7 @@ const FunctionSettings = (props) => {
             <ModalChannel
                 isShowModalChannel={isShowModalChannel}
                 action={actionModalChannel}
+                actionFuncSetting={actionFuncSetting}
                 dataModalChannel={dataModalChannel}
                 handleCloseModalChannel={handleCloseModalChannel}
                 listDevices={listDevices}

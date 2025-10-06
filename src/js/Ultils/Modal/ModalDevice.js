@@ -10,9 +10,9 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import { useState, useEffect } from 'react';
 import _ from 'lodash';
-import { createNewDevice, updateCurrentDevice, fetchAllComs } from '../../Services/APIDevice';
+import { createNewDevice, updateCurrentDevice, fetchAllComs } from '../../../Services/APIDevice';
 import toast from 'react-hot-toast';
-import useValidator from '../Valiedate/Validation'
+import useValidator from '../../Valiedate/Validation'
 
 function ModalDevice(props) {
     const style = {

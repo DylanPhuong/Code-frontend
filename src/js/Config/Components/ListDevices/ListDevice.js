@@ -9,9 +9,9 @@ import AddIcon from "@mui/icons-material/Add";
 import './ListDevice.scss'
 import toast from 'react-hot-toast';
 import { fetchAllDevices, deleteDevice, fetchAllComs, fetchAllProtocol } from "../../../../Services/APIDevice";
-import ModalDelete from '../../../Modal/ModalDelete';
-import ModalProtocol from '../../../Modal/ModalProtocol';
-import ModalDevice from '../../../Modal/ModalDevice';
+import ModalDelete from '../../../Ultils/Modal/ModalDelete';
+import ModalProtocol from '../../../Ultils/Modal/ModalProtocol';
+import ModalDevice from '../../../Ultils/Modal/ModalDevice';
 import Loading from '../../../Ultils/Loading/Loading';
 
 const ListDevices = (props) => {

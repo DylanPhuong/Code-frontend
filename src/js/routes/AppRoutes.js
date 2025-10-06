@@ -3,6 +3,7 @@ import ListChannels from "../TagName/ListChannels/ListChannels";
 import FunctionSettings from "../TagName/FunctionSetting/FunctionSettings";
 import DeviceTab from "../Config/DeviceTab";
 import HomeLayout from "../HomeLayout/HomeLayout";
+import InputPopover from "../Ultils/Popover/Popover";
 
 const AppRoutes = (props) => {
 
@@ -26,7 +27,8 @@ const AppRoutes = (props) => {
                 </Route>
 
                 <Route path="/" exact>
-                    <HomeLayout />
+                    {/* <HomeLayout /> */}
+                    <InputPopover />
                 </Route>
 
                 <Route path="*">

@@ -3,9 +3,9 @@ import { DataGrid } from '@mui/x-data-grid';
 import Paper from '@mui/material/Paper';
 import IconButton from '@mui/material/IconButton';
 import EditIcon from '@mui/icons-material/Edit';
-import toast from 'react-hot-toast';
+// import toast from 'react-hot-toast';
 import { fetchAllComs } from '../../../../Services/APIDevice'
-import ModalCom from '../../../Modal/ModalCom';
+import ModalCom from '../../../Ultils/Modal/ModalCom';
 import Loading from '../../../Ultils/Loading/Loading';
 
 const ListCom = (props) => {
@@ -22,7 +22,7 @@ const ListCom = (props) => {
     const fetchComs = async () => {
         let response = await fetchAllComs();
         setLoading(false);
-        // console.log('check data com read: ', response)
+        console.log('check data com read: ', response)
         if (response && response.EC === 0 && response.DT?.DT) {
             const rowsWithId = response.DT.DT.map((item, index) => ({
                 id: item._id,

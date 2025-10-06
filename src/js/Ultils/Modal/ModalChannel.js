@@ -10,11 +10,11 @@ import {
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { useState, useEffect } from 'react';
-import { createNewChannel, updateCurrentChannel } from '../../Services/APIDevice';
+import { createNewChannel, updateCurrentChannel } from '../../../Services/APIDevice';
 // import _ from 'lodash';
 import toast from 'react-hot-toast';
-import { Android12Switch } from '../Switch/IconSwitch'
-import useValidator from '../Valiedate/Validation'
+import { Android12Switch } from '../../Switch/IconSwitch'
+import useValidator from '../../Valiedate/Validation'
 
 function ModalChannel(props) {
     const style = {
@@ -55,12 +55,12 @@ function ModalChannel(props) {
     const [dataChannels, setDataChannels] = useState(defaultData);
     const [errors, setErrors] = useState({});
     const { validate } = useValidator();
-    const { action, isShowModalChannel, handleCloseModalChannel, dataModalChannel,
+    const { action, actionFuncSetting, isShowModalChannel, handleCloseModalChannel, dataModalChannel,
         listDevices, listDataFormat, listDataType, listFunctionCode } = props;
 
     useEffect(() => {
         if (isShowModalChannel) {
-            // console.log('check data tag name from list: ', dataModalChannel)
+            console.log('check data tag name from list: ', actionFuncSetting)
             setErrors({});
             if (action === 'EDIT' && dataModalChannel) {
                 const func = listFunctionCode.find(f => f.id === dataModalChannel.functionCodeId);
@@ -88,8 +88,18 @@ function ModalChannel(props) {
                     selectFTP: dataModalChannel.selectFTP
                 });
             }
+            if (action === 'CREATE') {
+                setDataChannels(prev => ({
+                    ...defaultData,
+                    functionText:
+                        `(x) => {
+    let y = Number(x.toFixed(2));
+    return y;
+}`
+                }));
+            }
         }
-    }, [isShowModalChannel, action, dataModalChannel]);
+    }, [isShowModalChannel, action, actionFuncSetting, dataModalChannel]);
 
     const handleClose = () => {
         handleCloseModalChannel();
@@ -155,15 +165,6 @@ function ModalChannel(props) {
         } else if (dataToSave.dataFormat === 2) {
             dataToSave.dataType = 2;
         }
-
-        // Giá trị mặc định cho functionText nếu đang rỗng
-        let finalFunctionText = dataToSave.functionText?.trim();
-        if (!finalFunctionText) {
-            finalFunctionText = `(x) => {
-    return x
-}`;
-        }
-        dataToSave.functionText = finalFunctionText;
 
         const res = action === 'CREATE'
             ? await createNewChannel(dataToSave)
@@ -438,27 +439,29 @@ function ModalChannel(props) {
                     />
 
                     {/* Function Text */}
-                    <TextField
-                        name="functionText"
-                        label="Function Text"
-                        value={dataChannels.functionText || ""}
-                        variant="standard"
-                        onChange={(e) => handleInputChange(e.target.value, 'functionText')}
-                        multiline
-                        minRows={5} // số dòng tối thiểu hiển thị
-                        maxRows={5} // số dòng tối đa trước khi hiện thanh cuộn
-                        // fullWidth
-                        sx={{
-                            gridColumn: 'span 2',
-                            '& .MuiInputBase-root': {
-                                maxHeight: 250,
-                                overflowY: 'auto',
-                                // fontFamily: 'monospace',
-                                whiteSpace: 'pre',
-                            }
-                        }}
-                    />
+                    {actionFuncSetting === 'FUNC' && (
+                        <TextField
+                            name="functionText"
+                            label="Function Text"
+                            value={dataChannels.functionText || ""}
+                            variant="standard"
+                            onChange={(e) => handleInputChange(e.target.value, 'functionText')}
+                            multiline
+                            minRows={5} // số dòng tối thiểu hiển thị
+                            maxRows={5} // số dòng tối đa trước khi hiện thanh cuộn
+                            // fullWidth
+                            sx={{
+                                gridColumn: 'span 2',
+                                '& .MuiInputBase-root': {
+                                    maxHeight: 250,
+                                    overflowY: 'auto',
+                                    // fontFamily: 'monospace',
+                                    whiteSpace: 'pre',
+                                }
+                            }}
 
+                        />
+                    )}
                     {/* Switch chọn FTP */}
                     <FormControlLabel
                         label="Select FTP"

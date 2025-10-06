@@ -11,8 +11,8 @@ import CloseIcon from '@mui/icons-material/Close';
 import { useState, useEffect } from 'react';
 import _ from 'lodash'
 import toast from 'react-hot-toast';
-import { updateCurrentCom } from '../../Services/APIDevice'
-import useValidator from '../Valiedate/Validation'
+import { updateCurrentCom } from '../../../Services/APIDevice'
+import useValidator from '../../Valiedate/Validation'
 
 const ModalCom = (props) => {
     const style = {

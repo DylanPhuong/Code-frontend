@@ -7,8 +7,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import toast from 'react-hot-toast';
 import { Android12Switch } from '../../Switch/IconSwitch'
 import { fetchAllDevices, fetchAllChannels, fetchAllDataFormat, fetchAllDataType, fetchAllFunctionCode, deleteChannel } from "../../../Services/APIDevice";
-import ModalChannel from '../../Modal/ModalChannel';
-import ModalDelete from '../../Modal/ModalDelete';
+import ModalChannel from '../../Ultils/Modal/ModalChannel';
+import ModalDelete from '../../Ultils/Modal/ModalDelete';
 import Loading from "../../Ultils/Loading/Loading";
 
 const ListChannels = (props) => {
