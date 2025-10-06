@@ -6,7 +6,7 @@ const InputPopover = ({
     onClose,                // đóng popover
     onConfirm,              // xử lý khi nhấn Confirm
     defaultValue = 0,       // giá trị mặc định hiển thị khi mở
-    errorMessage = "Please enter a valid number (0 - 65535)"
+    // errorMessage = "Please enter a valid number (0 - 65535)"
 }) => {
     const open = Boolean(anchorEl);
 

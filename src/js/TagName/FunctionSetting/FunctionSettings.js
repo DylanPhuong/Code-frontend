@@ -5,12 +5,13 @@ import IconButton from '@mui/material/IconButton';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import toast from 'react-hot-toast';
-import { Android12Switch } from '../../Switch/IconSwitch'
+import { Android12Switch } from '../../Ultils/Switch/IconSwitch'
 import { fetchAllDevices, fetchAllChannels, fetchAllDataFormat, fetchAllDataType, fetchAllFunctionCode, deleteChannel } from "../../../Services/APIDevice";
 import ModalChannel from '../../Ultils/Modal/ModalChannel';
 import ModalDelete from '../../Ultils/Modal/ModalDelete';
 import { socket } from '../../../js/Ultils/Socket/Socket';
 import Loading from "../../Ultils/Loading/Loading";
+import InputPopover from '../../Ultils/Popover/Popover'
 
 const FunctionSettings = (props) => {
     const [pageSize, setPageSize] = useState(5);
@@ -33,12 +34,15 @@ const FunctionSettings = (props) => {
     const [selectedCount, setSelectedCount] = useState([])
     const [loading, setLoading] = useState(true);
 
+    const [anchorEl, setAnchorEl] = useState(null);
+    const [selectedRow, setSelectedRow] = useState(null);
+
+
     useEffect(() => {
         socket.connect(); // kết nối khi trang mở
         socket.on("SERVER SEND HOME DATA", (data) => {
             const mapped = data.map((item, index) => {
                 let string_status;
-
                 if (item.status === 1) {
                     string_status = 'Normal';
                 } else if (item.status === 2) {
@@ -111,16 +115,15 @@ const FunctionSettings = (props) => {
                     dataTypeId: type ? type.id : item.dataType,
                     dataTypeName: type ? type.name : '',
                     functionText: item.functionText,
+                    permission: item.permission,
                     selectFTP: item.selectFTP
                 };
             });
-
             setListChannel(rowsWithId);
         }
         setSelectionChannel([]);
         setSelectedCount(0);
     };
-
 
     const fetchDevices = async () => {
         let response = await fetchAllDevices();
@@ -195,7 +198,6 @@ const FunctionSettings = (props) => {
         setisShowModalChannel(true);
     };
 
-
     const handleDeleteDevice = (device) => {
         if (device) {
             setSelectionChannel([device.id]);
@@ -209,7 +211,6 @@ const FunctionSettings = (props) => {
         setisShowModalDelete(true);
     };
 
-
     const conformDeleteChannel = async () => {
         let res = await deleteChannel({ ids: dataModalDelete });
         let serverData = res
@@ -221,6 +222,24 @@ const FunctionSettings = (props) => {
         else {
             toast.error(serverData.EM)
         }
+    };
+
+    const handleRowClick = (params, event) => {
+        console.log("Permission check:", params?.row?.permission);
+        if (params?.row?.permission === true) {
+            setSelectedRow(params.row);
+            setAnchorEl(event?.currentTarget || event?.target);
+        }
+    };
+
+    const handleClosePopover = () => {
+        setAnchorEl(null);
+        setSelectedRow(null);
+    };
+
+    const handleConfirmValue = (newValue) => {
+        console.log("Giá trị mới ghi cho channel:", selectedRow?.channel, "=", newValue);
+        handleClosePopover();
     };
 
     const columns = [
@@ -256,6 +275,7 @@ const FunctionSettings = (props) => {
                 </>
             ),
         },
+
         { field: 'channel', headerName: 'Channel', width: 80, headerAlign: 'center', align: 'center' },
         { field: 'name', headerName: 'Name', width: 150, headerAlign: 'center', align: 'center' },
         { field: 'deviceName', headerName: 'Device', width: 150, headerAlign: 'center', align: 'center' },
@@ -390,6 +410,7 @@ const FunctionSettings = (props) => {
                         sx={{
                             "& .MuiDataGrid-columnSeparator": { display: "none" },
                         }}
+                        onRowClick={handleRowClick}
                         loading={loading}
                         localeText={{
                             noRowsLabel: 'Không có dữ liệu',
@@ -458,6 +479,14 @@ const FunctionSettings = (props) => {
                 dataModalDelete={dataModalDelete}
                 selectedCount={selectedCount}
             />
+
+            <InputPopover
+                anchorEl={anchorEl}
+                onClose={handleClosePopover}
+                onConfirm={handleConfirmValue}
+                defaultValue={selectedRow?.value || 0}
+            />
+
         </>
     );
 };

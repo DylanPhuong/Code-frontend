@@ -6,14 +6,16 @@ import {
     Button,
     MenuItem,
     IconButton,
-    FormControlLabel
+    FormControlLabel,
+    Radio
 } from '@mui/material';
+import RadioGroup from '@mui/material/RadioGroup';
 import CloseIcon from '@mui/icons-material/Close';
 import { useState, useEffect } from 'react';
 import { createNewChannel, updateCurrentChannel } from '../../../Services/APIDevice';
 // import _ from 'lodash';
 import toast from 'react-hot-toast';
-import { Android12Switch } from '../../Switch/IconSwitch'
+import { Android12Switch } from '../Switch/IconSwitch'
 import useValidator from '../../Valiedate/Validation'
 
 function ModalChannel(props) {
@@ -49,6 +51,7 @@ function ModalChannel(props) {
         dataFormat: null,
         dataType: null,
         functionText: '',
+        permission: false,
         selectFTP: false,
     };
 
@@ -85,6 +88,7 @@ function ModalChannel(props) {
                     dataFormat: format ? format.id : null,
                     dataType: type ? type.id : null,
                     functionText: dataModalChannel.functionText,
+                    permission: dataModalChannel.permission,
                     selectFTP: dataModalChannel.selectFTP
                 });
             }
@@ -124,7 +128,6 @@ function ModalChannel(props) {
 
     const validateAll = () => {
         const newErrors = {};
-
         Object.entries(dataChannels).forEach(([key, value]) => {
             // Không validate dataType nếu dataFormat <= 2
             if (key === "functionText") {
@@ -135,7 +138,7 @@ function ModalChannel(props) {
             }
             // Không validate dataFormat nếu functionCode <= 2 hoặc = 5
             else if (
-                key === "dataFormat" &&
+                key === "dataFormat" || key === "unit" || key === "offset" || key === "gain" || key === "lowSet" || key === "highSet" &&
                 !(Number(dataChannels.functionCode) > 2 && Number(dataChannels.functionCode) !== 5)
             ) {
                 newErrors[key] = "";
@@ -177,7 +180,6 @@ function ModalChannel(props) {
             toast.error(res.EM);
         }
     };
-
 
     const getDataTypeOptionsByFormat = () => {
         const formatId = Number(dataChannels.dataFormat);
@@ -235,6 +237,7 @@ function ModalChannel(props) {
                 >
                     <CloseIcon />
                 </IconButton>
+
                 {/* Form */}
                 <Box
                     component="form"
@@ -255,6 +258,7 @@ function ModalChannel(props) {
                         error={!!errors.channel}
                         helperText={errors.channel}
                     />
+
                     {/* Name */}
                     <TextField
                         label="Name"
@@ -264,6 +268,7 @@ function ModalChannel(props) {
                         error={!!errors.name}
                         helperText={errors.name}
                     />
+
                     {/* Device */}
                     <TextField
                         select
@@ -286,6 +291,7 @@ function ModalChannel(props) {
                             </MenuItem>
                         ))}
                     </TextField>
+
                     {/* Function */}
                     <TextField
                         select
@@ -325,6 +331,7 @@ function ModalChannel(props) {
                         error={!!errors.slaveId}
                         helperText={errors.slaveId}
                     />
+
                     {/* Address */}
                     <TextField
                         label="Address"
@@ -334,6 +341,7 @@ function ModalChannel(props) {
                         error={!!errors.address}
                         helperText={errors.address}
                     />
+
                     {/* Data Format */}
                     {(Number(dataChannels.functionCode) > 2 && Number(dataChannels.functionCode) !== 5) && (
                         <TextField
@@ -394,49 +402,58 @@ function ModalChannel(props) {
                         error={!!errors.symbol}
                         helperText={errors.symbol}
                     />
-                    {/* Unit */}
-                    <TextField
-                        label="Unit"
-                        value={dataChannels.unit}
-                        variant="standard"
-                        onChange={(e) => handleInputChange(e.target.value, 'unit')}
-                    />
-                    {/* Offser */}
-                    <TextField
-                        label="Offset"
-                        value={dataChannels.offset}
-                        variant="standard"
-                        onChange={(e) => handleInputChange(e.target.value, 'offset')}
-                        error={!!errors.offset}
-                        helperText={errors.offset}
-                    />
-                    {/* Gain */}
-                    <TextField
-                        label="Gain"
-                        value={dataChannels.gain}
-                        variant="standard"
-                        onChange={(e) => handleInputChange(e.target.value, 'gain')}
-                        error={!!errors.gain}
-                        helperText={errors.gain}
-                    />
-                    {/* Low Set */}
-                    <TextField
-                        label="Low Set"
-                        value={dataChannels.lowSet}
-                        variant="standard"
-                        onChange={(e) => handleInputChange(e.target.value, 'lowSet')}
-                        error={!!errors.lowSet}
-                        helperText={errors.lowSet}
-                    />
-                    {/* High Set */}
-                    <TextField
-                        label="High Set"
-                        value={dataChannels.highSet}
-                        variant="standard"
-                        onChange={(e) => handleInputChange(e.target.value, 'highSet')}
-                        error={!!errors.highSet}
-                        helperText={errors.highSet}
-                    />
+
+                    {(Number(dataChannels.functionCode) > 2 && Number(dataChannels.functionCode) !== 5) && (
+                        <>
+                            {/* Unit */}
+                            <TextField
+                                label="Unit"
+                                value={dataChannels.unit}
+                                variant="standard"
+                                onChange={(e) => handleInputChange(e.target.value, 'unit')}
+                            />
+
+                            {/* Offset */}
+                            <TextField
+                                label="Offset"
+                                value={dataChannels.offset}
+                                variant="standard"
+                                onChange={(e) => handleInputChange(e.target.value, 'offset')}
+                                error={!!errors.offset}
+                                helperText={errors.offset}
+                            />
+
+                            {/* Gain */}
+                            <TextField
+                                label="Gain"
+                                value={dataChannels.gain}
+                                variant="standard"
+                                onChange={(e) => handleInputChange(e.target.value, 'gain')}
+                                error={!!errors.gain}
+                                helperText={errors.gain}
+                            />
+
+                            {/* Low Set */}
+                            <TextField
+                                label="Low Set"
+                                value={dataChannels.lowSet}
+                                variant="standard"
+                                onChange={(e) => handleInputChange(e.target.value, 'lowSet')}
+                                error={!!errors.lowSet}
+                                helperText={errors.lowSet}
+                            />
+
+                            {/* High Set */}
+                            <TextField
+                                label="High Set"
+                                value={dataChannels.highSet}
+                                variant="standard"
+                                onChange={(e) => handleInputChange(e.target.value, 'highSet')}
+                                error={!!errors.highSet}
+                                helperText={errors.highSet}
+                            />
+                        </>
+                    )}
 
                     {/* Function Text */}
                     {actionFuncSetting === 'FUNC' && (
@@ -462,9 +479,33 @@ function ModalChannel(props) {
 
                         />
                     )}
+
+                    <Box>
+                        <Box id="demo-row-radio-buttons-group-label">Permission</Box>
+                        <RadioGroup
+                            row
+                            aria-labelledby="demo-row-radio-buttons-group-label"
+                            name="row-radio-buttons-group"
+                            value={dataChannels.permission}
+                            onChange={(e) =>
+                                handleInputChange(e.target.value === "true", "permission")
+                            }
+                        >
+                            <FormControlLabel value={false} control={<Radio />} label="Read" />
+                            <FormControlLabel value={true} control={<Radio />} label="Read & Write" />
+                        </RadioGroup>
+                    </Box>
+
                     {/* Switch chọn FTP */}
                     <FormControlLabel
                         label="Select FTP"
+                        sx={{
+                            mb: 2,
+                            gap: 1, // khoảng cách giữa label và switch (theme.spacing(2) = 16px)
+                            "& .MuiFormControlLabel-label": {
+                                marginLeft: "12px", // cách trái 12px
+                            },
+                        }}
                         control={
                             <Android12Switch
                                 checked={dataChannels.selectFTP}
@@ -472,6 +513,7 @@ function ModalChannel(props) {
                             />
                         }
                     />
+
                     {/* Footer */}
                     <Box mt={3}
                         sx={{ gridColumn: 'span 2', display: 'flex', justifyContent: 'center' }}>
