@@ -71,6 +71,7 @@ export default function useValidator() {
                 break;
 
             // --- Number ---
+            case "popover":
             case "offset":
             case "channel":
             case "gain":

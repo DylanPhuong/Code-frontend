@@ -1,17 +1,24 @@
 import { LinearProgress, Box } from "@mui/material";
-import { useEffect, useState } from 'react';
-import { DataGrid } from '@mui/x-data-grid';
-import IconButton from '@mui/material/IconButton';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import toast from 'react-hot-toast';
-import { Android12Switch } from '../../Ultils/Switch/IconSwitch'
-import { fetchAllDevices, fetchAllChannels, fetchAllDataFormat, fetchAllDataType, fetchAllFunctionCode, deleteChannel } from "../../../Services/APIDevice";
-import ModalChannel from '../../Ultils/Modal/ModalChannel';
-import ModalDelete from '../../Ultils/Modal/ModalDelete';
-import { socket } from '../../../js/Ultils/Socket/Socket';
+import { useEffect, useState } from "react";
+import { DataGrid } from "@mui/x-data-grid";
+import IconButton from "@mui/material/IconButton";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+import toast from "react-hot-toast";
+import { Android12Switch } from "../../Ultils/Switch/IconSwitch";
+import {
+    fetchAllDevices,
+    fetchAllChannels,
+    fetchAllDataFormat,
+    fetchAllDataType,
+    fetchAllFunctionCode,
+    deleteChannel,
+} from "../../../Services/APIDevice";
+import ModalChannel from "../../Ultils/Modal/ModalChannel";
+import ModalDelete from "../../Ultils/Modal/ModalDelete";
+import { socket } from "../../../js/Ultils/Socket/Socket";
 import Loading from "../../Ultils/Loading/Loading";
-import InputPopover from '../../Ultils/Popover/Popover'
+import InputPopover from "../../Ultils/Popover/Popover";
 
 const FunctionSettings = (props) => {
     const [pageSize, setPageSize] = useState(5);
@@ -20,39 +27,37 @@ const FunctionSettings = (props) => {
     const [listDataFormat, setlistDataFormat] = useState([]);
     const [listDataType, setlistDataType] = useState([]);
     const [listFunctionCode, setlistFunctionCode] = useState([]);
-    const [listDevices, setListDevices] = useState([])
-    const [actionFuncSetting, setactionactionFuncSetting] = useState('FUNC');
-    const [actionModalChannel, setactionModalChannel] = useState('CREATE');
-    const [actionDeleteChannel, setactionDeleteChannel] = useState('');
+    const [listDevices, setListDevices] = useState([]);
+    const [actionFuncSetting, setactionactionFuncSetting] = useState("FUNC");
+    const [actionModalChannel, setactionModalChannel] = useState("CREATE");
+    const [actionDeleteChannel, setactionDeleteChannel] = useState("");
+
     // State cho các modal
     const [isShowModalDelete, setisShowModalDelete] = useState(false);
     const [isShowModalChannel, setisShowModalChannel] = useState(false);
-
     const [dataModalChannel, setdataModalChannel] = useState([]);
     const [dataModalDelete, setdataModalDelete] = useState([]);
     const [selectionChannel, setSelectionChannel] = useState([]);
-    const [selectedCount, setSelectedCount] = useState([])
+    const [selectedCount, setSelectedCount] = useState([]);
     const [loading, setLoading] = useState(true);
-
     const [anchorEl, setAnchorEl] = useState(null);
     const [selectedRow, setSelectedRow] = useState(null);
 
-
     useEffect(() => {
         socket.connect(); // kết nối khi trang mở
+
         socket.on("SERVER SEND HOME DATA", (data) => {
             const mapped = data.map((item, index) => {
                 let string_status;
                 if (item.status === 1) {
-                    string_status = 'Normal';
+                    string_status = "Normal";
                 } else if (item.status === 2) {
-                    string_status = 'Over range';
+                    string_status = "Over range";
                 } else if (item.status === 3) {
-                    string_status = 'Disconnect';
+                    string_status = "Disconnect";
                 } else {
-                    string_status = 'Sample';
+                    string_status = "Sample";
                 }
-
                 return {
                     id: item.tagnameId || index,
                     name: item.tagname,
@@ -60,6 +65,13 @@ const FunctionSettings = (props) => {
                     value: item.value,
                     channel: item.channel,
                     symbol: item.symbol,
+                    deviceId: item.deviceId,
+                    slaveId: item.slaveId,
+                    address: item.address,
+                    functionCode: item.functionCode,
+                    dataFormat: item.dataFormat,
+                    dataType: item.dataType,
+                    permission: item.permission,
                     status: string_status,
                 };
             });
@@ -67,7 +79,16 @@ const FunctionSettings = (props) => {
             setLoading(false);
         });
 
+        socket.on("SERVER WRITE RESULT", (res) => {
+            if (res.success) {
+                toast.success(res.message || "Ghi thành công!");
+            } else {
+                toast.error("Ghi thất bại: " + res.error);
+            }
+        });
+
         return () => {
+            socket.off("SERVER WRITE RESULT");
             socket.off("SERVER SEND HOME DATA");
             socket.disconnect(); // ngắt kết nối khi rời trang
         };
@@ -87,12 +108,12 @@ const FunctionSettings = (props) => {
 
     const fetchChannel = async (functionCodes = [], dataFormats = [], dataTypes = []) => {
         let response = await fetchAllChannels();
-        // console.log('tag name data: ', response)
+
         if (response && response.EC === 0 && Array.isArray(response.DT?.DT)) {
             const rowsWithId = response.DT.DT.map((item) => {
-                const func = functionCodes.find(f => f.id === item.functionCode);
-                const format = dataFormats.find(f => f.id === item.dataFormat);
-                const type = dataTypes.find(t => t.id === item.dataType);
+                const func = functionCodes.find((f) => f.id === item.functionCode);
+                const format = dataFormats.find((f) => f.id === item.dataFormat);
+                const type = dataTypes.find((t) => t.id === item.dataType);
 
                 return {
                     id: item._id,
@@ -109,14 +130,14 @@ const FunctionSettings = (props) => {
                     slaveId: item.slaveId,
                     address: item.address,
                     functionCodeId: func ? func.id : item.functionCode,
-                    functionCodeName: func ? func.name : '',
+                    functionCodeName: func ? func.name : "",
                     dataFormatId: format ? format.id : item.dataFormat,
-                    dataFormatName: format ? format.name : '',
+                    dataFormatName: format ? format.name : "",
                     dataTypeId: type ? type.id : item.dataType,
-                    dataTypeName: type ? type.name : '',
+                    dataTypeName: type ? type.name : "",
                     functionText: item.functionText,
                     permission: item.permission,
-                    selectFTP: item.selectFTP
+                    selectFTP: item.selectFTP,
                 };
             });
             setListChannel(rowsWithId);
@@ -127,7 +148,7 @@ const FunctionSettings = (props) => {
 
     const fetchDevices = async () => {
         let response = await fetchAllDevices();
-        // console.log('Check Lisst COM: ', response)
+
         if (response && response.EC === 0 && response.DT?.DT) {
             const listDevices = response.DT.DT.map((item, index) => ({
                 id: item._id,
@@ -139,11 +160,11 @@ const FunctionSettings = (props) => {
 
     const fetchDataFormat = async () => {
         let response = await fetchAllDataFormat();
-        // console.log('Check Data Format : ', response)
+
         if (response && response.EC === 0 && Array.isArray(response.DT?.DT)) {
             const listDataFormats = response.DT.DT.map((item) => ({
                 id: item._id,
-                name: item.name
+                name: item.name,
             }));
             setlistDataFormat(listDataFormats);
             return listDataFormats;
@@ -156,7 +177,7 @@ const FunctionSettings = (props) => {
         if (response && response.EC === 0 && Array.isArray(response.DT?.DT)) {
             const listDataTypes = response.DT.DT.map((item) => ({
                 id: item._id,
-                name: item.name
+                name: item.name,
             }));
             setlistDataType(listDataTypes);
             return listDataTypes;
@@ -169,7 +190,7 @@ const FunctionSettings = (props) => {
         if (response && response.EC === 0 && Array.isArray(response.DT?.DT)) {
             const listFunctions = response.DT.DT.map((item) => ({
                 id: item._id,
-                name: item.name
+                name: item.name,
             }));
             setlistFunctionCode(listFunctions);
             return listFunctions;
@@ -190,7 +211,6 @@ const FunctionSettings = (props) => {
     };
 
     const handleEditChannel = (device) => {
-        // console.log('Check channel update: ', device)
         setSelectionChannel([device.id]);
         setactionModalChannel("EDIT");
         setactionactionFuncSetting("FUNC");
@@ -207,25 +227,24 @@ const FunctionSettings = (props) => {
             setdataModalDelete(selectionChannel);
             setSelectedCount(selectionChannel.length);
         }
-        setactionDeleteChannel('CHANNEL')
+        setactionDeleteChannel("CHANNEL");
         setisShowModalDelete(true);
     };
 
     const conformDeleteChannel = async () => {
         let res = await deleteChannel({ ids: dataModalDelete });
-        let serverData = res
+        let serverData = res;
         if (+serverData.EC === 0) {
-            toast.success(serverData.EM)
-            setisShowModalDelete(false)
-            await fetchChannel()
-        }
-        else {
-            toast.error(serverData.EM)
+            toast.success(serverData.EM);
+            setisShowModalDelete(false);
+            await fetchChannel();
+        } else {
+            toast.error(serverData.EM);
         }
     };
 
     const handleRowClick = (params, event) => {
-        console.log("Permission check:", params?.row?.permission);
+        // console.log('check popover is: ', params.row)
         if (params?.row?.permission === true) {
             setSelectedRow(params.row);
             setAnchorEl(event?.currentTarget || event?.target);
@@ -238,7 +257,18 @@ const FunctionSettings = (props) => {
     };
 
     const handleConfirmValue = (newValue) => {
-        console.log("Giá trị mới ghi cho channel:", selectedRow?.channel, "=", newValue);
+        const payload = {
+            tagnameId: selectedRow?.id,
+            deviceId: selectedRow?.deviceId,
+            slaveId: selectedRow?.slaveId,
+            address: selectedRow?.address,
+            functionCode: selectedRow?.functionCode,
+            dataFormat: selectedRow?.dataFormat,
+            dataType: selectedRow?.dataType,
+            newValue: newValue,
+        };
+        // console.log("Send data write:", payload);
+        socket.emit("CLIENT WRITE TAG", payload);
         handleClosePopover();
     };
 
@@ -261,7 +291,6 @@ const FunctionSettings = (props) => {
                     >
                         <EditIcon />
                     </IconButton>
-
                     <IconButton
                         color="error"
                         title="Xóa"
@@ -275,123 +304,214 @@ const FunctionSettings = (props) => {
                 </>
             ),
         },
-
-        { field: 'channel', headerName: 'Channel', width: 80, headerAlign: 'center', align: 'center' },
-        { field: 'name', headerName: 'Name', width: 150, headerAlign: 'center', align: 'center' },
-        { field: 'deviceName', headerName: 'Device', width: 150, headerAlign: 'center', align: 'center' },
-        { field: 'symbol', headerName: 'Symbol', width: 80, headerAlign: 'center', align: 'center' },
-        { field: 'unit', headerName: 'Unit', width: 70, headerAlign: 'center', align: 'center' },
-        { field: 'gain', headerName: 'Gain', width: 70, headerAlign: 'center', align: 'center' },
-        { field: 'offset', headerName: 'OffSet', width: 70, headerAlign: 'center', align: 'center' },
-        { field: 'lowSet', headerName: 'LowSet', width: 100, headerAlign: 'center', align: 'center' },
-        { field: 'highSet', headerName: 'HighSet', width: 100, headerAlign: 'center', align: 'center' },
-        { field: 'slaveId', headerName: 'Slave Id', width: 80, headerAlign: 'center', align: 'center' },
-        { field: 'address', headerName: 'Address', width: 100, headerAlign: 'center', align: 'center' },
         {
-            field: 'functionCodeName',
-            headerName: 'Function Code',
+            field: "channel",
+            headerName: "Channel",
+            width: 80,
+            headerAlign: "center",
+            align: "center",
+        },
+        {
+            field: "name",
+            headerName: "Name",
+            width: 150,
+            headerAlign: "center",
+            align: "center",
+        },
+        {
+            field: "deviceName",
+            headerName: "Device",
+            width: 150,
+            headerAlign: "center",
+            align: "center",
+        },
+        {
+            field: "symbol",
+            headerName: "Symbol",
+            width: 80,
+            headerAlign: "center",
+            align: "center",
+        },
+        {
+            field: "unit",
+            headerName: "Unit",
+            width: 70,
+            headerAlign: "center",
+            align: "center",
+        },
+        {
+            field: "gain",
+            headerName: "Gain",
+            width: 70,
+            headerAlign: "center",
+            align: "center",
+        },
+        {
+            field: "offset",
+            headerName: "OffSet",
+            width: 70,
+            headerAlign: "center",
+            align: "center",
+        },
+        {
+            field: "lowSet",
+            headerName: "LowSet",
+            width: 100,
+            headerAlign: "center",
+            align: "center",
+        },
+        {
+            field: "highSet",
+            headerName: "HighSet",
+            width: 100,
+            headerAlign: "center",
+            align: "center",
+        },
+        {
+            field: "slaveId",
+            headerName: "Slave Id",
+            width: 80,
+            headerAlign: "center",
+            align: "center",
+        },
+        {
+            field: "address",
+            headerName: "Address",
+            width: 100,
+            headerAlign: "center",
+            align: "center",
+        },
+        {
+            field: "functionCodeName",
+            headerName: "Function Code",
             width: 200,
-            headerAlign: 'center',
-            align: 'center',
+            headerAlign: "center",
+            align: "center",
         },
         {
-            field: 'dataFormatName',
-            headerName: 'Data Format',
+            field: "dataFormatName",
+            headerName: "Data Format",
             width: 150,
-            headerAlign: 'center',
-            align: 'center',
+            headerAlign: "center",
+            align: "center",
         },
         {
-            field: 'dataTypeName',
-            headerName: 'Data Type',
+            field: "dataTypeName",
+            headerName: "Data Type",
             width: 150,
-            headerAlign: 'center',
-            align: 'center',
+            headerAlign: "center",
+            align: "center",
         },
         {
-            field: 'selectFTP',
-            headerName: 'Send Data',
+            field: "selectFTP",
+            headerName: "Send Data",
             width: 120,
-            headerAlign: 'center',
-            align: 'center',
-            renderCell: (params) => (
-                <Android12Switch checked={params.row.selectFTP === true} />
-            ),
+            headerAlign: "center",
+            align: "center",
+            renderCell: (params) => <Android12Switch checked={params.row.selectFTP === true} />,
         },
     ];
 
     const column_value = [
-        { field: 'channel', headerName: 'Channel', flex: 1, headerAlign: 'center', align: 'center' },
-        { field: 'name', headerName: 'Name', flex: 1, headerAlign: 'center', align: 'center' },
-        { field: 'symbol', headerName: 'Symbol', flex: 1, headerAlign: 'center', align: 'center' },
-        { field: 'realValue', headerName: 'Real Value', flex: 1, headerAlign: 'center', align: 'center' },
-        { field: 'value', headerName: 'Value', flex: 1, headerAlign: 'center', align: 'center' },
         {
-            field: 'status',
-            headerName: 'Status',
+            field: "channel",
+            headerName: "Channel",
             flex: 1,
-            headerAlign: 'center',
-            align: 'center',
+            headerAlign: "center",
+            align: "center",
+        },
+        {
+            field: "name",
+            headerName: "Name",
+            flex: 1,
+            headerAlign: "center",
+            align: "center",
+        },
+        {
+            field: "symbol",
+            headerName: "Symbol",
+            flex: 1,
+            headerAlign: "center",
+            align: "center",
+        },
+        {
+            field: "realValue",
+            headerName: "Real Value",
+            flex: 1,
+            headerAlign: "center",
+            align: "center",
+        },
+        {
+            field: "value",
+            headerName: "Value",
+            flex: 1,
+            headerAlign: "center",
+            align: "center",
+        },
+        {
+            field: "status",
+            headerName: "Status",
+            flex: 1,
+            headerAlign: "center",
+            align: "center",
             renderCell: (params) => {
-                let bgColor = '';
+                let bgColor = "";
                 switch (params.value) {
-                    case 'Normal':
-                        bgColor = '#4CAF50'; // xanh lá
+                    case "Normal":
+                        bgColor = "#4CAF50"; // xanh lá
                         break;
-                    case 'Over range':
-                        bgColor = '#FF9800'; // cam
+                    case "Over range":
+                        bgColor = "#FF9800"; // cam
                         break;
-                    case 'Disconnect':
-                        bgColor = '#F44336'; // đỏ
+                    case "Disconnect":
+                        bgColor = "#F44336"; // đỏ
                         break;
-                    case 'Sample':
-                        bgColor = '#795548'; // nâu
+                    case "Sample":
+                        bgColor = "#795548"; // nâu
                         break;
                     default:
-                        bgColor = '#9E9E9E'; // xám cho an toàn
+                        bgColor = "#9E9E9E"; // xám cho an toàn
                 }
-
                 return (
                     <Box
                         sx={{
                             bgcolor: bgColor,
-                            color: 'white',
+                            color: "white",
                             px: 1,
                             py: 0.5,
-                            borderRadius: '8px',
+                            borderRadius: "8px",
                             fontWeight: 600,
-                            textAlign: 'center',
-                            width: '50%',
+                            textAlign: "center",
+                            width: "50%",
                         }}
                     >
                         {params.value}
                     </Box>
                 );
             },
-        }
-
+        },
     ];
 
     return (
         <>
-            <div className='container'>
-                <button
-                    className='btn btn-success '
-                    onClick={() => handleAddChannel()}
-                >
+            <div className="container">
+                <button className="btn btn-success " onClick={() => handleAddChannel()}>
                     <i className="fa fa-refresh"></i> Add
                 </button>
 
                 {selectedCount > 0 && (
                     <IconButton
                         color="error"
-                        onClick={(e) => { e.stopPropagation(); handleDeleteDevice(); }}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteDevice();
+                        }}
                     >
                         <DeleteIcon />
                     </IconButton>
                 )}
 
-                <Box sx={{ height: 600, width: '100%' }}>
+                <Box sx={{ height: 600, width: "100%" }}>
                     <DataGrid
                         rows={listChannel}
                         columns={columns}
@@ -405,33 +525,31 @@ const FunctionSettings = (props) => {
                             // cho phép chọn nhiều khi dùng checkbox/checkall
                             setSelectionChannel(newSelection);
                             setSelectedCount(newSelection.length);
-
                         }}
                         sx={{
-                            "& .MuiDataGrid-columnSeparator": { display: "none" },
+                            "& .MuiDataGrid-columnSeparator": {
+                                display: "none",
+                            },
                         }}
-                        onRowClick={handleRowClick}
+                        // onRowClick={handleRowClick}
                         loading={loading}
                         localeText={{
-                            noRowsLabel: 'Không có dữ liệu',
+                            noRowsLabel: "Không có dữ liệu",
                             footerRowSelected: (count) => `${count} hàng đã chọn`,
                             MuiTablePagination: {
-                                labelRowsPerPage: 'Số hàng mỗi trang:',
+                                labelRowsPerPage: "Số hàng mỗi trang:",
                             },
                         }}
                     />
-
-                    {loading && (
-                        <Loading text="Đang tải dữ liệu..." />
-                    )}
+                    {loading && <Loading text="Đang tải dữ liệu..." />}
                 </Box>
 
                 <Box sx={{ mt: 1 }}>
                     <LinearProgress color="success" />
-                    <Box sx={{ mt: 3, fontSize: 25, textAlign: 'center', mt: 2, fontWeight: 600 }}>
+                    <Box sx={{ mt: 3, fontSize: 25, textAlign: "center", mt: 2, fontWeight: 600 }}>
                         GIÁ TRỊ CHƯA QUA XỬ LÝ
                     </Box>
-                    <Box sx={{ mt: 3, height: 300, width: '100%' }}>
+                    <Box sx={{ mt: 3, height: 300, width: "100%" }}>
                         <DataGrid
                             rows={listDataSocket}
                             columns={column_value}
@@ -441,21 +559,21 @@ const FunctionSettings = (props) => {
                             rowsPerPageOptions={[5, 10, 20]}
                             pagination
                             sx={{
-                                "& .MuiDataGrid-columnSeparator": { display: "none" },
+                                "& .MuiDataGrid-columnSeparator": {
+                                    display: "none",
+                                },
                             }}
+                            onRowClick={handleRowClick}
                             loading={loading}
                             localeText={{
-                                noRowsLabel: 'Không có dữ liệu',
+                                noRowsLabel: "Không có dữ liệu",
                                 footerRowSelected: (count) => `${count} hàng đã chọn`,
                                 MuiTablePagination: {
-                                    labelRowsPerPage: 'Số hàng mỗi trang:',
+                                    labelRowsPerPage: "Số hàng mỗi trang:",
                                 },
                             }}
                         />
-
-                        {loading && (
-                            <Loading text="Đang tải dữ liệu..." />
-                        )}
+                        {loading && <Loading text="Đang tải dữ liệu..." />}
                     </Box>
                 </Box>
             </div>
@@ -471,6 +589,7 @@ const FunctionSettings = (props) => {
                 listDataType={listDataType}
                 listFunctionCode={listFunctionCode}
             />
+
             <ModalDelete
                 action={actionDeleteChannel}
                 isShowModalDelete={isShowModalDelete}
@@ -484,12 +603,13 @@ const FunctionSettings = (props) => {
                 anchorEl={anchorEl}
                 onClose={handleClosePopover}
                 onConfirm={handleConfirmValue}
+                functionCode={selectedRow?.functionCode}
+                dataFormat={selectedRow?.dataFormat}
+                dataType={selectedRow?.dataType}
                 defaultValue={selectedRow?.value || 0}
             />
-
         </>
     );
 };
 
 export default FunctionSettings;
-

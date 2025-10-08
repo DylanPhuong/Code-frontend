@@ -34,7 +34,6 @@ function ModalChannel(props) {
         overflowY: 'auto', // bật scroll dọc khi vượt quá maxHeight
     };
 
-
     const defaultData = {
         channel: '',
         name: '',
@@ -63,7 +62,7 @@ function ModalChannel(props) {
 
     useEffect(() => {
         if (isShowModalChannel) {
-            console.log('check data tag name from list: ', actionFuncSetting)
+            // console.log('check data tag name from list: ', actionFuncSetting)
             setErrors({});
             if (action === 'EDIT' && dataModalChannel) {
                 const func = listFunctionCode.find(f => f.id === dataModalChannel.functionCodeId);
@@ -105,6 +104,12 @@ function ModalChannel(props) {
         }
     }, [isShowModalChannel, action, actionFuncSetting, dataModalChannel]);
 
+    // useEffect(() => {
+    //     if (isShowModalChannel) {
+    //         validateAll();
+    //     }
+    // }, [dataChannels.functionCode, dataChannels.dataFormat]);
+
     const handleClose = () => {
         handleCloseModalChannel();
         setDataChannels(defaultData);
@@ -129,37 +134,33 @@ function ModalChannel(props) {
     const validateAll = () => {
         const newErrors = {};
         Object.entries(dataChannels).forEach(([key, value]) => {
-            // Không validate dataType nếu dataFormat <= 2
-            if (key === "functionText") {
-                newErrors[key] = ""; // không kiểm tra
+            if (key === "functionText" || key === "unit") {
+                newErrors[key] = ""; // bỏ qua kiểm tra
             }
             else if (key === "dataType" && Number(dataChannels.dataFormat) <= 2) {
                 newErrors[key] = "";
             }
-            // Không validate dataFormat nếu functionCode <= 2 hoặc = 5
             else if (
-                key === "dataFormat" || key === "unit" || key === "offset" || key === "gain" || key === "lowSet" || key === "highSet" &&
+                ["dataFormat", "offset", "gain", "lowSet", "highSet"].includes(key) &&
                 !(Number(dataChannels.functionCode) > 2 && Number(dataChannels.functionCode) !== 5)
             ) {
                 newErrors[key] = "";
             }
-            // Còn lại validate như bình thường
             else {
                 newErrors[key] = validate(key, value);
             }
         });
 
         setErrors(newErrors);
-        return Object.values(newErrors).every((err) => err === "");
+        return Object.values(newErrors).every(err => err === "");
     };
 
     const handleConfirmChannel = async () => {
         if (!validateAll()) {
-            alert('Check Validate again');
+            // alert('Check Validate again');
             return;
         }
 
-        // Sao chép dữ liệu gốc
         const dataToSave = { ...dataChannels };
 
         // Nếu dataFormat là 1 hoặc 2 -> ép luôn dataType tương ứng
@@ -481,10 +482,9 @@ function ModalChannel(props) {
                     )}
 
                     <Box>
-                        <Box id="demo-row-radio-buttons-group-label">Permission</Box>
+                        <Box >Permission</Box>
                         <RadioGroup
                             row
-                            aria-labelledby="demo-row-radio-buttons-group-label"
                             name="row-radio-buttons-group"
                             value={dataChannels.permission}
                             onChange={(e) =>
