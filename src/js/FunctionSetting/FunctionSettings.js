@@ -5,7 +5,7 @@ import IconButton from "@mui/material/IconButton";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import toast from "react-hot-toast";
-import { Android12Switch } from "../../Ultils/Switch/IconSwitch";
+import { Android12Switch } from "../Ultils/Switch/IconSwitch";
 import {
     fetchAllDevices,
     fetchAllChannels,
@@ -13,12 +13,12 @@ import {
     fetchAllDataType,
     fetchAllFunctionCode,
     deleteChannel,
-} from "../../../Services/APIDevice";
-import ModalChannel from "../../Ultils/Modal/ModalChannel";
-import ModalDelete from "../../Ultils/Modal/ModalDelete";
-import { socket } from "../../../js/Ultils/Socket/Socket";
-import Loading from "../../Ultils/Loading/Loading";
-import InputPopover from "../../Ultils/Popover/Popover";
+} from "../../Services/APIDevice";
+import ModalChannel from "../Ultils/Modal/ModalChannel";
+import ModalDelete from "../Ultils/Modal/ModalDelete";
+import { socket } from "../Ultils/Socket/Socket";
+import Loading from "../Ultils/Loading/Loading";
+import InputPopover from "../Ultils/Popover/Popover";
 
 const FunctionSettings = (props) => {
     const [pageSize, setPageSize] = useState(5);

@@ -5,11 +5,11 @@ import IconButton from '@mui/material/IconButton';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import toast from 'react-hot-toast';
-import { Android12Switch } from '../../Ultils/Switch/IconSwitch'
-import { fetchAllDevices, fetchAllChannels, fetchAllDataFormat, fetchAllDataType, fetchAllFunctionCode, deleteChannel } from "../../../Services/APIDevice";
-import ModalChannel from '../../Ultils/Modal/ModalChannel';
-import ModalDelete from '../../Ultils/Modal/ModalDelete';
-import Loading from "../../Ultils/Loading/Loading";
+import { Android12Switch } from '../../../Ultils/Switch/IconSwitch'
+import { fetchAllDevices, fetchAllChannels, fetchAllDataFormat, fetchAllDataType, fetchAllFunctionCode, deleteChannel } from '../../../../Services/APIDevice';
+import ModalChannel from '../../../Ultils/Modal/ModalChannel';
+import ModalDelete from '../../../Ultils/Modal/ModalDelete';
+import Loading from '../../../Ultils/Loading/Loading';
 
 const ListChannels = (props) => {
     const [pageSize, setPageSize] = useState(5);
@@ -254,7 +254,7 @@ const ListChannels = (props) => {
 
     return (
         <>
-            <div className='container'>
+            <div >
                 <button
                     className='btn btn-success '
                     onClick={() => handleAddChannel()}

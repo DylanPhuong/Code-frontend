@@ -1,7 +1,7 @@
 import { Switch, Route } from "react-router-dom";
-import ListChannels from "../TagName/ListChannels/ListChannels";
-import FunctionSettings from "../TagName/FunctionSetting/FunctionSettings";
+import FunctionSettings from "../FunctionSetting/FunctionSettings";
 import DeviceTab from "../Config/DeviceTab";
+import SetupTab from "../Setup/SetupTab";
 import HomeLayout from "../HomeLayout/HomeLayout";
 import InputPopover from "../Ultils/Popover/Popover";
 
@@ -18,8 +18,8 @@ const AppRoutes = (props) => {
                     <DeviceTab />
                 </Route>
 
-                <Route path="/channels" exact>
-                    <ListChannels />
+                <Route path="/setup" exact>
+                    <SetupTab />
                 </Route>
 
                 <Route path="/funcSettings" exact>
