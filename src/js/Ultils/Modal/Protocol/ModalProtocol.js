@@ -1,16 +1,9 @@
 import {
-    Modal,
-    Box,
-    Typography,
-    TextField,
-    Button,
-    MenuItem,
-    IconButton,
-} from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
-import { useState, useEffect } from 'react';
-// import _ from 'lodash'
-import useValidator from '../../Valiedate/Validation'
+    useState, useEffect,
+    Button, CancelPresentation, MenuItem, TextField, Box, Modal, Typography, AddBoxIcon, IconButton, CloseIcon,
+    _
+} from '../../../ImportComponents/Imports';
+import useValidator from '../../../Valiedate/Validation'
 
 function ModalProtocol(props) {
 
@@ -191,10 +184,34 @@ function ModalProtocol(props) {
                         )}
                     </Box>
 
-                    <Box mt={3} textAlign="center">
+                    {/* <Box mt={3} textAlign="center">
                         <Button variant="contained" color="success" onClick={handleConfirmProtocol}>
                             Tiếp tục
                         </Button>
+                    </Box> */}
+                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2.5 }}>
+
+                        <Button
+                            variant="contained"
+                            color="error"
+                            startIcon={<CancelPresentation />}
+                            sx={{ mt: 1.5, textTransform: 'none' }}
+                            onClick={handleClose}
+                        >
+                            Thoát
+
+                        </Button>
+
+                        <Button
+                            variant="contained"
+                            color="success"
+                            startIcon={<AddBoxIcon />}
+                            sx={{ mt: 1.5, ml: 1.5, textTransform: 'none' }}
+                            onClick={handleConfirmProtocol}
+                        >
+                            Thêm
+                        </Button>
+
                     </Box>
                 </Box>
             </Modal >

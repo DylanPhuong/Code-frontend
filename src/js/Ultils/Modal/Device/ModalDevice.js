@@ -1,18 +1,10 @@
 import {
-    Modal,
-    Box,
-    Typography,
-    TextField,
-    Button,
-    MenuItem,
-    IconButton,
-} from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
-import { useState, useEffect } from 'react';
-import _ from 'lodash';
-import { createNewDevice, updateCurrentDevice, fetchAllComs } from '../../../Services/APIDevice';
-import toast from 'react-hot-toast';
-import useValidator from '../../Valiedate/Validation'
+    useState, useEffect,
+    Button, IconButton, MenuItem, TextField, Box, Modal, Typography, CloseIcon, CancelPresentation, BorderColorIcon,
+    toast, _
+} from '../../../ImportComponents/Imports';
+import { createNewDevice, updateCurrentDevice, fetchAllComs } from '../../../../Services/APIDevice';
+import useValidator from '../../../Valiedate/Validation'
 
 function ModalDevice(props) {
     const style = {
@@ -125,7 +117,7 @@ function ModalDevice(props) {
             const errorMsg = validate(key, value);
             newErrors[key] = errorMsg;
             if (errorMsg) {
-                console.warn(`❌ Lỗi ở ${key}: ${errorMsg}`);
+                console.warn(`Lỗi ở ${key}: ${errorMsg}`);
             }
         });
 
@@ -202,7 +194,7 @@ function ModalDevice(props) {
                     {/* Protocol */}
                     <TextField
                         select
-                        label="Protocol1"
+                        label="Protocol"
                         value={dataDevice.protocol}
                         variant="standard"
                         onChange={(e) => handleOnchangeInput(e.target.value, 'protocol')}
@@ -288,7 +280,8 @@ function ModalDevice(props) {
                         } : {}}
                     />
                     {/* Footer */}
-                    <Box mt={3}
+
+                    {/* <Box mt={3}
                         sx={{ gridColumn: 'span 2', display: 'flex', justifyContent: 'center' }}>
                         <Button
                             type="submit"
@@ -298,7 +291,34 @@ function ModalDevice(props) {
                         >
                             {action === 'CREATE' ? 'Lưu' : 'Cập nhật'}
                         </Button>
+                    </Box> */}
+
+                    <Box sx={{ gridColumn: 'span 2', display: 'flex', justifyContent: 'flex-end', mt: 2.5 }}>
+
+                        <Button
+                            variant="contained"
+                            color="error"
+                            startIcon={<CancelPresentation />}
+                            sx={{ mt: 1.5, textTransform: 'none' }}
+                            onClick={handleClose}
+                        >
+                            Thoát
+
+                        </Button>
+
+                        <Button
+                            variant="contained"
+                            color="success"
+                            startIcon={<BorderColorIcon />}
+                            sx={{ mt: 1.5, ml: 1.5, textTransform: 'none' }}
+                            type="submit"
+                        // disabled={_.isEqual(dataCom, originalData)}
+                        >
+                            {action === 'CREATE' ? 'Thêm' : 'Chỉnh sửa'}
+                        </Button>
+
                     </Box>
+
                 </Box>
             </Box>
         </Modal >

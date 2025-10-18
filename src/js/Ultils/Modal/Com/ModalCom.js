@@ -1,18 +1,10 @@
 import {
-    Modal,
-    Box,
-    Typography,
-    TextField,
-    Button,
-    MenuItem,
-    IconButton
-} from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
-import { useState, useEffect } from 'react';
-import _ from 'lodash'
-import toast from 'react-hot-toast';
-import { updateCurrentCom } from '../../../Services/APIDevice'
-import useValidator from '../../Valiedate/Validation'
+    useState, useEffect,
+    Button, CancelPresentation, MenuItem, TextField, Box, Modal, Typography, BorderColorIcon, IconButton, CloseIcon,
+    toast, _,
+} from '../../../ImportComponents/Imports';
+import { updateCurrentCom } from '../../../../Services/APIDevice';
+import useValidator from '../../../Valiedate/Validation'
 
 const ModalCom = (props) => {
     const style = {
@@ -214,7 +206,7 @@ const ModalCom = (props) => {
                 </Box>
 
                 {/* Footer */}
-                <Box mt={3} textAlign="center">
+                {/* <Box mt={3} textAlign="center">
                     <Button
                         variant="contained"
                         color="success"
@@ -224,7 +216,34 @@ const ModalCom = (props) => {
                     >
                         <span> Chỉnh Sửa </span>
                     </Button>
+                </Box> */}
+
+                <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2.5 }}>
+
+                    <Button
+                        variant="contained"
+                        color="error"
+                        startIcon={<CancelPresentation />}
+                        sx={{ mt: 1.5, textTransform: 'none' }}
+                        onClick={handleClose}
+                    >
+                        Thoát
+
+                    </Button>
+
+                    <Button
+                        variant="contained"
+                        color="success"
+                        startIcon={<BorderColorIcon />}
+                        sx={{ mt: 1.5, ml: 1.5, textTransform: 'none' }}
+                        onClick={() => handleConfirmCom()}
+                        disabled={_.isEqual(dataCom, originalData)}
+                    >
+                        Chỉnh Sửa
+                    </Button>
+
                 </Box>
+
             </Box>
         </Modal>
     );

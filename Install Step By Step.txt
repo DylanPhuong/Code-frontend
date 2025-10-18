@@ -20,7 +20,7 @@ How to post project on github
 
 Update
 git add .
-git commit -m "Cập nhật tính năng mới"
+git commit -m 'DATN-Fontend'
 git push
 
 

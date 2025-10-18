@@ -1,17 +1,15 @@
-import { useEffect, useState } from 'react';
-import { DataGrid } from '@mui/x-data-grid';
-import Paper from '@mui/material/Paper';
-import IconButton from '@mui/material/IconButton';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import { Button } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
+import {
+    useState, useEffect,
+    Paper, Button, IconButton,
+    DataGrid,
+    AddCardIcon, BorderColorIcon, DeleteForeverIcon,
+    toast
+} from '../../../ImportComponents/Imports';
 import './ListDevice.scss'
-import toast from 'react-hot-toast';
 import { fetchAllDevices, deleteDevice, fetchAllComs, fetchAllProtocol } from "../../../../Services/APIDevice";
-import ModalDelete from '../../../Ultils/Modal/ModalDelete';
-import ModalProtocol from '../../../Ultils/Modal/ModalProtocol';
-import ModalDevice from '../../../Ultils/Modal/ModalDevice';
+import ModalDelete from '../../../Ultils/Modal/Delete/ModalDelete';
+import ModalProtocol from '../../../Ultils/Modal/Protocol/ModalProtocol';
+import ModalDevice from '../../../Ultils/Modal/Device/ModalDevice';
 import Loading from '../../../Ultils/Loading/Loading';
 
 const ListDevices = (props) => {
@@ -173,13 +171,13 @@ const ListDevices = (props) => {
                         color="primary"
                         onClick={(e) => { e.stopPropagation(); handleEditDevice(params.row); }}
                     >
-                        <EditIcon />
+                        <BorderColorIcon />
                     </IconButton>
                     <IconButton
                         color="error"
                         onClick={(e) => { e.stopPropagation(); handleDeleteDevice(params.row); }}
                     >
-                        <DeleteIcon />
+                        <DeleteForeverIcon />
                     </IconButton>
                 </>
             ),
@@ -188,23 +186,27 @@ const ListDevices = (props) => {
 
     return (
         <>
-            <div className=''>
+            < >
                 <Button
                     variant="contained"
                     color="success"
-                    startIcon={<AddIcon />}
+                    startIcon={<AddCardIcon />}
                     onClick={handleAddDevice}
+                    sx={{ mb: 1.5, textTransform: 'none' }}
                 >
-                    Add
+                    Thêm thiết bị
                 </Button>
 
                 {selectedCount > 0 && (
-                    <IconButton
+                    <Button
+                        variant="contained"
                         color="error"
+                        startIcon={<DeleteForeverIcon />}
                         onClick={(e) => { e.stopPropagation(); handleDeleteDevice(); }}
+                        sx={{ mb: 1.5, ml: 1.5, textTransform: 'none' }}
                     >
-                        <DeleteIcon />
-                    </IconButton>
+                        Xóa thiết bị
+                    </Button>
                 )}
 
                 <Paper sx={{ height: 400, width: '100%' }}>
@@ -240,7 +242,7 @@ const ListDevices = (props) => {
                         <Loading text="Đang tải dữ liệu..." />
                     )}
                 </Paper>
-            </div>
+            </>
 
             {/* Modal chọn protocol */}
             <ModalProtocol

@@ -1,22 +1,16 @@
 import {
-    Modal,
-    Box,
-    Typography,
-    Paper,
-    IconButton,
-    TextField,
-    InputAdornment,
-} from '@mui/material';
-import { DataGrid } from '@mui/x-data-grid';
-import EditIcon from '@mui/icons-material/Edit';
-import CloseIcon from '@mui/icons-material/Close';
-import SearchIcon from '@mui/icons-material/Search';
-import { useState, useEffect } from 'react';
-import { fetchAllChannels } from '../../../Services/APIDevice';
-import Loading from '../Loading/Loading';
+    useState, useEffect,
+    Paper, IconButton, Modal, Box, Typography,
+    DataGrid,
+    BorderColorIcon, CancelIcon,
 
-const ModalSearchChannels = (props) => {
-    const { openModalSearch, handleCloseModalSearch } = props;
+} from '../../../ImportComponents/Imports';
+import { fetchConfigHistorical } from '../../../../Services/APIDevice';
+import Loading from '../../Loading/Loading';
+
+const ModalConfigHistorical = (props) => {
+
+    const { openModalConfig, handleCloseModalConfig, handleOpenModalEditConfig, reloadConfig } = props;
 
     const style = {
         position: 'absolute',
@@ -30,53 +24,48 @@ const ModalSearchChannels = (props) => {
         p: 3,
     };
 
-    const [listChannelSearch, setlistChannelSearch] = useState([]);
-    const [filteredList, setFilteredList] = useState([]);
-    const [searched, setSearched] = useState("");
+    const [listConfig, setlistConfig] = useState([]);
     const [pageSize, setPageSize] = useState(5);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (openModalSearch) {
-            fetchChannel();
+        if (openModalConfig) {
+            fetchConfig();
         }
-    }, [openModalSearch]);
+    }, [openModalConfig, reloadConfig]);
 
-    const fetchChannel = async () => {
+    const fetchConfig = async () => {
         setLoading(true);
-        let response = await fetchAllChannels();
+        let response = await fetchConfigHistorical();
         if (response && response.EC === 0 && Array.isArray(response.DT?.DT)) {
             const rowsWithId = response.DT.DT.map((item) => ({
                 id: item._id,
-                channel: item.channel,
                 name: item.name,
-                symbol: item.symbol,
-                unit: item.unit,
+                type: item.type,
+                cycle: item.cycle,
             }));
-            setlistChannelSearch(rowsWithId);
-            setFilteredList(rowsWithId);
+            setlistConfig(rowsWithId);
         }
         setLoading(false);
     };
 
     const handleClose = () => {
-        handleCloseModalSearch();
+        handleCloseModalConfig();
     };
 
-    const handleSearchChange = (event) => {
-        const value = event.target.value;
-        setSearched(value);
-        const filteredRows = listChannelSearch.filter((row) =>
-            row.name.toLowerCase().includes(value.toLowerCase())
-        );
-        setFilteredList(filteredRows);
+    const handleEditConfig = (row) => {
+        handleOpenModalEditConfig(row);
     };
 
     const columns = [
+
+        { field: 'name', headerName: 'Name', width: 200, align: 'center', headerAlign: 'center' },
+        { field: 'type', headerName: 'Type', width: 150, align: 'center', headerAlign: 'center' },
+        { field: 'cycle', headerName: 'Cycle (s)', width: 150, align: 'center', headerAlign: 'center' },
         {
             field: "action",
             headerName: "Action",
-            minWidth: 90,
+            minWidth: 100,
             sortable: false,
             filterable: false,
             align: "center",
@@ -87,59 +76,39 @@ const ModalSearchChannels = (props) => {
                     size="small"
                     onClick={(e) => {
                         e.stopPropagation();
-                        console.log("Edit row:", params.row);
+                        handleEditConfig(params.row)
                     }}
                 >
-                    <EditIcon />
+                    <BorderColorIcon />
                 </IconButton>
             ),
         },
-        { field: 'channel', headerName: 'Channel', width: 80, align: 'center', headerAlign: 'center' },
-        { field: 'name', headerName: 'Name', width: 200, align: 'center', headerAlign: 'center' },
-        { field: 'symbol', headerName: 'Symbol', width: 100, align: 'center', headerAlign: 'center' },
-        { field: 'unit', headerName: 'Unit', width: 100, align: 'center', headerAlign: 'center' },
     ];
 
     return (
-        <Modal open={openModalSearch} onClose={handleClose}>
+        <Modal open={openModalConfig} onClose={handleClose}>
             <Box sx={style}>
                 {/* Header */}
                 <Typography variant="h6" align="center" sx={{ mb: 2, fontWeight: 600 }}>
-                    Tìm kiếm Channels
+                    Cấu hình lưu trữ dữ liệu
                 </Typography>
 
                 <IconButton
                     onClick={handleClose}
                     sx={{
                         position: "absolute",
-                        right: 16,
-                        top: 16,
+                        right: 20,
+                        top: 20,
+                        width: { xs: 36, md: 48 },
+                        height: { xs: 36, md: 48 },
                     }}
                 >
-                    <CloseIcon />
+                    <CancelIcon sx={{ fontSize: { xs: 24, md: 32 } }} />
                 </IconButton>
-
-                {/* Thanh tìm kiếm */}
-                <TextField
-                    fullWidth
-                    variant="outlined"
-                    size="small"
-                    value={searched}
-                    onChange={handleSearchChange}
-                    placeholder="Nhập tên kênh cần tìm..."
-                    sx={{ mb: 2 }}
-                    InputProps={{
-                        startAdornment: (
-                            <InputAdornment position="start">
-                                <SearchIcon />
-                            </InputAdornment>
-                        ),
-                    }}
-                />
 
                 <Paper sx={{ height: 400, width: '100%' }}>
                     <DataGrid
-                        rows={filteredList}
+                        rows={listConfig}
                         columns={columns}
                         pageSize={pageSize}
                         onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
@@ -169,9 +138,30 @@ const ModalSearchChannels = (props) => {
                     />
                     {loading && <Loading text="Đang tải dữ liệu..." />}
                 </Paper>
+
+                {/* <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2.5 }}>
+
+                    <Button
+                        variant="contained"
+                        color="success"
+                        sx={{ textTransform: 'none' }}
+                    >
+                        Thoát
+                    </Button>
+
+                    <Button
+                        variant="contained"
+                        color="success"
+                        sx={{ ml: 1.5, textTransform: 'none' }}
+                    >
+                        Thêm
+                    </Button>
+
+                </Box> */}
+
             </Box>
         </Modal>
     );
 };
 
-export default ModalSearchChannels;
+export default ModalConfigHistorical;

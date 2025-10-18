@@ -3,6 +3,19 @@ import axios from '../Setup/Axios'
 const fetchAllProtocol = () => {
     return axios.get(`/api/v1/protocol/get-protocol`)
 }
+
+const fetchAllDataFormat = () => {
+    return axios.get(`/api/v1/channels/get-channels/data-format`)
+}
+
+const fetchAllDataType = () => {
+    return axios.get(`/api/v1/channels/get-channels/data-type`)
+}
+
+const fetchAllFunctionCode = () => {
+    return axios.get(`/api/v1/channels/get-channels/function-code`)
+}
+
 /* API Devices */
 const fetchAllDevices = () => {
     return axios.get(`/api/v1/devices/get-device`)
@@ -42,21 +55,31 @@ const deleteChannel = (deleteChannel) => {
     return axios.delete(`/api/v1/channels/delete-channel`, { data: deleteChannel });
 }
 
-const fetchAllDataFormat = () => {
-    return axios.get(`/api/v1/channels/get-channels/data-format`)
+/* API Historical */
+const fetchAllHistorical = () => {
+    return axios.get(`/api/v1/historical/get-historical`)
 }
 
-const fetchAllDataType = () => {
-    return axios.get(`/api/v1/channels/get-channels/data-type`)
+const createNewHistorical = (historicalNew) => {
+    return axios.post(`/api/v1/historical/create-historical`, historicalNew)
 }
 
-const fetchAllFunctionCode = () => {
-    return axios.get(`/api/v1/channels/get-channels/function-code`)
+const deleteHistorical = (deleteHistorical) => {
+    return axios.delete(`/api/v1/historical/delete-historical`, { data: deleteHistorical });
 }
 
+
+const fetchConfigHistorical = () => {
+    return axios.get(`/api/v1/historical/get-config`)
+}
+
+const updateConfigHistorical = (historicalConfig) => {
+    return axios.put(`/api/v1//historical/update-config`, historicalConfig)
+}
 export {
     fetchAllProtocol,
     fetchAllDevices, createNewDevice, deleteDevice, updateCurrentDevice,
     fetchAllComs, updateCurrentCom,
-    fetchAllChannels, createNewChannel, updateCurrentChannel, deleteChannel, fetchAllDataFormat, fetchAllDataType, fetchAllFunctionCode
+    fetchAllChannels, createNewChannel, updateCurrentChannel, deleteChannel, fetchAllDataFormat, fetchAllDataType, fetchAllFunctionCode,
+    fetchAllHistorical, fetchConfigHistorical, createNewHistorical, updateConfigHistorical, deleteHistorical
 }

@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react';
-import { DataGrid } from '@mui/x-data-grid';
-import Paper from '@mui/material/Paper';
-import IconButton from '@mui/material/IconButton';
-import EditIcon from '@mui/icons-material/Edit';
-// import toast from 'react-hot-toast';
+import {
+    useState, useEffect,
+    Paper, IconButton,
+    DataGrid,
+    BorderColorIcon
+} from '../../../ImportComponents/Imports';
 import { fetchAllComs } from '../../../../Services/APIDevice'
-import ModalCom from '../../../Ultils/Modal/ModalCom';
+import ModalCom from '../../../Ultils/Modal/Com/ModalCom';
 import Loading from '../../../Ultils/Loading/Loading';
 
 const ListCom = (props) => {
@@ -68,7 +68,7 @@ const ListCom = (props) => {
                         color="primary"
                         onClick={(e) => { e.stopPropagation(); handleEditCom(params.row); }}
                     >
-                        <EditIcon />
+                        <BorderColorIcon />
                     </IconButton>
                 </>
             ),

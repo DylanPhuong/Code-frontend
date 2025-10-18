@@ -1,14 +1,14 @@
-import { useEffect, useState } from 'react';
-import { DataGrid } from '@mui/x-data-grid';
-import Paper from '@mui/material/Paper';
-import IconButton from '@mui/material/IconButton';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import toast from 'react-hot-toast';
-import { Android12Switch } from '../../../Ultils/Switch/IconSwitch'
+import {
+    useState, useEffect,
+    Paper, Button, IconButton,
+    DataGrid,
+    AddCardIcon, BorderColorIcon, DeleteForeverIcon, SettingsApplicationsIcon,
+    toast
+} from '../../../ImportComponents/Imports';
+// import { Android12Switch } from '../../../Ultils/Switch/IconSwitch'
 import { fetchAllDevices, fetchAllChannels, fetchAllDataFormat, fetchAllDataType, fetchAllFunctionCode, deleteChannel } from '../../../../Services/APIDevice';
-import ModalChannel from '../../../Ultils/Modal/ModalChannel';
-import ModalDelete from '../../../Ultils/Modal/ModalDelete';
+import ModalChannel from '../../../Ultils/Modal/TagName/ModalChannel';
+import ModalDelete from '../../../Ultils/Modal/Delete/ModalDelete';
 import Loading from '../../../Ultils/Loading/Loading';
 
 const ListChannels = (props) => {
@@ -184,9 +184,22 @@ const ListChannels = (props) => {
     };
 
     const columns = [
+        { field: 'channel', headerName: 'Channel', flex: 1, width: 80, headerAlign: 'center', align: 'center' },
+        { field: 'name', headerName: 'Name', flex: 1, width: 150, headerAlign: 'center', align: 'center' },
+        { field: 'deviceName', headerName: 'Device', flex: 1, width: 150, headerAlign: 'center', align: 'center' },
+        { field: 'slaveId', headerName: 'Slave Id', flex: 1, width: 80, headerAlign: 'center', align: 'center' },
+        { field: 'address', headerName: 'Address', flex: 1, width: 100, headerAlign: 'center', align: 'center' },
+        {
+            field: 'functionCodeName',
+            headerName: 'Function Code',
+            width: 200,
+            headerAlign: 'center',
+            align: 'center',
+        },
         {
             field: "acction",
             headerName: "Action",
+            flex: 1,
             minWidth: 100,
             sortable: false,
             filterable: false,
@@ -196,57 +209,15 @@ const ListChannels = (props) => {
                         color="primary"
                         onClick={(e) => { e.stopPropagation(); handleEditChannel(params.row); }}
                     >
-                        <EditIcon />
+                        <BorderColorIcon />
                     </IconButton>
                     <IconButton
                         color="error"
                         onClick={(e) => { e.stopPropagation(); handleDeleteDevice(params.row); }}
                     >
-                        <DeleteIcon />
+                        <DeleteForeverIcon />
                     </IconButton>
                 </>
-            ),
-        },
-        { field: 'channel', headerName: 'Channel', width: 80, headerAlign: 'center', align: 'center' },
-        { field: 'name', headerName: 'Name', width: 150, headerAlign: 'center', align: 'center' },
-        { field: 'deviceName', headerName: 'Device', width: 150, headerAlign: 'center', align: 'center' },
-        { field: 'symbol', headerName: 'Symbol', width: 80, headerAlign: 'center', align: 'center' },
-        { field: 'unit', headerName: 'Unit', width: 70, headerAlign: 'center', align: 'center' },
-        { field: 'gain', headerName: 'Gain', width: 70, headerAlign: 'center', align: 'center' },
-        { field: 'offset', headerName: 'OffSet', width: 70, headerAlign: 'center', align: 'center' },
-        { field: 'lowSet', headerName: 'LowSet', width: 100, headerAlign: 'center', align: 'center' },
-        { field: 'highSet', headerName: 'HighSet', width: 100, headerAlign: 'center', align: 'center' },
-        { field: 'slaveId', headerName: 'Slave Id', width: 80, headerAlign: 'center', align: 'center' },
-        { field: 'address', headerName: 'Address', width: 100, headerAlign: 'center', align: 'center' },
-        {
-            field: 'functionCodeName',
-            headerName: 'Function Code',
-            width: 200,
-            headerAlign: 'center',
-            align: 'center',
-        },
-        {
-            field: 'dataFormatName',
-            headerName: 'Data Format',
-            width: 150,
-            headerAlign: 'center',
-            align: 'center',
-        },
-        {
-            field: 'dataTypeName',
-            headerName: 'Data Type',
-            width: 150,
-            headerAlign: 'center',
-            align: 'center',
-        },
-        {
-            field: 'selectFTP',
-            headerName: 'Send Data',
-            width: 120,
-            headerAlign: 'center',
-            align: 'center',
-            renderCell: (params) => (
-                <Android12Switch checked={params.row.selectFTP === true} />
             ),
         },
     ];
@@ -255,20 +226,36 @@ const ListChannels = (props) => {
     return (
         <>
             <div >
-                <button
-                    className='btn btn-success '
+                <Button
+                    variant="contained"
+                    color="success"
+                    startIcon={<AddCardIcon />}
                     onClick={() => handleAddChannel()}
+                    sx={{ mb: 1.5, textTransform: 'none' }}
                 >
-                    <i className="fa fa-refresh"></i> Add
-                </button>
+                    Thêm Tag
+                </Button>
+
+                <Button
+                    variant="contained"
+                    color="success"
+                    startIcon={<SettingsApplicationsIcon />}
+                    // onClick={handleOpenModalConfig}
+                    sx={{ mb: 1.5, ml: 1.5, textTransform: 'none' }}
+                >
+                    Cấu hình
+                </Button>
 
                 {selectedCount > 0 && (
-                    <IconButton
+                    <Button
+                        variant="contained"
                         color="error"
+                        startIcon={<DeleteForeverIcon />}
                         onClick={(e) => { e.stopPropagation(); handleDeleteDevice(); }}
+                        sx={{ mb: 1.5, mx: 1.5, textTransform: 'none' }}
                     >
-                        <DeleteIcon />
-                    </IconButton>
+                        Xóa Tag
+                    </Button>
                 )}
 
                 <Paper sx={{ height: 600, width: '100%' }}>

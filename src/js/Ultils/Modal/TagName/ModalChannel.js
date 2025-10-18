@@ -1,22 +1,12 @@
 import {
-    Modal,
-    Box,
-    Typography,
-    TextField,
-    Button,
-    MenuItem,
-    IconButton,
-    FormControlLabel,
-    Radio
-} from '@mui/material';
-import RadioGroup from '@mui/material/RadioGroup';
-import CloseIcon from '@mui/icons-material/Close';
-import { useState, useEffect } from 'react';
-import { createNewChannel, updateCurrentChannel } from '../../../Services/APIDevice';
-// import _ from 'lodash';
-import toast from 'react-hot-toast';
-import { Android12Switch } from '../Switch/IconSwitch'
-import useValidator from '../../Valiedate/Validation'
+    useState, useEffect,
+    Button, IconButton, Modal, Box, Typography, TextField, MenuItem, RadioGroup, Radio, FormControlLabel, CloseIcon,
+    SaveIcon,
+    toast
+} from '../../../ImportComponents/Imports';
+import { createNewChannel, updateCurrentChannel } from '../../../../Services/APIDevice';
+import { Android12Switch } from '../../Switch/IconSwitch'
+import useValidator from '../../../Valiedate/Validation'
 
 function ModalChannel(props) {
     const style = {
@@ -521,6 +511,7 @@ function ModalChannel(props) {
                             type="submit"
                             variant="contained"
                             color="success"
+                            startIcon={<SaveIcon />}
                             sx={{ width: '150px' }}
                         >
                             {action === 'CREATE' ? 'Lưu' : 'Cập nhật'}

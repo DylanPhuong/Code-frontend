@@ -10,13 +10,15 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 
 const ModalDelete = (props) => {
-    const { action, isShowModalDelete, handleCloseModalDelete, conformDeleteDevice, conformDeleteChannel, selectedCount } = props
+    const { action, isShowModalDelete, handleCloseModalDelete, conformDeleteDevice, conformDeleteChannel, conformDeleteHistorical, selectedCount } = props
     const handleDelete = () => {
         switch (action) {
             case 'CHANNEL':
                 return conformDeleteChannel();
             case 'DEVICE':
                 return conformDeleteDevice();
+            case 'HISTORICAL':
+                return conformDeleteHistorical();
             default:
                 return null;
         }

@@ -67,6 +67,7 @@ export default function useValidator() {
             case "slaveId":
             case "address":
             case "timeOut":
+            case "cycle":
                 if (!isInteger(value)) return "⚠️ Phải nhập số nguyên!";
                 break;
 
