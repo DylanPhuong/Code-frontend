@@ -4,6 +4,7 @@ import {
     DataGrid,
     BorderColorIcon
 } from '../../../ImportComponents/Imports';
+import '../../../../scss/main.scss';
 import { fetchAllComs } from '../../../../Services/APIDevice'
 import ModalCom from '../../../Ultils/Modal/Com/ModalCom';
 import Loading from '../../../Ultils/Loading/Loading';
@@ -20,8 +21,8 @@ const ListCom = (props) => {
     }, []);
 
     const fetchComs = async () => {
+        setLoading(true);
         let response = await fetchAllComs();
-        setLoading(false);
         console.log('check data com read: ', response)
         if (response && response.EC === 0 && response.DT?.DT) {
             const rowsWithId = response.DT.DT.map((item, index) => ({
@@ -36,7 +37,7 @@ const ListCom = (props) => {
             }));
             setListComs(rowsWithId);
         }
-
+        setLoading(false);
     };
     const handleCloseModalCom = () => {
         setisShowModalCom(false);
@@ -77,7 +78,7 @@ const ListCom = (props) => {
 
     return (
         <>
-            <div className=''>
+            <div >
 
                 <Paper sx={{ height: 400, width: '100%' }}>
                     <DataGrid
@@ -88,16 +89,16 @@ const ListCom = (props) => {
                         rowsPerPageOptions={[5, 10, 20]}
                         pagination
                         hideFooterSelectedRowCount={true}
-                        sx={{
-                            "& .MuiDataGrid-columnSeparator": { display: "none" },
-                        }}
                         loading={loading}
                         localeText={{
-                            noRowsLabel: 'Không có dữ liệu',
-                            footerRowSelected: (count) => `${count} hàng đã chọn`,
-                            MuiTablePagination: {
+                            noRowsLabel: 'Không có dữ liệu'
+                        }}
+                        componentsProps={{
+                            pagination: {
                                 labelRowsPerPage: 'Số hàng mỗi trang:',
-                            },
+                                labelDisplayedRows: ({ from, to, count }) =>
+                                    `${from}–${to} trong tổng ${count !== -1 ? count : `hơn ${to}`}`,
+                            }
                         }}
                     />
 

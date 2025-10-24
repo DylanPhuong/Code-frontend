@@ -4,6 +4,7 @@ import DeviceTab from "../Config/DeviceTab";
 import SetupTab from "../Setup/SetupTab";
 import HomeLayout from "../HomeLayout/HomeLayout";
 import InputPopover from "../Ultils/Popover/Popover";
+import HistoricalTab from "../Historical/HistoricalTab";
 
 const AppRoutes = (props) => {
 
@@ -12,6 +13,11 @@ const AppRoutes = (props) => {
 
             <Switch>
                 <Route path="/login">
+                    Login
+                </Route>
+
+                <Route path="/historical" exact>
+                    <HistoricalTab />
                 </Route>
 
                 <Route path="/config" exact>

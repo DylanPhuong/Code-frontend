@@ -58,15 +58,9 @@ const ModalAddHistorical = (props) => {
     const handleOnchangeInput = (value, name) => {
         let _dataEditTag = _.cloneDeep(dataEditTag)
         _dataEditTag[name] = value;
-        setDataEditTag((prev) => ({
-            ...prev,
-            [name]: value,
-        }));
+        setDataEditTag((prev) => ({ ...prev, [name]: value, }));
         const errorMessage = validate(name, value);
-        setErrors((prev) => ({
-            ...prev,
-            [name]: errorMessage,
-        }));
+        setErrors((prev) => ({ ...prev, [name]: errorMessage, }));
     }
 
     const validateAll = () => {
@@ -179,6 +173,7 @@ const ModalAddHistorical = (props) => {
                         error={!!errors.type}
                         helperText={errors.type}
                     >
+                        <MenuItem value="none">None</MenuItem>
                         <MenuItem value="cycle">Cycle</MenuItem>
                         <MenuItem value="trigger">Trigger</MenuItem>
                     </TextField>

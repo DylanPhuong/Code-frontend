@@ -4,9 +4,11 @@ import {
     AddBoxIcon, SearchIcon, CancelIcon, CancelPresentation, MenuItem,
     toast
 } from '../../../ImportComponents/Imports';
+import '../../../../scss/main.scss'
 import { fetchAllChannels, createNewHistorical } from '../../../../Services/APIDevice';
 import Loading from '../../Loading/Loading';
 import useValidator from '../../../Valiedate/Validation'
+import { socket } from '../../Socket/Socket';
 
 const ModalSearchChannels = (props) => {
     const { openModalAdd, handleCloseModalAdd, dataConfig } = props;
@@ -21,6 +23,8 @@ const ModalSearchChannels = (props) => {
         borderRadius: 2,
         boxShadow: 24,
         p: 3,
+        maxHeight: '90vh', // chiều cao tối đa theo viewport
+        overflowY: 'auto',
     };
 
     const defaultData = {
@@ -117,6 +121,7 @@ const ModalSearchChannels = (props) => {
         const res = await createNewHistorical(selectedData);
         if (res && res.EC === 0) {
             toast.success(res.EM);
+            socket.emit("CHANGE HISTORICAL TYPE");
             handleClose();
         } else {
             toast.error(res.EM);
@@ -196,11 +201,14 @@ const ModalSearchChannels = (props) => {
                         }}
                         loading={loading}
                         localeText={{
-                            noRowsLabel: 'Không có dữ liệu',
-                            footerRowSelected: (count) => `${count} hàng đã chọn`,
-                            MuiTablePagination: {
+                            noRowsLabel: 'Không có dữ liệu'
+                        }}
+                        componentsProps={{
+                            pagination: {
                                 labelRowsPerPage: 'Số hàng mỗi trang:',
-                            },
+                                labelDisplayedRows: ({ from, to, count }) =>
+                                    `${from}–${to} trong tổng ${count !== -1 ? count : `hơn ${to}`}`,
+                            }
                         }}
                     />
 

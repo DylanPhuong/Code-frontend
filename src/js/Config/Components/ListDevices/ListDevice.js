@@ -5,7 +5,6 @@ import {
     AddCardIcon, BorderColorIcon, DeleteForeverIcon,
     toast
 } from '../../../ImportComponents/Imports';
-import './ListDevice.scss'
 import { fetchAllDevices, deleteDevice, fetchAllComs, fetchAllProtocol } from "../../../../Services/APIDevice";
 import ModalDelete from '../../../Ultils/Modal/Delete/ModalDelete';
 import ModalProtocol from '../../../Ultils/Modal/Protocol/ModalProtocol';
@@ -39,8 +38,8 @@ const ListDevices = (props) => {
     }, []);
 
     const fetchDevices = async () => {
+        setLoading(true);
         let response = await fetchAllDevices();
-        setLoading(false);
         // console.log('Check Lisst COM: ', response)
         if (response && response.EC === 0 && response.DT?.DT) {
             const rowsWithId = response.DT.DT.map((item, index) => ({
@@ -57,6 +56,7 @@ const ListDevices = (props) => {
         }
         setSelectionModel([]);
         setSelectedCount(0);
+        setLoading(false);
     };
 
     const fetchComs = async () => {
@@ -225,16 +225,17 @@ const ListDevices = (props) => {
                             setSelectedCount(newSelection.length);
 
                         }}
-                        sx={{
-                            "& .MuiDataGrid-columnSeparator": { display: "none" },
-                        }}
+
                         loading={loading}
                         localeText={{
-                            noRowsLabel: 'Không có dữ liệu',
-                            footerRowSelected: (count) => `${count} hàng đã chọn`,
-                            MuiTablePagination: {
+                            noRowsLabel: 'Không có dữ liệu'
+                        }}
+                        componentsProps={{
+                            pagination: {
                                 labelRowsPerPage: 'Số hàng mỗi trang:',
-                            },
+                                labelDisplayedRows: ({ from, to, count }) =>
+                                    `${from}–${to} trong tổng ${count !== -1 ? count : `hơn ${to}`}`,
+                            }
                         }}
                     />
 

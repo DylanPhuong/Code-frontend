@@ -64,9 +64,12 @@ const createNewHistorical = (historicalNew) => {
     return axios.post(`/api/v1/historical/create-historical`, historicalNew)
 }
 
-const deleteHistorical = (deleteHistorical) => {
-    return axios.delete(`/api/v1/historical/delete-historical`, { data: deleteHistorical });
-}
+const deleteHistorical = (dataDelete) => {
+    return axios.delete(`/api/v1/historical/delete-historical`, {
+        data: dataDelete
+    });
+};
+
 
 
 const fetchConfigHistorical = () => {
@@ -76,10 +79,16 @@ const fetchConfigHistorical = () => {
 const updateConfigHistorical = (historicalConfig) => {
     return axios.put(`/api/v1//historical/update-config`, historicalConfig)
 }
+
+/* API Historical Value */
+const fetchAllHistoricalValue = () => {
+    return axios.get(`/api/v1/historical/get-listdata`)
+}
 export {
     fetchAllProtocol,
     fetchAllDevices, createNewDevice, deleteDevice, updateCurrentDevice,
     fetchAllComs, updateCurrentCom,
     fetchAllChannels, createNewChannel, updateCurrentChannel, deleteChannel, fetchAllDataFormat, fetchAllDataType, fetchAllFunctionCode,
-    fetchAllHistorical, fetchConfigHistorical, createNewHistorical, updateConfigHistorical, deleteHistorical
+    fetchAllHistorical, fetchConfigHistorical, createNewHistorical, updateConfigHistorical, deleteHistorical,
+    fetchAllHistoricalValue,
 }

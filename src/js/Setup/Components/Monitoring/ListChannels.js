@@ -43,6 +43,7 @@ const ListChannels = (props) => {
     }, [isShowModalChannel]);
 
     const fetchChannel = async (functionCodes = [], dataFormats = [], dataTypes = []) => {
+        setLoading(true);
         let response = await fetchAllChannels();
         // console.log('tag name data: ', response)
         if (response && response.EC === 0 && Array.isArray(response.DT?.DT)) {
@@ -50,7 +51,6 @@ const ListChannels = (props) => {
                 const func = functionCodes.find(f => f.id === item.functionCode);
                 const format = dataFormats.find(f => f.id === item.dataFormat);
                 const type = dataTypes.find(t => t.id === item.dataType);
-
                 return {
                     id: item._id,
                     channel: item.channel,
@@ -81,6 +81,7 @@ const ListChannels = (props) => {
         }
         setSelectionChannel([]);
         setSelectedCount(0);
+        setLoading(false);
     };
 
 
@@ -274,16 +275,17 @@ const ListChannels = (props) => {
                             setSelectedCount(newSelection.length);
 
                         }}
-                        sx={{
-                            "& .MuiDataGrid-columnSeparator": { display: "none" },
-                        }}
+
                         loading={loading}
                         localeText={{
-                            noRowsLabel: 'Không có dữ liệu',
-                            footerRowSelected: (count) => `${count} hàng đã chọn`,
-                            MuiTablePagination: {
+                            noRowsLabel: 'Không có dữ liệu'
+                        }}
+                        componentsProps={{
+                            pagination: {
                                 labelRowsPerPage: 'Số hàng mỗi trang:',
-                            },
+                                labelDisplayedRows: ({ from, to, count }) =>
+                                    `${from}–${to} trong tổng ${count !== -1 ? count : `hơn ${to}`}`,
+                            }
                         }}
                     />
 

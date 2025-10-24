@@ -22,6 +22,8 @@ const ModalConfigHistorical = (props) => {
         borderRadius: 2,
         boxShadow: 24,
         p: 3,
+        maxHeight: '90vh', // chiều cao tối đa theo viewport
+        overflowY: 'auto',
     };
 
     const [listConfig, setlistConfig] = useState([]);
@@ -129,11 +131,14 @@ const ModalConfigHistorical = (props) => {
                         }}
                         loading={loading}
                         localeText={{
-                            noRowsLabel: 'Không có dữ liệu',
-                            footerRowSelected: (count) => `${count} hàng đã chọn`,
-                            MuiTablePagination: {
+                            noRowsLabel: 'Không có dữ liệu'
+                        }}
+                        componentsProps={{
+                            pagination: {
                                 labelRowsPerPage: 'Số hàng mỗi trang:',
-                            },
+                                labelDisplayedRows: ({ from, to, count }) =>
+                                    `${from}–${to} trong tổng ${count !== -1 ? count : `hơn ${to}`}`,
+                            }
                         }}
                     />
                     {loading && <Loading text="Đang tải dữ liệu..." />}

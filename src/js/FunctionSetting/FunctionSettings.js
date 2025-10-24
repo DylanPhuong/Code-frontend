@@ -1,6 +1,6 @@
 import {
     useState, useEffect,
-    IconButton, Box, Button,
+    IconButton, Box, Button, Paper,
     DataGrid, LinearProgress,
     AddCardIcon, BorderColorIcon, DeleteForeverIcon, SettingsApplicationsIcon,
     toast
@@ -107,6 +107,7 @@ const FunctionSettings = (props) => {
     }, [isShowModalChannel]);
 
     const fetchChannel = async (functionCodes = [], dataFormats = [], dataTypes = []) => {
+        setLoading(true);
         let response = await fetchAllChannels();
 
         if (response && response.EC === 0 && Array.isArray(response.DT?.DT)) {
@@ -144,6 +145,7 @@ const FunctionSettings = (props) => {
         }
         setSelectionChannel([]);
         setSelectedCount(0);
+        setLoading(false);
     };
 
     const fetchDevices = async () => {
@@ -393,8 +395,7 @@ const FunctionSettings = (props) => {
 
     return (
         <>
-            <div className="container">
-
+            <div className='container'>
                 <Button
                     variant="contained"
                     color="success"
@@ -417,7 +418,7 @@ const FunctionSettings = (props) => {
                     </Button>
                 )}
 
-                <Box sx={{ height: 600, width: "100%" }}>
+                <Paper sx={{ height: 600, width: '100%' }}>
                     <DataGrid
                         rows={listChannel}
                         columns={columns}
@@ -432,25 +433,22 @@ const FunctionSettings = (props) => {
                             setSelectionChannel(newSelection);
                             setSelectedCount(newSelection.length);
                         }}
-                        sx={{
-                            "& .MuiDataGrid-columnSeparator": {
-                                display: "none",
-                            },
-                        }}
-                        // onRowClick={handleRowClick}
                         loading={loading}
                         localeText={{
-                            noRowsLabel: "Không có dữ liệu",
-                            footerRowSelected: (count) => `${count} hàng đã chọn`,
-                            MuiTablePagination: {
-                                labelRowsPerPage: "Số hàng mỗi trang:",
-                            },
+                            noRowsLabel: 'Không có dữ liệu'
+                        }}
+                        componentsProps={{
+                            pagination: {
+                                labelRowsPerPage: 'Số hàng mỗi trang:',
+                                labelDisplayedRows: ({ from, to, count }) =>
+                                    `${from}–${to} trong tổng ${count !== -1 ? count : `hơn ${to}`}`,
+                            }
                         }}
                     />
                     {loading && <Loading text="Đang tải dữ liệu..." />}
-                </Box>
+                </Paper>
 
-                <Box sx={{ mt: 1 }}>
+                <Paper sx={{ mt: 1 }}>
                     <LinearProgress color="success" />
                     <Box sx={{ mt: 3, fontSize: 25, textAlign: "center", mt: 2, fontWeight: 600 }}>
                         GIÁ TRỊ CHƯA QUA XỬ LÝ
@@ -464,24 +462,22 @@ const FunctionSettings = (props) => {
                             onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
                             rowsPerPageOptions={[5, 10, 20]}
                             pagination
-                            sx={{
-                                "& .MuiDataGrid-columnSeparator": {
-                                    display: "none",
-                                },
-                            }}
                             onRowClick={handleRowClick}
                             loading={loading}
                             localeText={{
-                                noRowsLabel: "Không có dữ liệu",
-                                footerRowSelected: (count) => `${count} hàng đã chọn`,
-                                MuiTablePagination: {
-                                    labelRowsPerPage: "Số hàng mỗi trang:",
-                                },
+                                noRowsLabel: 'Không có dữ liệu'
+                            }}
+                            componentsProps={{
+                                pagination: {
+                                    labelRowsPerPage: 'Số hàng mỗi trang:',
+                                    labelDisplayedRows: ({ from, to, count }) =>
+                                        `${from}–${to} trong tổng ${count !== -1 ? count : `hơn ${to}`}`,
+                                }
                             }}
                         />
                         {loading && <Loading text="Đang tải dữ liệu..." />}
                     </Box>
-                </Box>
+                </Paper>
             </div>
 
             <ModalChannel

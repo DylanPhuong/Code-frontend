@@ -12,8 +12,9 @@ import ModalSearchChannels from '../../../Ultils/Modal/Search/ModalSearchChannel
 import ModalTagHistorical from '../../../Ultils/Modal/Historical/ModalTagHistorical'
 import Loading from '../../../Ultils/Loading/Loading';
 import ModalDelete from '../../../Ultils/Modal/Delete/ModalDelete';
+import { socket } from '../../../Ultils/Socket/Socket';
 
-function ListHistorical() {
+const ListHistorical = () => {
     const [openModalAdd, setOpenModalAdd] = useState(false);
     const [isShowModalEdit, setIsShowModalEdit] = useState(false);
     const [openModalConfig, setOpenModalConfig] = useState(false);
@@ -69,6 +70,7 @@ function ListHistorical() {
         if (response && response.EC === 0 && Array.isArray(response.DT?.DT)) {
             const rows = response.DT.DT.map((item) => ({
                 id: item._id,
+                tagnameId: item.id,
                 channel: item.channel,
                 name: item.name,
                 type: item.type
@@ -123,32 +125,41 @@ function ListHistorical() {
     }
     const handleCloseModalDelete = () => { setIsShowModalDelete(false); }
     const handleDeleteHistorical = (historical) => {
+        console.log('check id delete historical: ', historical);
+        let dataToDelete = [];
         if (historical) {
-            // Nếu bấm icon delete 1 hàng
-            setDataModalDelete([historical.id]);
+            dataToDelete = [{ id: historical.id, tagnameId: historical.tagnameId }];
             setSelectedCount(1);
         } else {
-            // Nếu bấm nút “Xóa Tag” hàng loạt
-            setDataModalDelete(selectedRows);
-            setSelectedCount(selectedRows.length);
+            dataToDelete = _listHistorical
+                .filter(item => selectedRows.includes(item.id))
+                .map(item => ({
+                    id: item.id,
+                    tagnameId: item.tagnameId
+                }));
+            setSelectedCount(dataToDelete.length);
         }
+
+        setDataModalDelete(dataToDelete);
         setIsShowModalDelete(true);
-        setactionDeleteHistorical('HISTORICAL')
+        setactionDeleteHistorical('HISTORICAL');
     };
 
     const conformDeleteHistorical = async () => {
-        // console.log('check delete tag historical', { ids: dataModalDelete })
-        let res = await deleteHistorical({ ids: dataModalDelete });
-        let serverData = res
+        // Gửi xuống cả id và tagnameId
+        let res = await deleteHistorical({ list: dataModalDelete });
+        let serverData = res;
+
         if (+serverData.EC === 0) {
-            toast.success(serverData.EM)
-            setIsShowModalDelete(false)
-            await fetchHistorical()
-        }
-        else {
-            toast.error(serverData.EM)
+            socket.emit("CHANGE HISTORICAL TYPE");
+            toast.success(serverData.EM);
+            setIsShowModalDelete(false);
+            await fetchHistorical();
+        } else {
+            toast.error(serverData.EM);
         }
     };
+
 
     const _listHistorical = useMemo(() => {
         return listHistorical.map(his => {
@@ -178,14 +189,14 @@ function ListHistorical() {
             headerAlign: 'center', align: 'center',
             renderCell: (params) => (
                 <>
-                    <IconButton
+                    {/* <IconButton
                         sx={{ mr: 2 }}
                         color="primary"
                         title="Chỉnh sửa"
                         onClick={(e) => { e.stopPropagation(); handleShowModalEditTag(params.row); }}
                     >
                         <BorderColorIcon />
-                    </IconButton>
+                    </IconButton> */}
                     <IconButton
                         color="error"
                         title="Xóa"
@@ -245,25 +256,17 @@ function ListHistorical() {
                         setSelectedRows(newSelection);
                         setSelectedCount(newSelection.length);
                     }}
-                    sx={{
-                        "& .MuiDataGrid-columnHeaders": {
-                            backgroundColor: "#968d8d",
-                            color: "#fff",
-                            fontWeight: "bold",
-                            fontSize: 15,
-                        },
-                        "& .MuiDataGrid-columnSeparator": { display: "none" },
-                        "& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows": {
-                            margin: 0,
-                        },
-                    }}
+
                     loading={loading}
                     localeText={{
-                        noRowsLabel: 'Không có dữ liệu',
-                        footerRowSelected: (count) => `${count} hàng đã chọn`,
-                        MuiTablePagination: {
+                        noRowsLabel: 'Không có dữ liệu'
+                    }}
+                    componentsProps={{
+                        pagination: {
                             labelRowsPerPage: 'Số hàng mỗi trang:',
-                        },
+                            labelDisplayedRows: ({ from, to, count }) =>
+                                `${from}–${to} trong tổng ${count !== -1 ? count : `hơn ${to}`}`,
+                        }
                     }}
                 />
 

@@ -6,6 +6,7 @@ import {
 } from '../../../ImportComponents/Imports';
 import { updateConfigHistorical } from '../../../../Services/APIDevice';
 import useValidator from '../../../Valiedate/Validation'
+import { socket } from "../../Socket/Socket";
 
 const ModalEditConfig = (props) => {
     const style = {
@@ -89,6 +90,7 @@ const ModalEditConfig = (props) => {
         let res = await updateConfigHistorical(dataToUpdate)
         if (res && res && res.EC === 0) {
             toast.success(res.EM)
+            socket.emit("CHANGE HISTORICAL TYPE");
             handleClose()
         } else {
             toast.error(res.EM)
@@ -140,7 +142,6 @@ const ModalEditConfig = (props) => {
                     />
                     {/* Type */}
                     <TextField
-                        disabled
                         select
                         label="Type"
                         value={dataConfig.type}
@@ -149,24 +150,29 @@ const ModalEditConfig = (props) => {
                         error={!!errors.type}
                         helperText={errors.type}
                     >
-                        <MenuItem value="cycle">Cycle</MenuItem>
-                        <MenuItem value="trigger">Trigger</MenuItem>
+                        <MenuItem value="None">None</MenuItem>
+                        <MenuItem value="Cycle">Cycle</MenuItem>
+                        <MenuItem value="TT10/2021">TT10/2021</MenuItem>
                     </TextField>
                     {/* Parity*/}
-                    <TextField
-                        label="Cycle (s)"
-                        value={dataConfig.cycle}
-                        variant="standard"
-                        onChange={(event) => handleOnchangeInput(event.target.value, 'cycle')}
-                        error={!!errors.cycle}
-                        helperText={errors.cycle}
-                        sx={{
-                            gridColumn: 'span 2',
-                            justifySelf: 'center',
-                            width: '50%'
-                        }}
-                    >
-                    </TextField>
+
+                    {/* Hiển thị khi Type là "cycle" */}
+                    {dataConfig.type === "Cycle" && (
+                        <TextField
+                            label="Cycle (s)"
+                            value={dataConfig.cycle}
+                            variant="standard"
+                            onChange={(event) => handleOnchangeInput(event.target.value, 'cycle')}
+                            error={!!errors.cycle}
+                            helperText={errors.cycle}
+                            sx={{
+                                gridColumn: 'span 2',
+                                justifySelf: 'center',
+                                width: '50%',
+                            }}
+                        />
+                    )}
+
                 </Box>
 
                 {/* Footer */}
