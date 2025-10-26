@@ -1,13 +1,12 @@
 import {
     useState, useEffect,
     Paper, IconButton, Modal, Box, Typography,
-    DataGrid,
     BorderColorIcon, CancelIcon,
-
 } from '../../../ImportComponents/Imports';
 import { fetchConfigHistorical } from '../../../../Services/APIDevice';
 import Loading from '../../Loading/Loading';
-
+import CustomDataGrid
+    from '../../../ImportComponents/CustomDataGrid';
 const ModalConfigHistorical = (props) => {
 
     const { openModalConfig, handleCloseModalConfig, handleOpenModalEditConfig, reloadConfig } = props;
@@ -27,8 +26,8 @@ const ModalConfigHistorical = (props) => {
     };
 
     const [listConfig, setlistConfig] = useState([]);
-    const [pageSize, setPageSize] = useState(5);
     const [loading, setLoading] = useState(true);
+    const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 5, });
 
     useEffect(() => {
         if (openModalConfig) {
@@ -61,9 +60,9 @@ const ModalConfigHistorical = (props) => {
 
     const columns = [
 
-        { field: 'name', headerName: 'Name', width: 200, align: 'center', headerAlign: 'center' },
-        { field: 'type', headerName: 'Type', width: 150, align: 'center', headerAlign: 'center' },
-        { field: 'cycle', headerName: 'Cycle (s)', width: 150, align: 'center', headerAlign: 'center' },
+        { field: 'name', headerName: 'Name', flex: 1, align: 'center', headerAlign: 'center' },
+        { field: 'type', headerName: 'Type', flex: 1, align: 'center', headerAlign: 'center' },
+        { field: 'cycle', headerName: 'Cycle (s)', flex: 1, align: 'center', headerAlign: 'center' },
         {
             field: "action",
             headerName: "Action",
@@ -109,37 +108,15 @@ const ModalConfigHistorical = (props) => {
                 </IconButton>
 
                 <Paper sx={{ height: 400, width: '100%' }}>
-                    <DataGrid
+                    <CustomDataGrid
                         rows={listConfig}
                         columns={columns}
-                        pageSize={pageSize}
-                        onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
-                        rowsPerPageOptions={[5, 10, 20]}
+                        paginationModel={paginationModel}
+                        onPaginationModelChange={setPaginationModel}
+                        pageSizeOptions={[5, 10, 20]}
                         pagination
                         disableColumnMenu
-                        sx={{
-                            "& .MuiDataGrid-columnHeaders": {
-                                backgroundColor: "#777777ff",
-                                color: "#fff",
-                                fontWeight: "bold",
-                                fontSize: 15,
-                            },
-                            "& .MuiDataGrid-columnSeparator": { display: "none" },
-                            "& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows": {
-                                margin: 0,
-                            },
-                        }}
                         loading={loading}
-                        localeText={{
-                            noRowsLabel: 'Không có dữ liệu'
-                        }}
-                        componentsProps={{
-                            pagination: {
-                                labelRowsPerPage: 'Số hàng mỗi trang:',
-                                labelDisplayedRows: ({ from, to, count }) =>
-                                    `${from}–${to} trong tổng ${count !== -1 ? count : `hơn ${to}`}`,
-                            }
-                        }}
                     />
                     {loading && <Loading text="Đang tải dữ liệu..." />}
                 </Paper>

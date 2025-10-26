@@ -1,8 +1,6 @@
 import {
     useState, useEffect,
-    Button, IconButton, Modal, Box, Typography, TextField, CloseIcon,
-    _, MenuItem,
-    toast
+    Button, IconButton, Modal, Box, Typography, TextField, CloseIcon, _, MenuItem, toast
 } from '../../../ImportComponents/Imports';
 import { updateConfigHistorical } from '../../../../Services/APIDevice';
 import useValidator from '../../../Valiedate/Validation'

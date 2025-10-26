@@ -4,15 +4,15 @@ import {
     AddBoxIcon, SearchIcon, CancelIcon, CancelPresentation, MenuItem,
     toast
 } from '../../../ImportComponents/Imports';
-import '../../../../scss/main.scss'
 import { fetchAllChannels, createNewHistorical } from '../../../../Services/APIDevice';
 import Loading from '../../Loading/Loading';
 import useValidator from '../../../Valiedate/Validation'
 import { socket } from '../../Socket/Socket';
+import CustomDataGrid from '../../../ImportComponents/CustomDataGrid';
 
 const ModalSearchChannels = (props) => {
     const { openModalAdd, handleCloseModalAdd, dataConfig } = props;
-
+    const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 5, });
     const style = {
         position: 'absolute',
         top: '50%',
@@ -38,7 +38,6 @@ const ModalSearchChannels = (props) => {
     const [listChannelSearch, setlistChannelSearch] = useState([]);
     const [filteredList, setFilteredList] = useState([]);
     const [searched, setSearched] = useState("");
-    const [pageSize, setPageSize] = useState(5);
     const [loading, setLoading] = useState(true);
     const [selectedRows, setSelectedRows] = useState([]);
 
@@ -53,7 +52,6 @@ const ModalSearchChannels = (props) => {
     const fetchChannel = async () => {
         setLoading(true);
         let response = await fetchAllChannels();
-        // console.log('checkkkkkkkkkkkkkkkk: ', response)
         if (response && response.EC === 0 && Array.isArray(response.DT?.DT)) {
             const rowsWithId = response.DT.DT.map((item) => ({
                 id: item._id,
@@ -129,11 +127,11 @@ const ModalSearchChannels = (props) => {
     };
 
     const columns = [
-        { field: 'channel', headerName: 'Channel', width: 80, align: 'center', headerAlign: 'center' },
-        { field: 'name', headerName: 'Name', width: 200, align: 'center', headerAlign: 'center' },
-        { field: 'deviceName', headerName: 'Device', width: 100, align: 'center', headerAlign: 'center' },
-        { field: 'symbol', headerName: 'Symbol', width: 100, align: 'center', headerAlign: 'center' },
-        { field: 'unit', headerName: 'Unit', width: 100, align: 'center', headerAlign: 'center' },
+        { field: 'channel', headerName: 'Channel', flex: 1, align: 'center', headerAlign: 'center' },
+        { field: 'name', headerName: 'Name', flex: 1, align: 'center', headerAlign: 'center' },
+        { field: 'deviceName', headerName: 'Device', flex: 1, align: 'center', headerAlign: 'center' },
+        { field: 'symbol', headerName: 'Symbol', flex: 1, align: 'center', headerAlign: 'center' },
+        { field: 'unit', headerName: 'Unit', flex: 1, align: 'center', headerAlign: 'center' },
     ];
 
     return (
@@ -176,40 +174,16 @@ const ModalSearchChannels = (props) => {
                 />
 
                 <Paper sx={{ height: 350, width: '100%' }}>
-                    <DataGrid
+                    <CustomDataGrid
                         rows={filteredList}
                         columns={columns}
-                        pageSize={pageSize}
-                        onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
-                        rowsPerPageOptions={[5, 10, 20]}
+                        paginationModel={paginationModel}
+                        onPaginationModelChange={setPaginationModel}
+                        pageSizeOptions={[5, 10, 20]}
                         pagination
                         checkboxSelection
-                        onSelectionModelChange={(newSelection) => {
-                            setSelectedRows(newSelection);
-                        }}
-                        sx={{
-                            "& .MuiDataGrid-columnHeaders": {
-                                backgroundColor: "#777777ff",
-                                color: "#fff",
-                                fontWeight: "bold",
-                                fontSize: 15,
-                            },
-                            "& .MuiDataGrid-columnSeparator": { display: "none" },
-                            "& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows": {
-                                margin: 0,
-                            },
-                        }}
+                        onRowSelectionModelChange={(newSelectionModel) => { setSelectedRows(newSelectionModel); }}
                         loading={loading}
-                        localeText={{
-                            noRowsLabel: 'Không có dữ liệu'
-                        }}
-                        componentsProps={{
-                            pagination: {
-                                labelRowsPerPage: 'Số hàng mỗi trang:',
-                                labelDisplayedRows: ({ from, to, count }) =>
-                                    `${from}–${to} trong tổng ${count !== -1 ? count : `hơn ${to}`}`,
-                            }
-                        }}
                     />
 
                     {loading && <Loading text="Đang tải dữ liệu..." />}

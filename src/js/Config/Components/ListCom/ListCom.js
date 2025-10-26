@@ -1,16 +1,15 @@
 import {
     useState, useEffect,
     Paper, IconButton,
-    DataGrid,
     BorderColorIcon
 } from '../../../ImportComponents/Imports';
-import '../../../../scss/main.scss';
 import { fetchAllComs } from '../../../../Services/APIDevice'
 import ModalCom from '../../../Ultils/Modal/Com/ModalCom';
 import Loading from '../../../Ultils/Loading/Loading';
+import CustomDataGrid from '../../../ImportComponents/CustomDataGrid';
 
 const ListCom = (props) => {
-    const [pageSize, setPageSize] = useState(5);
+    const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 5, });
     const [listComs, setListComs] = useState([]);
     const [dataModalCom, setdataModalCom] = useState([]);
     const [isShowModalCom, setisShowModalCom] = useState(false);
@@ -81,27 +80,17 @@ const ListCom = (props) => {
             <div >
 
                 <Paper sx={{ height: 400, width: '100%' }}>
-                    <DataGrid
+                    <CustomDataGrid
                         rows={listComs}
                         columns={columns}
-                        pageSize={pageSize}
-                        onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
-                        rowsPerPageOptions={[5, 10, 20]}
+                        paginationModel={paginationModel}
+                        onPaginationModelChange={setPaginationModel}
+                        pageSizeOptions={[5, 10, 20]}
                         pagination
                         hideFooterSelectedRowCount={true}
                         loading={loading}
-                        localeText={{
-                            noRowsLabel: 'Không có dữ liệu'
-                        }}
-                        componentsProps={{
-                            pagination: {
-                                labelRowsPerPage: 'Số hàng mỗi trang:',
-                                labelDisplayedRows: ({ from, to, count }) =>
-                                    `${from}–${to} trong tổng ${count !== -1 ? count : `hơn ${to}`}`,
-                            }
-                        }}
+                    // Có thể override styles nếu cần
                     />
-
                     {loading && (
                         <Loading text="Đang tải dữ liệu..." />
                     )}

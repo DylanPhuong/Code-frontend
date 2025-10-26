@@ -7,6 +7,7 @@ import {
 import { createNewChannel, updateCurrentChannel } from '../../../../Services/APIDevice';
 import { Android12Switch } from '../../Switch/IconSwitch'
 import useValidator from '../../../Valiedate/Validation'
+import { socket } from '../../Socket/Socket';
 
 function ModalChannel(props) {
     const style = {
@@ -94,12 +95,6 @@ function ModalChannel(props) {
         }
     }, [isShowModalChannel, action, actionFuncSetting, dataModalChannel]);
 
-    // useEffect(() => {
-    //     if (isShowModalChannel) {
-    //         validateAll();
-    //     }
-    // }, [dataChannels.functionCode, dataChannels.dataFormat]);
-
     const handleClose = () => {
         handleCloseModalChannel();
         setDataChannels(defaultData);
@@ -165,6 +160,7 @@ function ModalChannel(props) {
             : await updateCurrentChannel(dataToSave);
 
         if (res && res.EC === 0) {
+            socket.emit("CREATE TAG");
             toast.success(res.EM);
             handleClose();
         } else {

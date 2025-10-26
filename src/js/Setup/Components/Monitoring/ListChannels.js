@@ -1,18 +1,17 @@
 import {
     useState, useEffect,
     Paper, Button, IconButton,
-    DataGrid,
-    AddCardIcon, BorderColorIcon, DeleteForeverIcon, SettingsApplicationsIcon,
-    toast
+    AddCardIcon, BorderColorIcon, DeleteForeverIcon, SettingsApplicationsIcon, toast
 } from '../../../ImportComponents/Imports';
 // import { Android12Switch } from '../../../Ultils/Switch/IconSwitch'
 import { fetchAllDevices, fetchAllChannels, fetchAllDataFormat, fetchAllDataType, fetchAllFunctionCode, deleteChannel } from '../../../../Services/APIDevice';
 import ModalChannel from '../../../Ultils/Modal/TagName/ModalChannel';
 import ModalDelete from '../../../Ultils/Modal/Delete/ModalDelete';
 import Loading from '../../../Ultils/Loading/Loading';
+import CustomDataGrid from '../../../ImportComponents/CustomDataGrid'
 
 const ListChannels = (props) => {
-    const [pageSize, setPageSize] = useState(5);
+    const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 5, });
     const [listChannel, setListChannel] = useState([]);
     const [listDataFormat, setlistDataFormat] = useState([]);
     const [listDataType, setlistDataType] = useState([]);
@@ -260,33 +259,20 @@ const ListChannels = (props) => {
                 )}
 
                 <Paper sx={{ height: 600, width: '100%' }}>
-                    <DataGrid
+                    <CustomDataGrid
                         rows={listChannel}
                         columns={columns}
-                        pageSize={pageSize}
-                        onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
-                        rowsPerPageOptions={[5, 10, 20]}
+                        paginationModel={paginationModel}
+                        onPaginationModelChange={setPaginationModel}
+                        pageSizeOptions={[5, 10, 20]}
                         pagination
                         checkboxSelection
-                        selectionModel={selectionChannel}
-                        onSelectionModelChange={(newSelection) => {
-                            // cho phép chọn nhiều khi dùng checkbox/checkall
+                        rowSelectionModel={selectionChannel}
+                        onRowSelectionModelChange={(newSelection) => {
                             setSelectionChannel(newSelection);
                             setSelectedCount(newSelection.length);
-
                         }}
-
                         loading={loading}
-                        localeText={{
-                            noRowsLabel: 'Không có dữ liệu'
-                        }}
-                        componentsProps={{
-                            pagination: {
-                                labelRowsPerPage: 'Số hàng mỗi trang:',
-                                labelDisplayedRows: ({ from, to, count }) =>
-                                    `${from}–${to} trong tổng ${count !== -1 ? count : `hơn ${to}`}`,
-                            }
-                        }}
                     />
 
                     {loading && (

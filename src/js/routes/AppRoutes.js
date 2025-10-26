@@ -1,4 +1,4 @@
-import { Switch, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import FunctionSettings from "../FunctionSetting/FunctionSettings";
 import DeviceTab from "../Config/DeviceTab";
 import SetupTab from "../Setup/SetupTab";
@@ -7,42 +7,24 @@ import InputPopover from "../Ultils/Popover/Popover";
 import HistoricalTab from "../Historical/HistoricalTab";
 
 const AppRoutes = (props) => {
-
     return (
-        <>
+        <Routes>
+            <Route path="/login" element={<div>Login</div>} />
 
-            <Switch>
-                <Route path="/login">
-                    Login
-                </Route>
+            <Route path="/historical" element={<HistoricalTab />} />
 
-                <Route path="/historical" exact>
-                    <HistoricalTab />
-                </Route>
+            <Route path="/config" element={<DeviceTab />} />
 
-                <Route path="/config" exact>
-                    <DeviceTab />
-                </Route>
+            <Route path="/setup" element={<SetupTab />} />
 
-                <Route path="/setup" exact>
-                    <SetupTab />
-                </Route>
+            <Route path="/funcSettings" element={<FunctionSettings />} />
 
-                <Route path="/funcSettings" exact>
-                    <FunctionSettings />
-                </Route>
+            <Route path="/" element={<InputPopover />} />
+            {/* Hoặc: <Route path="/" element={<HomeLayout />} /> */}
 
-                <Route path="/" exact>
-                    {/* <HomeLayout /> */}
-                    <InputPopover />
-                </Route>
-
-                <Route path="*">
-                    404 Not Found!!
-                </Route>
-            </Switch>
-        </>
+            <Route path="*" element={<div>404 Not Found!!</div>} />
+        </Routes>
     )
 }
 
-export default AppRoutes
+export default AppRoutes;

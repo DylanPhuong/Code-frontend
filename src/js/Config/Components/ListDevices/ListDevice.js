@@ -1,7 +1,6 @@
 import {
     useState, useEffect,
     Paper, Button, IconButton,
-    DataGrid,
     AddCardIcon, BorderColorIcon, DeleteForeverIcon,
     toast
 } from '../../../ImportComponents/Imports';
@@ -10,9 +9,10 @@ import ModalDelete from '../../../Ultils/Modal/Delete/ModalDelete';
 import ModalProtocol from '../../../Ultils/Modal/Protocol/ModalProtocol';
 import ModalDevice from '../../../Ultils/Modal/Device/ModalDevice';
 import Loading from '../../../Ultils/Loading/Loading';
+import CustomDataGrid from '../../../ImportComponents/CustomDataGrid';
 
 const ListDevices = (props) => {
-    const [pageSize, setPageSize] = useState(5);
+    const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 5, });
     const [listDevices, setListDevices] = useState([]);
     const [listComs, setListComs] = useState([])
     const [listProtocol, setListProtocol] = useState([])
@@ -32,17 +32,20 @@ const ListDevices = (props) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetchDevices();
-        fetchComs();
-        fetchProtocol();
+        const init = async () => {
+            await fetchComs();
+            await fetchDevices();
+            await fetchProtocol();
+        };
+        init();
     }, []);
 
     const fetchDevices = async () => {
         setLoading(true);
         let response = await fetchAllDevices();
-        // console.log('Check Lisst COM: ', response)
         if (response && response.EC === 0 && response.DT?.DT) {
-            const rowsWithId = response.DT.DT.map((item, index) => ({
+            const rowsWithId = response.DT.DT.filter(item => !!item._id).map((item) => ({
+                ...item,
                 id: item._id,
                 name: item.name,
                 protocol: item.protocol,
@@ -72,6 +75,7 @@ const ListDevices = (props) => {
 
     const fetchProtocol = async () => {
         let response = await fetchAllProtocol();
+
         if (response && response.EC === 0 && response.DT) {
             const protocol = response.DT.Protocol?.map(item => ({
                 id: item._id,
@@ -128,7 +132,6 @@ const ListDevices = (props) => {
         setisShowModalDelete(true);
     };
 
-
     const conformDeleteDevice = async () => {
         let res = await deleteDevice({ ids: dataModalDelete });
         let serverData = res
@@ -153,34 +156,43 @@ const ListDevices = (props) => {
             flex: 1,
             headerAlign: 'center',
             align: 'center',
-            valueGetter: (params) => {
-                const com = listComs.find(c => c.serialPort === params.row.serialPort);
-                return com ? com.name : params.row.serialPort;
-            }
+            renderCell: (params) => {
+                const serialPort = params.row?.serialPort;
+                const com = Array.isArray(listComs)
+                    ? listComs.find(c => c.serialPort === serialPort)
+                    : null;
+                return com?.name || serialPort || '';
+            },
         },
         {
             field: 'action',
             headerName: 'Action',
             flex: 1,
-            headerAlign: 'center', align: 'center',
-            renderCell: (params) => (
-                <>
-                    {/* stopPropagation để không làm DataGrid thay đổi selection */}
-                    <IconButton
-                        sx={{ mr: 2 }}
-                        color="primary"
-                        onClick={(e) => { e.stopPropagation(); handleEditDevice(params.row); }}
-                    >
-                        <BorderColorIcon />
-                    </IconButton>
-                    <IconButton
-                        color="error"
-                        onClick={(e) => { e.stopPropagation(); handleDeleteDevice(params.row); }}
-                    >
-                        <DeleteForeverIcon />
-                    </IconButton>
-                </>
-            ),
+            headerAlign: 'center',
+            align: 'center',
+            renderCell: (params) => {
+                // Kiểm tra params tồn tại
+                if (!params || !params.row) {
+                    return null;
+                }
+                return (
+                    <>
+                        <IconButton
+                            sx={{ mr: 2 }}
+                            color="primary"
+                            onClick={(e) => { e.stopPropagation(); handleEditDevice(params.row); }}
+                        >
+                            <BorderColorIcon />
+                        </IconButton>
+                        <IconButton
+                            color="error"
+                            onClick={(e) => { e.stopPropagation(); handleDeleteDevice(params.row); }}
+                        >
+                            <DeleteForeverIcon />
+                        </IconButton>
+                    </>
+                );
+            },
         },
     ];
 
@@ -210,35 +222,23 @@ const ListDevices = (props) => {
                 )}
 
                 <Paper sx={{ height: 400, width: '100%' }}>
-                    <DataGrid
-                        rows={listDevices}
+                    <CustomDataGrid
+                        getRowId={(row) => row.id}
+                        rows={listDevices || []}
                         columns={columns}
-                        pageSize={pageSize}
-                        onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
-                        rowsPerPageOptions={[5, 10, 20]}
+                        paginationModel={paginationModel}
+                        onPaginationModelChange={setPaginationModel}
+                        pageSizeOptions={[5, 10, 20]}
                         pagination
                         checkboxSelection
                         selectionModel={selectionModel}
-                        onSelectionModelChange={(newSelection) => {
-                            // cho phép chọn nhiều khi dùng checkbox/checkall
+                        rowSelectionModel={selectionModel}
+                        onRowSelectionModelChange={(newSelection) => {
                             setSelectionModel(newSelection);
                             setSelectedCount(newSelection.length);
-
                         }}
-
                         loading={loading}
-                        localeText={{
-                            noRowsLabel: 'Không có dữ liệu'
-                        }}
-                        componentsProps={{
-                            pagination: {
-                                labelRowsPerPage: 'Số hàng mỗi trang:',
-                                labelDisplayedRows: ({ from, to, count }) =>
-                                    `${from}–${to} trong tổng ${count !== -1 ? count : `hơn ${to}`}`,
-                            }
-                        }}
                     />
-
                     {loading && (
                         <Loading text="Đang tải dữ liệu..." />
                     )}

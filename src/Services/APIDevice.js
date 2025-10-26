@@ -84,11 +84,16 @@ const updateConfigHistorical = (historicalConfig) => {
 const fetchAllHistoricalValue = () => {
     return axios.get(`/api/v1/historical/get-listdata`)
 }
+
+const findHistoricalTime = (dateTime) => {
+    return axios.post(`/api/v1/historical/get-listdata-time`, dateTime)
+}
+
 export {
     fetchAllProtocol,
     fetchAllDevices, createNewDevice, deleteDevice, updateCurrentDevice,
     fetchAllComs, updateCurrentCom,
     fetchAllChannels, createNewChannel, updateCurrentChannel, deleteChannel, fetchAllDataFormat, fetchAllDataType, fetchAllFunctionCode,
     fetchAllHistorical, fetchConfigHistorical, createNewHistorical, updateConfigHistorical, deleteHistorical,
-    fetchAllHistoricalValue,
+    fetchAllHistoricalValue, findHistoricalTime,
 }

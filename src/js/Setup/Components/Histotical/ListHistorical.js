@@ -1,9 +1,7 @@
 import {
     useState, useEffect, useMemo,
     Paper, Button, IconButton,
-    DataGrid,
-    AddCardIcon, BorderColorIcon, DeleteForeverIcon, SettingsApplicationsIcon,
-    toast
+    AddCardIcon, DeleteForeverIcon, SettingsApplicationsIcon, toast
 } from '../../../ImportComponents/Imports';
 import { fetchAllHistorical, deleteHistorical, fetchConfigHistorical, fetchAllChannels } from "../../../../Services/APIDevice";
 import ModalConfigHistorical from "../../../Ultils/Modal/Historical/ModalConfigHistorical";
@@ -13,6 +11,7 @@ import ModalTagHistorical from '../../../Ultils/Modal/Historical/ModalTagHistori
 import Loading from '../../../Ultils/Loading/Loading';
 import ModalDelete from '../../../Ultils/Modal/Delete/ModalDelete';
 import { socket } from '../../../Ultils/Socket/Socket';
+import CustomDataGrid from '../../../ImportComponents/CustomDataGrid'
 
 const ListHistorical = () => {
     const [openModalAdd, setOpenModalAdd] = useState(false);
@@ -29,8 +28,7 @@ const ListHistorical = () => {
     const [selectedCount, setSelectedCount] = useState(0);
     const [actionDeleteChannel, setactionDeleteHistorical] = useState([]);
 
-
-    const [pageSize, setPageSize] = useState(5);
+    const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 5, });
     const [loading, setLoading] = useState(true);
     const [listChannel, setListChannel] = useState([]);
     const [listHistorical, setListHistorical] = useState([]);
@@ -244,30 +242,20 @@ const ListHistorical = () => {
             )}
 
             <Paper sx={{ height: 400, width: '100%' }}>
-                <DataGrid
+                <CustomDataGrid
                     rows={_listHistorical}
                     columns={columns}
-                    pageSize={pageSize}
-                    onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
-                    rowsPerPageOptions={[5, 10, 20]}
+                    paginationModel={paginationModel}
+                    onPaginationModelChange={setPaginationModel}
+                    pageSizeOptions={[5, 10, 20]}
                     pagination
                     checkboxSelection
-                    onSelectionModelChange={(newSelection) => {
+                    onRowSelectionModelChange={(newSelection) => {
                         setSelectedRows(newSelection);
                         setSelectedCount(newSelection.length);
                     }}
 
                     loading={loading}
-                    localeText={{
-                        noRowsLabel: 'Không có dữ liệu'
-                    }}
-                    componentsProps={{
-                        pagination: {
-                            labelRowsPerPage: 'Số hàng mỗi trang:',
-                            labelDisplayedRows: ({ from, to, count }) =>
-                                `${from}–${to} trong tổng ${count !== -1 ? count : `hơn ${to}`}`,
-                        }
-                    }}
                 />
 
                 {loading && <Loading text="Đang tải dữ liệu..." />}

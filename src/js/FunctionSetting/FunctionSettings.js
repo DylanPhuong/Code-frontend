@@ -1,11 +1,9 @@
 import {
-    useState, useEffect,
-    IconButton, Box, Button, Paper,
-    DataGrid, LinearProgress,
-    AddCardIcon, BorderColorIcon, DeleteForeverIcon, SettingsApplicationsIcon,
-    toast
+    useState, useEffect, Chip,
+    IconButton, Box, Button, Paper, LinearProgress,
+    AddCardIcon, BorderColorIcon, DeleteForeverIcon, toast,
+    CheckCircleIcon, ErrorIcon, WarningAmberIcon, SensorsOffIcon, HelpOutlineIcon,
 } from '../ImportComponents/Imports';
-import { Android12Switch } from "../Ultils/Switch/IconSwitch";
 import {
     fetchAllDevices,
     fetchAllChannels,
@@ -19,9 +17,10 @@ import ModalDelete from "../Ultils/Modal/Delete/ModalDelete";
 import { socket } from "../Ultils/Socket/Socket";
 import Loading from "../Ultils/Loading/Loading";
 import InputPopover from "../Ultils/Popover/Popover";
+import CustomDataGrid from '../ImportComponents/CustomDataGrid'
 
 const FunctionSettings = (props) => {
-    const [pageSize, setPageSize] = useState(5);
+    const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 5, });
     const [listChannel, setListChannel] = useState([]);
     const [listDataSocket, setListDataSocket] = useState([]);
     const [listDataFormat, setlistDataFormat] = useState([]);
@@ -150,7 +149,6 @@ const FunctionSettings = (props) => {
 
     const fetchDevices = async () => {
         let response = await fetchAllDevices();
-
         if (response && response.EC === 0 && response.DT?.DT) {
             const listDevices = response.DT.DT.map((item, index) => ({
                 id: item._id,
@@ -356,41 +354,52 @@ const FunctionSettings = (props) => {
             headerAlign: "center",
             align: "center",
             renderCell: (params) => {
-                let bgColor = "";
+                let color = "default";
+                let icon = <HelpOutlineIcon sx={{ fontSize: 18 }} />;
+                let label = params.value || "Unknown";
+
                 switch (params.value) {
                     case "Normal":
-                        bgColor = "#4CAF50"; // xanh lá
+                        color = "success";
+                        icon = <CheckCircleIcon sx={{ fontSize: 18 }} />;
                         break;
                     case "Over range":
-                        bgColor = "#FF9800"; // cam
+                        color = "warning";
+                        icon = <WarningAmberIcon sx={{ fontSize: 18 }} />;
                         break;
                     case "Disconnect":
-                        bgColor = "#F44336"; // đỏ
+                        color = "error";
+                        icon = <ErrorIcon sx={{ fontSize: 18 }} />;
                         break;
                     case "Sample":
-                        bgColor = "#795548"; // nâu
+                        color = "secondary";
+                        icon = < SensorsOffIcon sx={{ fontSize: 18 }} />;
                         break;
                     default:
-                        bgColor = "#9E9E9E"; // xám cho an toàn
+                        color = "default";
+                        icon = <HelpOutlineIcon sx={{ fontSize: 18 }} />;
                 }
+
                 return (
-                    <Box
+                    <Chip
+                        icon={icon}
+                        label={label}
+                        color={color}
+                        variant="filled"
                         sx={{
-                            bgcolor: bgColor,
-                            color: "white",
-                            px: 1,
-                            py: 0.5,
-                            borderRadius: "8px",
                             fontWeight: 600,
-                            textAlign: "center",
-                            width: "50%",
+                            textTransform: "capitalize",
+                            minWidth: 120,
+                            justifyContent: "center",
+                            pl: 1,
+                            "& .MuiChip-icon": {
+                                ml: 0.3,
+                            },
                         }}
-                    >
-                        {params.value}
-                    </Box>
+                    />
                 );
-            },
-        },
+            }
+        }
     ];
 
     return (
@@ -401,7 +410,7 @@ const FunctionSettings = (props) => {
                     color="success"
                     startIcon={<AddCardIcon />}
                     onClick={handleAddChannel}
-                    sx={{ mb: 1.5, textTransform: 'none' }}
+                    sx={{ my: 1.5, textTransform: 'none' }}
                 >
                     Thêm Tag
                 </Button>
@@ -412,38 +421,27 @@ const FunctionSettings = (props) => {
                         color="error"
                         startIcon={<DeleteForeverIcon />}
                         onClick={(e) => { e.stopPropagation(); handleDeleteDevice(); }}
-                        sx={{ mb: 1.5, ml: 1.5, textTransform: 'none' }}
+                        sx={{ my: 1.5, ml: 1.5, textTransform: 'none' }}
                     >
                         Xóa thiết bị
                     </Button>
                 )}
 
                 <Paper sx={{ height: 600, width: '100%' }}>
-                    <DataGrid
+                    <CustomDataGrid
                         rows={listChannel}
                         columns={columns}
-                        pageSize={pageSize}
-                        onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
-                        rowsPerPageOptions={[5, 10, 20]}
+                        paginationModel={paginationModel}
+                        onPaginationModelChange={setPaginationModel}
+                        pageSizeOptions={[5, 10, 20]}
                         pagination
                         checkboxSelection
-                        selectionModel={selectionChannel}
-                        onSelectionModelChange={(newSelection) => {
-                            // cho phép chọn nhiều khi dùng checkbox/checkall
+                        rowSelectionModel={selectionChannel}
+                        onRowSelectionModelChange={(newSelection) => {
                             setSelectionChannel(newSelection);
                             setSelectedCount(newSelection.length);
                         }}
                         loading={loading}
-                        localeText={{
-                            noRowsLabel: 'Không có dữ liệu'
-                        }}
-                        componentsProps={{
-                            pagination: {
-                                labelRowsPerPage: 'Số hàng mỗi trang:',
-                                labelDisplayedRows: ({ from, to, count }) =>
-                                    `${from}–${to} trong tổng ${count !== -1 ? count : `hơn ${to}`}`,
-                            }
-                        }}
                     />
                     {loading && <Loading text="Đang tải dữ liệu..." />}
                 </Paper>
@@ -454,26 +452,16 @@ const FunctionSettings = (props) => {
                         GIÁ TRỊ CHƯA QUA XỬ LÝ
                     </Box>
                     <Box sx={{ mt: 3, height: 300, width: "100%" }}>
-                        <DataGrid
+                        <CustomDataGrid
                             rows={listDataSocket}
                             columns={column_value}
-                            pageSize={pageSize}
                             hideFooterSelectedRowCount={true}
-                            onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
-                            rowsPerPageOptions={[5, 10, 20]}
+                            paginationModel={paginationModel}
+                            onPaginationModelChange={setPaginationModel}
+                            pageSizeOptions={[5, 10, 20]}
                             pagination
                             onRowClick={handleRowClick}
                             loading={loading}
-                            localeText={{
-                                noRowsLabel: 'Không có dữ liệu'
-                            }}
-                            componentsProps={{
-                                pagination: {
-                                    labelRowsPerPage: 'Số hàng mỗi trang:',
-                                    labelDisplayedRows: ({ from, to, count }) =>
-                                        `${from}–${to} trong tổng ${count !== -1 ? count : `hơn ${to}`}`,
-                                }
-                            }}
                         />
                         {loading && <Loading text="Đang tải dữ liệu..." />}
                     </Box>
