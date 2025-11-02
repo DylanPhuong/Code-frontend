@@ -29,7 +29,12 @@ const HistoricalTab = () => {
 
     return (
         <div className="container">
-            <Paper sx={{ width: "100%", p: 2, borderRadius: 2, boxShadow: 2 }}>
+            <Paper sx={{
+                p: 2,
+                borderRadius: 2,
+                filter: 'drop-shadow(0 0 8px rgba(0,0,0,0.25))',
+                mt: 2,
+            }}>
                 <Box sx={{ height: 20, display: 'flex', alignItems: 'center' }}>
                     {/* Tabs */}
                     <Tabs
@@ -45,10 +50,10 @@ const HistoricalTab = () => {
             </Paper>
 
 
-            <TabPanel value={tabValue} index={1}>
+            <TabPanel value={tabValue} index={0}>
                 <HistirocalTrend />
             </TabPanel>
-            <TabPanel value={tabValue} index={0}>
+            <TabPanel value={tabValue} index={1}>
                 <HistirocalData />
             </TabPanel>
 

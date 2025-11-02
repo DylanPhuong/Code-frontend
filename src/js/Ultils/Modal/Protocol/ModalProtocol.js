@@ -1,16 +1,15 @@
 import {
-    useState, useEffect,
-    Button, CancelPresentation, MenuItem, TextField, Box, Modal, Typography, AddBoxIcon, IconButton, CloseIcon,
-    _
+    useState, useEffect, Button, CancelPresentation, MenuItem, TextField, Box,
+    Modal, Typography, AddBoxIcon, IconButton, CancelIcon, _
 } from '../../../ImportComponents/Imports';
 import useValidator from '../../../Valiedate/Validation'
 
-function ModalProtocol(props) {
-
+const ModalProtocol = (props) => {
     const {
         listProtocol,
         listModbus,
         listSiemens,
+        listMqtt,
         isShowModalProtocol,
         handleCloseModalProtocol,
         setisShowModalDevice,
@@ -26,7 +25,7 @@ function ModalProtocol(props) {
         bgcolor: '#fff',
         borderRadius: 2,
         boxShadow: 24,
-        p: 4,
+        p: 2.5,
     };
 
     useEffect(() => {
@@ -69,6 +68,21 @@ function ModalProtocol(props) {
         setdataProtocol(defaultData)
     };
 
+    // const validateAll = () => {
+    //     const newErrors = {};
+    //     Object.entries(dataProtocol).forEach(([key, value]) => {
+    //         // Nếu là MQTT thì bỏ qua validate driverName
+    //         if (dataProtocol.protocol === "MQTT Client" && key === "driverName") {
+    //             newErrors[key] = "";
+    //         } else {
+    //             newErrors[key] = validate(key, value);
+    //         }
+    //     });
+
+    //     setErrors(newErrors);
+    //     return Object.values(newErrors).every((err) => err === "");
+    // };
+
     const validateAll = () => {
         const newErrors = {};
         Object.entries(dataProtocol).forEach(([key, value]) => {
@@ -97,9 +111,10 @@ function ModalProtocol(props) {
                     }));
                     handleClose();
                     setisShowModalDevice(true);
-                } else {
-                    alert("Vui lòng chọn driver Modbus hợp lệ");
                 }
+                // else {
+                //     alert("Vui lòng chọn driver Modbus hợp lệ");
+                // }
                 break;
             }
 
@@ -117,16 +132,19 @@ function ModalProtocol(props) {
                 break;
             }
 
-            case "MQTT Client": {
+            case "MQTT": {
+                const mqttsDriver = listMqtt.find(
+                    item => item.name === dataProtocol.driverName
+                );
                 setdataModalDevice(prev => ({
                     ...prev,
-                    protocol: dataProtocol.protocol
+                    protocol: dataProtocol.protocol,
+                    driverName: mqttsDriver ? mqttsDriver.name : ""
                 }));
                 handleClose();
                 setisShowModalDevice(true);
                 break;
             }
-
             default:
                 alert("Vui lòng chọn protocol hợp lệ");
                 break;
@@ -138,12 +156,20 @@ function ModalProtocol(props) {
             {/* Modal chọn protocol */}
             <Modal open={isShowModalProtocol} onClose={handleClose}>
                 <Box sx={style}>
-                    <Typography variant="h6" align="center">Chọn Protocol</Typography>
+                    <Typography variant="h6" align="center" sx={{ fontWeight: 600, }}  >
+                        Chọn Protocol
+                    </Typography>
                     <IconButton
                         onClick={handleClose}
-                        sx={{ position: "absolute", right: 20, top: 20 }}
+                        sx={{
+                            position: "absolute",
+                            right: 20,
+                            top: 20,
+                            width: { xs: 36, md: 48 },
+                            height: { xs: 36, md: 25 },
+                        }}
                     >
-                        <CloseIcon />
+                        <CancelIcon sx={{ fontSize: { xs: 24, md: 32 } }} />
                     </IconButton>
 
                     <Box display="grid" gridTemplateColumns="1fr 1fr" gap={2} mt={2}>
@@ -182,13 +208,46 @@ function ModalProtocol(props) {
                                 ))}
                             </TextField>
                         )}
+
+                        {dataProtocol.protocol === 'Siemens' && (
+                            <TextField
+                                select
+                                label="Driver Name"
+                                variant="standard"
+                                value={dataProtocol.driverName}
+                                onChange={(e) => handleOnchangeInput(e.target.value, 'driverName')}
+                                sx={{ gridColumn: "1 / -1" }}
+                                error={!!errors.driverName}
+                                helperText={errors.driverName}
+                            >
+                                {listSiemens.map((item) => (
+                                    <MenuItem key={item.id} value={item.name}>
+                                        {item.name}
+                                    </MenuItem>
+                                ))}
+                            </TextField>
+                        )}
+
+                        {dataProtocol.protocol === 'MQTT' && (
+                            <TextField
+                                select
+                                label="Driver Name"
+                                variant="standard"
+                                value={dataProtocol.driverName}
+                                onChange={(e) => handleOnchangeInput(e.target.value, 'driverName')}
+                                sx={{ gridColumn: "1 / -1" }}
+                                error={!!errors.driverName}
+                                helperText={errors.driverName}
+                            >
+                                {listMqtt.map((item) => (
+                                    <MenuItem key={item.id} value={item.name}>
+                                        {item.name}
+                                    </MenuItem>
+                                ))}
+                            </TextField>
+                        )}
                     </Box>
 
-                    {/* <Box mt={3} textAlign="center">
-                        <Button variant="contained" color="success" onClick={handleConfirmProtocol}>
-                            Tiếp tục
-                        </Button>
-                    </Box> */}
                     <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2.5 }}>
 
                         <Button

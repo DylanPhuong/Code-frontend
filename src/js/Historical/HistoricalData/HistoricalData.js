@@ -96,7 +96,7 @@ const ListHistorical = () => {
             const selectedTagObj = listTagHistorical.find(tag => tag.id === selectedTag);
             const tagNameId = selectedTagObj ? selectedTagObj.id : "";
             const response = await findHistoricalTime({ startTime, endTime, tagNameId });
-            console.log('check data: ', response)
+            //console.log('check data: ', response)
             if (response && response.EC === 0 && response.DT) {
                 const dataFinds = [];
                 response.DT.forEach((item) => {
@@ -132,8 +132,9 @@ const ListHistorical = () => {
     };
 
     const handleExportCSV = () => {
+        // console.log('selectedTag: ', selectedTag)
+        if (!validateAll()) return;
         const headers = ['STT', 'Ngày và Giờ', 'Tên', 'Symbol', 'Giá trị', 'Đơn vị', 'Trạng thái'];
-
         const csvData = listHistoricalValue.map(item => [
             item.id,
             item.timestamp,
@@ -144,7 +145,11 @@ const ListHistorical = () => {
             item.status
         ]);
 
-        exportToCSV(headers, csvData, 'historical_data');
+        // Lấy tên từ selectedTag
+        const selectedTagObj = listTagHistorical.find(tag => tag.id === selectedTag);
+        const filename = selectedTagObj ? selectedTagObj.name : 'historical_data';
+
+        exportToCSV(headers, csvData, filename);
     };
 
     const columns = [
@@ -211,7 +216,12 @@ const ListHistorical = () => {
 
     return (
         <div>
-            <Paper sx={{ height: 100, width: '100%', p: 2, mb: 2 }}>
+            <Paper sx={{
+                p: 2,
+                mb: 2,
+                borderRadius: 2,
+                filter: 'drop-shadow(0 0 8px rgba(0,0,0,0.25))',
+            }}>
                 <Stack direction="row" spacing={2} alignItems="center" sx={{ height: '100%' }}>
                     <Box sx={{ width: '45%' }}>
                         <CustomDateTimePicker
@@ -272,6 +282,7 @@ const ListHistorical = () => {
                             height: 'fit-content',
                             minWidth: '120px'
                         }}
+                        disabled={selectedTag === ""}
                     >
                         Xuất Excel
                     </Button>
@@ -308,7 +319,7 @@ const ListHistorical = () => {
                 }
             </Paper>
 
-        </div>
+        </div >
     );
 }
 

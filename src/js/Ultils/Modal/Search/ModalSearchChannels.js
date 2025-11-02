@@ -1,6 +1,6 @@
 import {
     useState, useEffect,
-    Paper, Button, IconButton, Modal, Box, Typography, InputAdornment, TextField, DataGrid,
+    Paper, Button, IconButton, Modal, Box, Typography, InputAdornment, TextField,
     AddBoxIcon, SearchIcon, CancelIcon, CancelPresentation, MenuItem,
     toast
 } from '../../../ImportComponents/Imports';
@@ -11,7 +11,8 @@ import { socket } from '../../Socket/Socket';
 import CustomDataGrid from '../../../ImportComponents/CustomDataGrid';
 
 const ModalSearchChannels = (props) => {
-    const { openModalAdd, handleCloseModalAdd, dataConfig } = props;
+    const { actionHistorical, openModalAdd, handleCloseModalAdd, dataConfig,
+        openModalSearchTag, actionAlarm, setDataModalAlarm } = props;
     const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 5, });
     const style = {
         position: 'absolute',
@@ -42,12 +43,12 @@ const ModalSearchChannels = (props) => {
     const [selectedRows, setSelectedRows] = useState([]);
 
     useEffect(() => {
-        if (openModalAdd) {
+        if (openModalAdd || openModalSearchTag) {
             setDataEditTag(defaultData);
             setSelectedRows([]);
             fetchChannel();
         }
-    }, [openModalAdd]);
+    }, [openModalAdd, openModalSearchTag]);
 
     const fetchChannel = async () => {
         setLoading(true);
@@ -101,11 +102,10 @@ const ModalSearchChannels = (props) => {
         setFilteredList(filteredRows);
     };
 
-    const handleAdd = async () => {
+    const handleAddTagHistorical = async () => {
         if (!validateAll()) {
             return;
         }
-
         const selectedData = filteredList
             .filter((row) => selectedRows.includes(row.id))
             .map((row) => ({
@@ -115,8 +115,9 @@ const ModalSearchChannels = (props) => {
                 device: { _id: row.deviceId },
             }));
 
-        // console.log("check addddddd: ", selectedData);
-        const res = await createNewHistorical(selectedData);
+        const res = actionHistorical === 'HISTORICAL'
+            ? await createNewHistorical(selectedData)
+            : []
         if (res && res.EC === 0) {
             toast.success(res.EM);
             socket.emit("CHANGE HISTORICAL TYPE");
@@ -126,20 +127,46 @@ const ModalSearchChannels = (props) => {
         }
     };
 
+    const handleChooseTagAlarm = (rowData) => {
+        setDataModalAlarm(rowData);
+        handleClose();
+    }
+
     const columns = [
         { field: 'channel', headerName: 'Channel', flex: 1, align: 'center', headerAlign: 'center' },
         { field: 'name', headerName: 'Name', flex: 1, align: 'center', headerAlign: 'center' },
         { field: 'deviceName', headerName: 'Device', flex: 1, align: 'center', headerAlign: 'center' },
         { field: 'symbol', headerName: 'Symbol', flex: 1, align: 'center', headerAlign: 'center' },
         { field: 'unit', headerName: 'Unit', flex: 1, align: 'center', headerAlign: 'center' },
+        ...(actionAlarm === 'ALARM' ? [
+            {
+                field: "action",
+                headerName: "Action",
+                flex: 1,
+                headerAlign: 'center',
+                align: 'center',
+                sortable: false,
+                filterable: false,
+                renderCell: (params) => (
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        sx={{ textTransform: 'capitalize' }}
+                        onClick={(e) => { e.stopPropagation(); handleChooseTagAlarm(params.row); }}
+                    >
+                        Chọn
+                    </Button>
+                ),
+            }
+        ] : [])
     ];
 
     return (
-        <Modal open={openModalAdd} onClose={handleClose}>
+        <Modal open={!!(openModalAdd || openModalSearchTag)} onClose={handleClose}>
             <Box sx={style}>
                 {/* Header */}
                 <Typography variant="h6" align="center" sx={{ mb: 2, fontWeight: 600 }}>
-                    Tìm kiếm Channels
+                    Tìm kiếm Tag Name
                 </Typography>
 
                 <IconButton
@@ -181,39 +208,39 @@ const ModalSearchChannels = (props) => {
                         onPaginationModelChange={setPaginationModel}
                         pageSizeOptions={[5, 10, 20]}
                         pagination
-                        checkboxSelection
+                        {...(actionHistorical === 'HISTORICAL' && { checkboxSelection: true })}
                         onRowSelectionModelChange={(newSelectionModel) => { setSelectedRows(newSelectionModel); }}
                         loading={loading}
                     />
 
                     {loading && <Loading text="Đang tải dữ liệu..." />}
                 </Paper>
+                {actionHistorical === 'HISTORICAL' && (
+                    <Paper sx={{ mt: 2, width: "100%", p: 2, borderRadius: 2, boxShadow: 2, }} >
+                        <Box sx={{ ml: 15, display: "flex", alignItems: "center", height: 50, }} >
+                            <Typography sx={{ fontSize: 16, fontWeight: 500, }} >
+                                Chọn Group lưu trữ:
+                            </Typography>
+                            <TextField
+                                select
+                                label="Type"
+                                variant="outlined"
+                                sx={{ ml: 3, mt: 0, minWidth: 200 }}
+                                value={dataEditTag.type || ""}
+                                onChange={(event) => handleOnchangeInput(event.target.value, 'type')}
+                                error={!!errors.type}
+                                helperText={errors.type}
+                            >
+                                {dataConfig.map((item) => (
+                                    <MenuItem key={item.id} value={item.name}>
+                                        {item.name}
+                                    </MenuItem>
+                                ))}
+                            </TextField>
 
-                <Paper sx={{ mt: 2, width: "100%", p: 2, borderRadius: 2, boxShadow: 2, }} >
-                    <Box sx={{ ml: 15, display: "flex", alignItems: "center", height: 50, }} >
-                        <Typography sx={{ fontSize: 16, fontWeight: 500, }} >
-                            Chọn Group lưu trữ:
-                        </Typography>
-                        <TextField
-                            select
-                            label="Type"
-                            variant="outlined"
-                            sx={{ ml: 3, mt: 0, minWidth: 200 }}
-                            value={dataEditTag.type || ""}
-                            onChange={(event) => handleOnchangeInput(event.target.value, 'type')}
-                            error={!!errors.type}
-                            helperText={errors.type}
-                        >
-                            {dataConfig.map((item) => (
-                                <MenuItem key={item.id} value={item.name}>
-                                    {item.name}
-                                </MenuItem>
-                            ))}
-                        </TextField>
-
-                    </Box>
-                </Paper>
-
+                        </Box>
+                    </Paper>
+                )}
                 <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2.5 }}>
 
                     <Button
@@ -226,20 +253,19 @@ const ModalSearchChannels = (props) => {
                         Thoát
 
                     </Button>
-
-                    <Button
-                        variant="contained"
-                        color="success"
-                        startIcon={<AddBoxIcon />}
-                        sx={{ ml: 1.5, textTransform: 'none' }}
-                        onClick={handleAdd}
-                        disabled={selectedRows.length === 0}
-                    >
-                        Thêm
-                    </Button>
-
+                    {actionHistorical === 'HISTORICAL' && (
+                        <Button
+                            variant="contained"
+                            color="success"
+                            startIcon={<AddBoxIcon />}
+                            sx={{ ml: 1.5, textTransform: 'none' }}
+                            onClick={handleAddTagHistorical}
+                            disabled={selectedRows.length === 0}
+                        >
+                            Thêm
+                        </Button>
+                    )}
                 </Box>
-
             </Box>
         </Modal>
     );

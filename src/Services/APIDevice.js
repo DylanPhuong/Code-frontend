@@ -57,20 +57,18 @@ const deleteChannel = (deleteChannel) => {
 
 /* API Historical */
 const fetchAllHistorical = () => {
-    return axios.get(`/api/v1/historical/get-historical`)
+    return axios.get(`/api/v1/historical/get-taghistorical`)
 }
 
 const createNewHistorical = (historicalNew) => {
-    return axios.post(`/api/v1/historical/create-historical`, historicalNew)
+    return axios.post(`/api/v1/historical/create-taghistorical`, historicalNew)
 }
 
 const deleteHistorical = (dataDelete) => {
-    return axios.delete(`/api/v1/historical/delete-historical`, {
+    return axios.delete(`/api/v1/historical/delete-taghistorical`, {
         data: dataDelete
     });
 };
-
-
 
 const fetchConfigHistorical = () => {
     return axios.get(`/api/v1/historical/get-config`)
@@ -89,6 +87,26 @@ const findHistoricalTime = (dateTime) => {
     return axios.post(`/api/v1/historical/get-listdata-time`, dateTime)
 }
 
+/* API Alarm */
+const fetchAllTagAlarm = () => {
+    return axios.get(`/api/v1/alarm/get-tagalram`)
+}
+
+const createNewAlarm = (alarmNew) => {
+    return axios.post(`/api/v1/alarm/create-tagalram`, alarmNew)
+}
+
+const updateTagAlarm = (tagAlarm) => {
+    return axios.put(`/api/v1/alarm/update-tagalram`, tagAlarm)
+}
+
+const deleteTagAlarm = (dataDelete) => {
+    return axios.delete(`/api/v1/alarm/delete-tagalarm`, {
+        data: dataDelete
+    });
+};
+
+
 export {
     fetchAllProtocol,
     fetchAllDevices, createNewDevice, deleteDevice, updateCurrentDevice,
@@ -96,4 +114,5 @@ export {
     fetchAllChannels, createNewChannel, updateCurrentChannel, deleteChannel, fetchAllDataFormat, fetchAllDataType, fetchAllFunctionCode,
     fetchAllHistorical, fetchConfigHistorical, createNewHistorical, updateConfigHistorical, deleteHistorical,
     fetchAllHistoricalValue, findHistoricalTime,
+    fetchAllTagAlarm, createNewAlarm, updateTagAlarm, deleteTagAlarm
 }

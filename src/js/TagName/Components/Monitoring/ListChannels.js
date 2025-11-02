@@ -155,7 +155,6 @@ const ListChannels = (props) => {
         setisShowModalChannel(true);
     };
 
-
     const handleDeleteDevice = (device) => {
         if (device) {
             setSelectionChannel([device.id]);
@@ -176,7 +175,7 @@ const ListChannels = (props) => {
         if (+serverData.EC === 0) {
             toast.success(serverData.EM)
             setisShowModalDelete(false)
-            await fetchChannel()
+            await fetchChannel();
         }
         else {
             toast.error(serverData.EM)
@@ -192,7 +191,7 @@ const ListChannels = (props) => {
         {
             field: 'functionCodeName',
             headerName: 'Function Code',
-            width: 200,
+            width: 250,
             headerAlign: 'center',
             align: 'center',
         },
@@ -200,7 +199,8 @@ const ListChannels = (props) => {
             field: "acction",
             headerName: "Action",
             flex: 1,
-            minWidth: 100,
+            headerAlign: 'center',
+            align: 'center',
             sortable: false,
             filterable: false,
             renderCell: (params) => (

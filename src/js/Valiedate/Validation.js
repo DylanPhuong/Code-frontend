@@ -79,6 +79,7 @@ export default function useValidator() {
             case "lowSet":
             case "highSet":
             case "idAddress":
+            case "rangeAlarm":
                 if (!isNumber(value)) return "⚠️ Phải nhập số!";
                 break;
 

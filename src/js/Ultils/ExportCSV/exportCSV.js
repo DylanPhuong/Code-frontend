@@ -1,11 +1,13 @@
+import { toast } from '../../ImportComponents/Imports';
+
 export const exportToCSV = (headers, data, filename = 'export_data') => {
     if (!data || data.length === 0) {
-        alert('Không có dữ liệu để xuất!');
+        toast.error('Không có dữ liệu để xuất!');
         return false;
     }
 
     if (!headers || headers.length === 0) {
-        alert('Thiếu thông tin headers!');
+        toast.error('Thiếu thông tin headers!');
         return false;
     }
 
@@ -26,7 +28,7 @@ export const exportToCSV = (headers, data, filename = 'export_data') => {
     const url = URL.createObjectURL(blob);
 
     link.setAttribute('href', url);
-    link.setAttribute('download', `${filename}_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.csv`);
+    link.setAttribute('download', `${filename}_${new Date().toISOString().slice(0, 10).replace(/-/g, '')}.csv`);
     link.style.visibility = 'hidden';
 
     document.body.appendChild(link);

@@ -1,15 +1,13 @@
 import {
-    useState, useEffect,
-    Button, IconButton, Modal, Box, Typography, TextField, MenuItem, RadioGroup, Radio, FormControlLabel, CloseIcon,
-    SaveIcon,
-    toast
+    useState, useEffect, Button, IconButton, Modal, Box, Typography, TextField, CancelPresentation,
+    MenuItem, RadioGroup, Radio, FormControlLabel, CancelIcon, SaveIcon, toast
 } from '../../../ImportComponents/Imports';
 import { createNewChannel, updateCurrentChannel } from '../../../../Services/APIDevice';
 import { Android12Switch } from '../../Switch/IconSwitch'
 import useValidator from '../../../Valiedate/Validation'
 import { socket } from '../../Socket/Socket';
 
-function ModalChannel(props) {
+const ModalChannel = (props) => {
     const style = {
         position: 'absolute',
         top: '50%',
@@ -20,7 +18,7 @@ function ModalChannel(props) {
         bgcolor: '#fff',
         borderRadius: 2,
         boxShadow: 24,
-        p: 4,
+        p: 2.5,
         maxHeight: '90vh', // chiều cao tối đa theo viewport
         overflowY: 'auto', // bật scroll dọc khi vượt quá maxHeight
     };
@@ -205,11 +203,7 @@ function ModalChannel(props) {
         >
             <Box sx={style}>
                 {/* Header */}
-                <Typography
-                    variant="h6"
-                    align="center"
-                    sx={{ mb: 2 }}
-                >
+                <Typography variant="h6" align="center" sx={{ fontWeight: 600, fontSize: 25 }}  >
                     {action === 'CREATE' ? 'Thêm mới' : 'Chỉnh sửa'}
                 </Typography>
 
@@ -218,11 +212,12 @@ function ModalChannel(props) {
                     sx={{
                         position: "absolute",
                         right: 20,
-                        top: "8%",
-                        transform: "translateY(-50%)"
+                        top: 20,
+                        width: { xs: 36, md: 48 },
+                        height: { xs: 36, md: 48 },
                     }}
                 >
-                    <CloseIcon />
+                    <CancelIcon sx={{ fontSize: { xs: 24, md: 32 } }} />
                 </IconButton>
 
                 {/* Form */}
@@ -502,15 +497,25 @@ function ModalChannel(props) {
 
                     {/* Footer */}
                     <Box mt={3}
-                        sx={{ gridColumn: 'span 2', display: 'flex', justifyContent: 'center' }}>
+                        sx={{ gridColumn: 'span 2', display: 'flex', justifyContent: 'flex-end' }}>
+                        <Button
+                            variant="contained"
+                            color="error"
+                            startIcon={<CancelPresentation />}
+                            sx={{ textTransform: 'none' }}
+                            onClick={handleClose}
+                        >
+                            Thoát
+
+                        </Button>
                         <Button
                             type="submit"
                             variant="contained"
                             color="success"
                             startIcon={<SaveIcon />}
-                            sx={{ width: '150px' }}
+                            sx={{ ml: 1.5, textTransform: 'none' }}
                         >
-                            {action === 'CREATE' ? 'Lưu' : 'Cập nhật'}
+                            {action === 'CREATE' ? 'Thêm' : 'Cập nhật'}
                         </Button>
                     </Box>
                 </Box>

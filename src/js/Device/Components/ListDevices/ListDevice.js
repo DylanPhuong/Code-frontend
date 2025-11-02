@@ -18,6 +18,7 @@ const ListDevices = (props) => {
     const [listProtocol, setListProtocol] = useState([])
     const [listModbus, setListModbus] = useState([])
     const [listSiemens, setListSiemens] = useState([])
+    const [listMqtt, setListMqtt] = useState([])
     const [actionModalDevice, setactionModalDevice] = useState('CREATE');
     const [actionDeleteDevice, setactionDeleteDevice] = useState('');
     // State cho các modal
@@ -52,6 +53,8 @@ const ListDevices = (props) => {
                 driverName: item.driverName,
                 ipAddress: item.ipAddress,
                 port: item.port,
+                username: item.username,
+                password: item.password,
                 serialPort: item.serialPort,
                 timeOut: item.timeOut
             }));
@@ -92,9 +95,15 @@ const ListDevices = (props) => {
                 name: item.name,
             })) || [];
 
+            const mqtt = response.DT.MQTT?.map(item => ({
+                id: item._id,
+                name: item.name,
+            })) || [];
+
             setListProtocol(protocol);
             setListModbus(modbus);
             setListSiemens(siemens);
+            setListMqtt(mqtt);
         }
     };
 
@@ -251,6 +260,7 @@ const ListDevices = (props) => {
                 listProtocol={listProtocol}
                 listModbus={listModbus}
                 listSiemens={listSiemens}
+                listMqtt={listMqtt}
                 dataModalDevice={dataModalDevice}
                 isShowModalProtocol={isShowModalProtocol}
                 handleCloseModalProtocol={handleCloseModalProtocol}
@@ -264,6 +274,8 @@ const ListDevices = (props) => {
             <ModalDevice
                 listProtocol={listProtocol}
                 listModbus={listModbus}
+                listSiemens={listSiemens}
+                listMqtt={listMqtt}
                 action={actionModalDevice}
                 dataModalDevice={dataModalDevice}
                 isShowModalDevice={isShowModalDevice}

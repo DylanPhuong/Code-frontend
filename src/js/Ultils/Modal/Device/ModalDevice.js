@@ -1,12 +1,11 @@
 import {
-    useState, useEffect,
-    Button, IconButton, MenuItem, TextField, Box, Modal, Typography, CloseIcon, CancelPresentation, BorderColorIcon,
-    toast, _
+    useState, useEffect, Button, IconButton, MenuItem, TextField, Box, FormControl, InputLabel, Input, InputAdornment,
+    Modal, Typography, CancelIcon, CancelPresentation, BorderColorIcon, toast, _, Visibility, VisibilityOff
 } from '../../../ImportComponents/Imports';
 import { createNewDevice, updateCurrentDevice, fetchAllComs } from '../../../../Services/APIDevice';
 import useValidator from '../../../Valiedate/Validation'
 
-function ModalDevice(props) {
+const ModalDevice = (props) => {
     const style = {
         position: 'absolute',
         top: '50%',
@@ -16,7 +15,7 @@ function ModalDevice(props) {
         bgcolor: '#fff',
         borderRadius: 2,
         boxShadow: 24,
-        p: 4,
+        p: 2.5,
     };
 
     const defaultData = {
@@ -27,6 +26,8 @@ function ModalDevice(props) {
         driverName: '',
         timeOut: '',
         ipAddress: '',
+        username: '',
+        password: '',
         port: '',
     };
 
@@ -34,7 +35,10 @@ function ModalDevice(props) {
     const [errors, setErrors] = useState({});
     const [dataDevice, setDataDevice] = useState(defaultData);
     const [listComs, setListComs] = useState([]);
-    const { action, isShowModalDevice, handleCloseModalDevice, dataModalDevice, listProtocol, listModbus } = props;
+    const [showPassword, setShowPassword] = useState(false);
+
+    const { action, isShowModalDevice, handleCloseModalDevice, dataModalDevice,
+        listProtocol, listModbus, listSiemens, listMqtt } = props;
 
     useEffect(() => {
         fetchComs();
@@ -65,6 +69,8 @@ function ModalDevice(props) {
                     driverName: dataModalDevice.driverName || '',
                     timeOut: dataModalDevice.timeOut || '',
                     ipAddress: dataModalDevice.ipAddress || '',
+                    username: dataModalDevice.username || '',
+                    password: dataModalDevice.password || '',
                     port: dataModalDevice.port || '',
                 });
             } else if (action === 'CREATE' && dataModalDevice) {
@@ -89,14 +95,74 @@ function ModalDevice(props) {
     };
 
     const handleOnchangeInput = (value, name) => {
-        let _dataDevice = _.cloneDeep(dataDevice);
-        _dataDevice[name] = value;
-        setDataDevice((prev) => ({
+        // Khi đổi Protocol → reset toàn bộ các trường liên quan
+        if (name === "protocol") {
+            setDataDevice(prev => {
+                let updated = {
+                    ...prev,
+                    protocol: value,
+                    driverName: "",
+                    ipAddress: "",
+                    port: "",
+                    username: "",
+                    password: "",
+                };
+
+                if (value === "Siemens" || value === "MQTT") {
+                    updated.serialPort = "";
+                }
+
+                return updated;
+            });
+            return;
+        }
+
+        // Khi đổi DriverName → xử lý riêng
+        if (name === "driverName") {
+            setDataDevice(prev => {
+                let updated = { ...prev, driverName: value };
+
+                switch (value) {
+                    case "Modbus RTU Client":
+                        updated.ipAddress = "";
+                        updated.port = "";
+                        updated.username = "";
+                        updated.password = "";
+                        break;
+
+                    case "Modbus TCP Client":
+                    case "S7-1200":
+                        updated.serialPort = "";
+                        updated.username = "";
+                        updated.password = "";
+                        break;
+
+                    case "MQTT Client":
+                        updated.serialPort = "";
+                        break;
+
+                    default:
+                        updated.serialPort = "";
+                        updated.ipAddress = "";
+                        updated.port = "";
+                        updated.username = "";
+                        updated.password = "";
+                        break;
+                }
+                return updated;
+            });
+            return;
+        }
+
+        // Cập nhật các field khác bình thường
+        setDataDevice(prev => ({
             ...prev,
             [name]: value,
         }));
+
+        // Validate lại
         const errorMessage = validate(name, value);
-        setErrors((prev) => ({
+        setErrors(prev => ({
             ...prev,
             [name]: errorMessage,
         }));
@@ -106,12 +172,22 @@ function ModalDevice(props) {
         const newErrors = {};
         const isRTU = dataDevice.driverName === "Modbus RTU Client";
         const isTCP = dataDevice.driverName === "Modbus TCP Client";
+        const isS7 = dataDevice.driverName === "S7-1200";
+        const isMQTT = dataDevice.driverName === "MQTT Client";
 
-        // Danh sách các trường cần validate dựa trên loại driver
-        let fieldsToValidate = ["name", "protocol", "driverName", "timeOut"];
-        if (isRTU) fieldsToValidate.push("serialPort");
-        if (isTCP) fieldsToValidate.push("ipAddress", "port");
+        let fieldsToValidate = ["name", "protocol", "timeOut"];
 
+        if (isMQTT) {
+            fieldsToValidate.push("username", "password");
+        }
+
+        if (isRTU) {
+            fieldsToValidate.push("serialPort");
+        }
+
+        if (isTCP || isS7 || isMQTT) {
+            fieldsToValidate.push("ipAddress", "port");
+        }
         fieldsToValidate.forEach((key) => {
             const value = dataDevice[key];
             const errorMsg = validate(key, value);
@@ -122,15 +198,22 @@ function ModalDevice(props) {
         });
 
         setErrors(newErrors);
-        return Object.values(newErrors).every(err => err === "");
+        return Object.values(newErrors).every((err) => err === "");
     };
 
+    const handleClickShowPassword = () => setShowPassword((show) => !show);
+    const handleMouseDownPassword = (event) => {
+        event.preventDefault();
+    };
+
+    const handleMouseUpPassword = (event) => {
+        event.preventDefault();
+    };
     const handleConfirmDevice = async () => {
         if (!validateAll()) {
             return;
         }
         const dataToUpdate = { ...dataDevice, id: dataModalDevice?.id };
-        // console.log('Check data device update: ', dataDevice);
         let res = action === 'CREATE'
             ? await createNewDevice(dataDevice)
             : await updateCurrentDevice(dataToUpdate);
@@ -151,11 +234,7 @@ function ModalDevice(props) {
         }}>
             <Box sx={style}>
                 {/* Header */}
-                <Typography
-                    variant="h6"
-                    align="center"
-                    sx={{ mb: 2 }}
-                >
+                <Typography variant="h6" align="center" sx={{ fontWeight: 600, mb: 2 }}  >
                     {action === 'CREATE' ? 'Thêm mới' : 'Chỉnh sửa'}
                 </Typography>
 
@@ -164,11 +243,12 @@ function ModalDevice(props) {
                     sx={{
                         position: "absolute",
                         right: 20,
-                        top: "8%",
-                        transform: "translateY(-50%)"
+                        top: 20,
+                        width: { xs: 36, md: 48 },
+                        height: { xs: 36, md: 25 },
                     }}
                 >
-                    <CloseIcon />
+                    <CancelIcon sx={{ fontSize: { xs: 24, md: 32 } }} />
                 </IconButton>
 
                 {/* Form */}
@@ -217,11 +297,27 @@ function ModalDevice(props) {
                         error={!!errors.driverName}
                         helperText={errors.driverName}
                     >
-                        {listModbus.map((item) => (
-                            <MenuItem key={item.id} value={item.name}>
-                                {item.name}
-                            </MenuItem>
-                        ))}
+                        {dataDevice.protocol === 'Modbus' ? (
+                            listModbus.map((item) => (
+                                <MenuItem key={item.id} value={item.name}>
+                                    {item.name}
+                                </MenuItem>
+                            ))
+                        ) : dataDevice.protocol === 'Siemens' ? (
+                            listSiemens.map((item) => (
+                                <MenuItem key={item.id} value={item.name}>
+                                    {item.name}
+                                </MenuItem>
+                            ))
+                        ) : dataDevice.protocol === 'MQTT' ? (
+                            listMqtt.map((item) => (
+                                <MenuItem key={item.id} value={item.name}>
+                                    {item.name}
+                                </MenuItem>
+                            ))
+                        ) : (
+                            <MenuItem disabled>— Chọn protocol trước —</MenuItem>
+                        )}
                     </TextField>
                     {/* Serial Port cho Modbus RTU */}
                     {dataDevice.driverName === 'Modbus RTU Client' && (
@@ -242,24 +338,64 @@ function ModalDevice(props) {
                         </TextField>
                     )}
 
-                    {/* Ip + Port cho Modbus TCP */}
-                    {dataDevice.driverName === 'Modbus TCP Client' && (
+                    {/* Ip + Port cho Modbus TCP, S7-1200, MQTT Client*/}
+                    {(
+                        dataDevice.driverName === 'Modbus TCP Client' ||
+                        dataDevice.driverName === 'S7-1200' ||
+                        dataDevice.driverName === 'MQTT Client'
+                    ) && (
+                            <>
+                                <TextField
+                                    label="Ip Address"
+                                    value={dataDevice.ipAddress || ''}
+                                    variant="standard"
+                                    onChange={(e) => handleOnchangeInput(e.target.value, 'ipAddress')}
+                                    error={!!errors.ipAddress}
+                                    helperText={errors.ipAddress}
+                                />
+                                <TextField
+                                    label="Port"
+                                    value={dataDevice.port || ''}
+                                    variant="standard"
+                                    onChange={(e) => handleOnchangeInput(e.target.value, 'port')}
+                                    error={!!errors.port}
+                                    helperText={errors.port}
+                                />
+                            </>
+                        )}
+
+                    {/* User + Pass cho MQTT Client*/}
+                    {dataDevice.protocol === 'MQTT' && (
                         <>
                             <TextField
-                                label="Ip Address"
-                                value={dataDevice.ipAddress || ''}
+                                label="User Name"
+                                value={dataDevice.username || ''}
                                 variant="standard"
-                                onChange={(e) => handleOnchangeInput(e.target.value, 'ipAddress')}
-                                error={!!errors.ipAddress}
-                                helperText={errors.ipAddress}
+                                onChange={(e) => handleOnchangeInput(e.target.value, 'username')}
+                                error={!!errors.username}
+                                helperText={errors.username}
                             />
                             <TextField
-                                label="Port"
-                                value={dataDevice.port || ''}
+                                type={showPassword ? 'text' : 'password'}
+                                label="Password"
+                                value={dataDevice.password || ''}
+                                onChange={(e) => handleOnchangeInput(e.target.value, 'password')}
+                                error={!!errors.password}
+                                helperText={errors.password}
                                 variant="standard"
-                                onChange={(e) => handleOnchangeInput(e.target.value, 'port')}
-                                error={!!errors.port}
-                                helperText={errors.port}
+                                InputProps={{
+                                    endAdornment: (
+                                        <InputAdornment position="end">
+                                            <IconButton
+                                                onClick={handleClickShowPassword}
+                                                onMouseDown={handleMouseDownPassword}
+                                                onMouseUp={handleMouseUpPassword}
+                                            >
+                                                {showPassword ? <VisibilityOff /> : <Visibility />}
+                                            </IconButton>
+                                        </InputAdornment>
+                                    ),
+                                }}
                             />
                         </>
                     )}
@@ -280,26 +416,13 @@ function ModalDevice(props) {
                         } : {}}
                     />
                     {/* Footer */}
-
-                    {/* <Box mt={3}
-                        sx={{ gridColumn: 'span 2', display: 'flex', justifyContent: 'center' }}>
-                        <Button
-                            type="submit"
-                            variant="contained"
-                            color="success"
-                            sx={{ width: '150px' }}
-                        >
-                            {action === 'CREATE' ? 'Lưu' : 'Cập nhật'}
-                        </Button>
-                    </Box> */}
-
-                    <Box sx={{ gridColumn: 'span 2', display: 'flex', justifyContent: 'flex-end', mt: 2.5 }}>
+                    <Box sx={{ gridColumn: 'span 2', display: 'flex', justifyContent: 'flex-end', mt: 1.5 }}>
 
                         <Button
                             variant="contained"
                             color="error"
                             startIcon={<CancelPresentation />}
-                            sx={{ mt: 1.5, textTransform: 'none' }}
+                            sx={{ textTransform: 'none' }}
                             onClick={handleClose}
                         >
                             Thoát
@@ -310,7 +433,7 @@ function ModalDevice(props) {
                             variant="contained"
                             color="success"
                             startIcon={<BorderColorIcon />}
-                            sx={{ mt: 1.5, ml: 1.5, textTransform: 'none' }}
+                            sx={{ ml: 1.5, textTransform: 'none' }}
                             type="submit"
                         // disabled={_.isEqual(dataCom, originalData)}
                         >

@@ -281,7 +281,7 @@ const FunctionSettings = (props) => {
         {
             field: 'functionCodeName',
             headerName: 'Function Code',
-            width: 200,
+            width: 250,
             headerAlign: 'center',
             align: 'center',
         },
@@ -289,7 +289,8 @@ const FunctionSettings = (props) => {
             field: "acction",
             headerName: "Action",
             flex: 1,
-            minWidth: 100,
+            headerAlign: 'center',
+            align: 'center',
             sortable: false,
             filterable: false,
             renderCell: (params) => (

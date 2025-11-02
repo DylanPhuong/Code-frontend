@@ -14,6 +14,7 @@ import { socket } from '../../../Ultils/Socket/Socket';
 import CustomDataGrid from '../../../ImportComponents/CustomDataGrid'
 
 const ListHistorical = () => {
+    const [actionHistorical, setActionHistorical] = useState([]);
     const [openModalAdd, setOpenModalAdd] = useState(false);
     const [isShowModalEdit, setIsShowModalEdit] = useState(false);
     const [openModalConfig, setOpenModalConfig] = useState(false);
@@ -34,7 +35,7 @@ const ListHistorical = () => {
     const [listHistorical, setListHistorical] = useState([]);
     const [selectedRows, setSelectedRows] = useState([]);
 
-    const [dataListHistorical, setDataListHistorical] = useState([]);
+    // const [dataListHistorical, setDataListHistorical] = useState([]);
 
     useEffect(() => {
         fetchChannel();
@@ -45,7 +46,6 @@ const ListHistorical = () => {
     const fetchChannel = async () => {
         setLoading(true);
         let response = await fetchAllChannels();
-        console.log('check fetchAllChannels: ', response)
         if (response && response.EC === 0 && Array.isArray(response.DT?.DT)) {
             const rowsWithId = response.DT.DT.map((item) => ({
                 id: item._id,
@@ -59,12 +59,12 @@ const ListHistorical = () => {
             setListChannel(rowsWithId);
         }
         setLoading(false);
+        setSelectedCount(0);
     };
 
     const fetchHistorical = async () => {
         let response = await fetchAllHistorical();
         setLoading(false);
-        //console.log('check listHistorical: ', response)
         if (response && response.EC === 0 && Array.isArray(response.DT?.DT)) {
             const rows = response.DT.DT.map((item) => ({
                 id: item._id,
@@ -95,6 +95,7 @@ const ListHistorical = () => {
 
     // mở/đóng Modal Add
     const handleOpenModalAdd = () => {
+        setActionHistorical('HISTORICAL');
         setOpenModalAdd(true);
     }
     const handleCloseModalAdd = () => { setOpenModalAdd(false); fetchHistorical(); }
@@ -123,7 +124,6 @@ const ListHistorical = () => {
     }
     const handleCloseModalDelete = () => { setIsShowModalDelete(false); }
     const handleDeleteHistorical = (historical) => {
-        console.log('check id delete historical: ', historical);
         let dataToDelete = [];
         if (historical) {
             dataToDelete = [{ id: historical.id, tagnameId: historical.tagnameId }];
@@ -263,6 +263,7 @@ const ListHistorical = () => {
 
             {/* Modal thêm mới */}
             <ModalSearchChannels
+                actionHistorical={actionHistorical}
                 openModalAdd={openModalAdd}
                 handleCloseModalAdd={handleCloseModalAdd}
                 dataConfig={dataConfig}

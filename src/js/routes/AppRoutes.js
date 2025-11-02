@@ -1,7 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 import FunctionSettings from "../FunctionSetting/FunctionSettings";
-import DeviceTab from "../Config/DeviceTab";
-import SetupTab from "../Setup/SetupTab";
+import DeviceTab from "../Device/DeviceTab";
+import TagName from "../TagName/TagName";
 import HomeLayout from "../HomeLayout/HomeLayout";
 import InputPopover from "../Ultils/Popover/Popover";
 import HistoricalTab from "../Historical/HistoricalTab";
@@ -13,9 +13,9 @@ const AppRoutes = (props) => {
 
             <Route path="/historical" element={<HistoricalTab />} />
 
-            <Route path="/config" element={<DeviceTab />} />
+            <Route path="/device" element={<DeviceTab />} />
 
-            <Route path="/setup" element={<SetupTab />} />
+            <Route path="/tagname" element={<TagName />} />
 
             <Route path="/funcSettings" element={<FunctionSettings />} />
 

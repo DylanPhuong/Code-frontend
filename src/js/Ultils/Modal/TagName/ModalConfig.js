@@ -5,7 +5,7 @@ import {
 import { updateCurrentCom } from '../../../../Services/APIDevice';
 import useValidator from '../../../Valiedate/Validation'
 
-const ModalCom = (props) => {
+const ModalConfig = (props) => {
     const style = {
         position: 'absolute',
         top: '50%',
@@ -29,40 +29,40 @@ const ModalCom = (props) => {
 
     const [errors, setErrors] = useState({});
     const { validate } = useValidator();
-    const [dataCom, setdataComs] = useState(defaultData);
+    const [dataConfig, setdataConfigs] = useState(defaultData);
     const [originalData, setOriginalData] = useState(defaultData);
-    const { handleCloseModalCom, isShowModalCom, dataModalCom } = props
+    const { handleCloseModalConfig, isShowModalConfig, dataModalConfig } = props
 
     useEffect(() => {
-        if (isShowModalCom) {
+        if (isShowModalConfig) {
             setErrors({});
             const mapped = {
-                name: dataModalCom.name || '',
-                type: dataModalCom.type || '',
-                baudRate: dataModalCom.baudRate ?? '',
-                parity: dataModalCom.parity || '',
-                dataBit: dataModalCom.dataBit || '',
-                stopBit: dataModalCom.stopBit || '',
+                name: dataModalConfig.name || '',
+                type: dataModalConfig.type || '',
+                baudRate: dataModalConfig.baudRate ?? '',
+                parity: dataModalConfig.parity || '',
+                dataBit: dataModalConfig.dataBit || '',
+                stopBit: dataModalConfig.stopBit || '',
             }
-            setdataComs(mapped);
+            setdataConfigs(mapped);
             setOriginalData(mapped);
         }
         else {
-            setdataComs(defaultData);
+            setdataConfigs(defaultData);
             setOriginalData(defaultData);
         }
 
-    }, [isShowModalCom, dataModalCom]);
+    }, [isShowModalConfig, dataModalConfig]);
 
     const handleClose = () => {
         setErrors({});
-        handleCloseModalCom()
+        handleCloseModalConfig()
     }
 
     const handleOnchangeInput = (value, name) => {
-        let _dataCom = _.cloneDeep(dataCom)
-        _dataCom[name] = value;
-        setdataComs((prev) => ({
+        let _dataConfig = _.cloneDeep(dataConfig)
+        _dataConfig[name] = value;
+        setdataConfigs((prev) => ({
             ...prev,
             [name]: value,
         }));
@@ -75,7 +75,7 @@ const ModalCom = (props) => {
 
     const validateAll = () => {
         const newErrors = {};
-        Object.entries(dataCom).forEach(([key, value]) => {
+        Object.entries(dataConfig).forEach(([key, value]) => {
             newErrors[key] = validate(key, value);
 
         });
@@ -88,7 +88,7 @@ const ModalCom = (props) => {
         if (!validateAll()) {
             return;
         }
-        const dataToUpdate = { ...dataCom, id: dataModalCom.id };
+        const dataToUpdate = { ...dataConfig, id: dataModalConfig.id };
         let res = await updateCurrentCom(dataToUpdate)
         if (res && res && res.EC === 0) {
             toast.success(res.EM)
@@ -99,7 +99,7 @@ const ModalCom = (props) => {
     }
 
     return (
-        <Modal open={isShowModalCom} onClose={handleClose}>
+        <Modal open={isShowModalConfig} onClose={handleClose}>
             <Box sx={style}>
                 {/* Header */}
                 <Typography variant="h6" align="center" sx={{ fontWeight: 600, }}  >
@@ -131,7 +131,7 @@ const ModalCom = (props) => {
                     <TextField
                         disabled
                         label="Name"
-                        value={dataCom.name}
+                        value={dataConfig.name}
                         variant="standard"
                         onChange={(event) => handleOnchangeInput(event.target.value, 'name')}
                         error={!!errors.name}
@@ -141,7 +141,7 @@ const ModalCom = (props) => {
                     <TextField
                         disabled
                         label="Type"
-                        value={dataCom.type}
+                        value={dataConfig.type}
                         variant="standard"
                         onChange={(event) => handleOnchangeInput(event.target.value, 'type')}
                         error={!!errors.type}
@@ -151,7 +151,7 @@ const ModalCom = (props) => {
                     {/* Baud Rate */}
                     <TextField
                         label="Baud Rate"
-                        value={dataCom.baudRate}
+                        value={dataConfig.baudRate}
                         variant="standard"
                         onChange={(event) => handleOnchangeInput(event.target.value, 'baudRate')}
                         error={!!errors.baudRate}
@@ -161,7 +161,7 @@ const ModalCom = (props) => {
                     <TextField
                         select
                         label="Data Bit"
-                        value={dataCom.dataBit}
+                        value={dataConfig.dataBit}
                         variant="standard"
                         onChange={(event) => handleOnchangeInput(event.target.value, 'dataBit')}
                         error={!!errors.dataBit}
@@ -174,7 +174,7 @@ const ModalCom = (props) => {
                     <TextField
                         select
                         label="Stop Bit"
-                        value={dataCom.stopBit}
+                        value={dataConfig.stopBit}
                         variant="standard"
                         onChange={(event) => handleOnchangeInput(event.target.value, 'stopBit')}
                         error={!!errors.stopBit}
@@ -187,7 +187,7 @@ const ModalCom = (props) => {
                     <TextField
                         select
                         label="Parity"
-                        value={dataCom.parity}
+                        value={dataConfig.parity}
                         variant="standard"
                         onChange={(event) => handleOnchangeInput(event.target.value, 'parity')}
                         error={!!errors.parity}
@@ -204,7 +204,7 @@ const ModalCom = (props) => {
                     <Button
                         variant="contained"
                         color="success"
-                        disabled={_.isEqual(dataCom, originalData)}
+                        disabled={_.isEqual(dataConfig, originalData)}
                         sx={{ width: '150px' }}
                         onClick={() => handleConfirmCom()}
                     >
@@ -231,7 +231,7 @@ const ModalCom = (props) => {
                         startIcon={<BorderColorIcon />}
                         sx={{ mt: 1.5, ml: 1.5, textTransform: 'none' }}
                         onClick={() => handleConfirmCom()}
-                        disabled={_.isEqual(dataCom, originalData)}
+                        disabled={_.isEqual(dataConfig, originalData)}
                     >
                         Chỉnh Sửa
                     </Button>
@@ -243,4 +243,4 @@ const ModalCom = (props) => {
     );
 }
 
-export default ModalCom
+export default ModalConfig

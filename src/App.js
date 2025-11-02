@@ -1,6 +1,6 @@
 import AppRoutes from './js/routes/AppRoutes';
 import { useEffect } from 'react';
-import { Toaster } from 'react-hot-toast';
+import { ToastContainer, Bounce } from '../src/js/ImportComponents/Imports';
 import { BrowserRouter as Router } from "react-router-dom";
 import { socket } from '../src/js/Ultils/Socket/Socket';
 
@@ -21,10 +21,21 @@ function App() {
         <div className='app-container'>
           <AppRoutes />
         </div>
-        <Toaster
+
+        <ToastContainer
           position="top-center"
-          reverseOrder={false}
+          autoClose={3000}
+          hideProgressBar
+          newestOnTop
+          closeOnClick={false}
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="colored"
+          transition={Bounce}
         />
+
       </Router>
     </>
   );

@@ -1,6 +1,6 @@
 import {
     useState, useEffect,
-    Button, IconButton, Modal, Box, Typography, TextField, CloseIcon, _, MenuItem, toast
+    Button, IconButton, Modal, Box, Typography, TextField, CancelIcon, _, MenuItem, toast
 } from '../../../ImportComponents/Imports';
 import { updateConfigHistorical } from '../../../../Services/APIDevice';
 import useValidator from '../../../Valiedate/Validation'
@@ -115,12 +115,14 @@ const ModalEditConfig = (props) => {
                     sx={{
                         position: "absolute",
                         right: 20,
-                        top: "8%",
-                        transform: "translateY(-50%)"
+                        top: 20,
+                        width: { xs: 36, md: 48 },
+                        height: { xs: 36, md: 48 },
                     }}
                 >
-                    <CloseIcon />
+                    <CancelIcon sx={{ fontSize: { xs: 24, md: 32 } }} />
                 </IconButton>
+
                 {/* Form */}
                 <Box
                     component="form"

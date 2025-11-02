@@ -1,16 +1,13 @@
 import {
-    Dialog,
+    Button, Dialog,
     DialogTitle,
     DialogContent,
-    DialogActions,
-    Button,
-    IconButton,
-    Typography,
-} from "@mui/material";
-import CloseIcon from '@mui/icons-material/Close';
+    DialogActions, Typography, IconButton, CancelIcon, _,
+} from '../../../ImportComponents/Imports';
 
 const ModalDelete = (props) => {
-    const { action, isShowModalDelete, handleCloseModalDelete, conformDeleteDevice, conformDeleteChannel, conformDeleteHistorical, selectedCount } = props
+    const { action, isShowModalDelete, handleCloseModalDelete, conformDeleteDevice,
+        conformDeleteChannel, conformDeleteHistorical, conformDeleteAlarm, selectedCount } = props
     const handleDelete = () => {
         switch (action) {
             case 'CHANNEL':
@@ -19,6 +16,8 @@ const ModalDelete = (props) => {
                 return conformDeleteDevice();
             case 'HISTORICAL':
                 return conformDeleteHistorical();
+            case 'ALARM':
+                return conformDeleteAlarm();
             default:
                 return null;
         }
@@ -38,13 +37,20 @@ const ModalDelete = (props) => {
         >
             {/* Tiêu đề */}
             <DialogTitle sx={{ fontWeight: 600, textAlign: "center", position: "relative", top: "-15px" }}>
-                Xác nhận xoá?
+                Xác nhận xoá ?
             </DialogTitle>
             {/* Nút đóng */}
-            <IconButton onClick={handleCloseModalDelete}
-                sx={{ position: "absolute", right: 8, top: 8, }}
+            <IconButton
+                onClick={handleCloseModalDelete}
+                sx={{
+                    position: "absolute",
+                    right: 20,
+                    top: 20,
+                    width: { xs: 36, md: 48 },
+                    height: { xs: 36, md: 25 },
+                }}
             >
-                <CloseIcon />
+                <CancelIcon sx={{ fontSize: { xs: 24, md: 32 } }} />
             </IconButton>
             {/* Nội dung */}
             <DialogContent sx={{ fontWeight: 600, textAlign: "center", position: "relative", top: "-15px" }}>
@@ -54,17 +60,29 @@ const ModalDelete = (props) => {
             {/* Footer */}
             <DialogActions sx={{ justifyContent: "center", gap: 5 }}>
                 <Button
-                    onClick={handleDelete}
-                    variant="contained" sx={{ bgcolor: "#3b82f6", "&:hover": { bgcolor: "#2563eb" } }} >
-                    Xác nhận
-                </Button>
-                <Button
-                    onClick={() => handleCloseModalDelete()}
+                    onClick={handleCloseModalDelete}
                     variant="contained"
-                    sx={{ bgcolor: "#ef4444", "&:hover": { bgcolor: "#dc2626" } }}
+                    sx={{
+                        width: '110px',
+                        bgcolor: '#ef4444',
+                        "&:hover": { bgcolor: '#dc2626' },
+                    }}
                 >
                     Hủy
                 </Button>
+
+                <Button
+                    onClick={handleDelete}
+                    variant="contained"
+                    sx={{
+                        width: '110px',
+                        bgcolor: '#1657beff',
+                        "&:hover": { bgcolor: '#2563eb' },
+                    }}
+                >
+                    Xác nhận
+                </Button>
+
             </DialogActions>
         </Dialog>
     );
