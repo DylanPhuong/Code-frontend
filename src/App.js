@@ -1,54 +1,12 @@
-// import AppRoutes from './js/routes/AppRoutes';
-// import { useEffect } from 'react';
-// import { ToastContainer, Bounce } from '../src/js/ImportComponents/Imports';
-// import { BrowserRouter as Router } from "react-router-dom";
-// import { socket } from '../src/js/Ultils/Socket/Socket';
-
-// function App() {
-//   useEffect(() => {
-
-//   })
-
-//   useEffect(() => {
-//     socket.connect();
-//     return () => {
-//       socket.disconnect()
-//     };
-//   }, []);
-//   return (
-//     <>
-//       <Router>
-//         <div className='app-container'>
-//           <AppRoutes />
-//         </div>
-
-//         <ToastContainer
-//           position="top-center"
-//           autoClose={3000}
-//           hideProgressBar
-//           newestOnTop
-//           closeOnClick={false}
-//           rtl={false}
-//           pauseOnFocusLoss
-//           draggable
-//           pauseOnHover
-//           theme="colored"
-//           transition={Bounce}
-//         />
-
-//       </Router>
-//     </>
-//   );
-// }
-
-// export default App;
-
 // src/App.js
 import { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ToastContainer, Bounce } from './js/ImportComponents/Imports';
 import { socket } from './js/Ultils/Socket/Socket';
 import DashboardLayout from './js/Layout/DashboardLayout';
+import Login from './js/Auth/Login';
+import NotFound from './js/Components/NotFound';
+import PrivateRoute from './js/Components/PrivateRoute';
 
 function App() {
   useEffect(() => {
@@ -62,8 +20,21 @@ function App() {
     <>
       <Router>
         <Routes>
-          {/* Tất cả routes đều render DashboardLayout */}
-          <Route path="/*" element={<DashboardLayout />} />
+          {/* Route công khai - Login */}
+          <Route path="/login" element={<Login />} />
+
+          {/* Routes được bảo vệ - Cần đăng nhập */}
+          <Route
+            path="/*"
+            element={
+              <PrivateRoute>
+                <DashboardLayout />
+              </PrivateRoute>
+            }
+          />
+
+          {/* Route 404 - Phải đặt cuối cùng */}
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>
 

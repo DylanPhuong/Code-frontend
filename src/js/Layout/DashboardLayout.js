@@ -16,6 +16,11 @@ import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
+import LogoutIcon from '@mui/icons-material/Logout';
+
+// 🔧 Thêm import toast để fix lỗi no-undef
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 // Import các component pages
 import DeviceTab from '../Device/DeviceTab';
@@ -32,6 +37,13 @@ const DashboardLayout = () => {
     const [mobileOpen, setMobileOpen] = useState(false);
     const [configOpen, setConfigOpen] = useState(false);
     const [darkMode, setDarkMode] = useState(false);
+
+    const handleLogout = () => {
+        localStorage.removeItem('isAuthenticated');
+        localStorage.removeItem('username');
+        navigate('/login');
+        toast.info('Đã đăng xuất!');
+    };
 
     // Lấy current page từ URL
     const currentPage = location.pathname.substring(1) || 'home';
@@ -92,7 +104,7 @@ const DashboardLayout = () => {
                         gap: 1
                     }}
                 >
-                    🎯 SCADA HCMUTE
+                    🎯 IOT DATALOGER
                 </Typography>
             </Toolbar>
 
@@ -284,11 +296,23 @@ const DashboardLayout = () => {
 
                     <Box sx={{ flexGrow: 1 }} />
 
+                    {/* Nút chuyển theme */}
                     <IconButton
                         onClick={() => setDarkMode(!darkMode)}
                         color="inherit"
+                        title={darkMode ? 'Chuyển sáng' : 'Chuyển tối'}
                     >
                         {darkMode ? <Brightness7Icon /> : <Brightness4Icon />}
+                    </IconButton>
+
+                    {/* ✅ Nút Đăng xuất để dùng handleLogout & LogoutIcon */}
+                    <IconButton
+                        onClick={handleLogout}
+                        color="inherit"
+                        sx={{ ml: 1 }}
+                        title="Đăng xuất"
+                    >
+                        <LogoutIcon />
                     </IconButton>
                 </Toolbar>
             </AppBar>
