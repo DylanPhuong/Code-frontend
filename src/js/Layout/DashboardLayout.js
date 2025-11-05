@@ -47,8 +47,8 @@ const DashboardLayout = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
-    const [mobileOpen, setMobileOpen] = useState(false);
-    const [drawerOpen, setDrawerOpen] = useState(true);
+    const [mobileOpen, setMobileOpen] = useState(false);   // Drawer tạm trên mobile
+    const [drawerOpen, setDrawerOpen] = useState(true);    // Thu gọn/phóng to desktop
     const [configOpen, setConfigOpen] = useState(false);
 
     const handleLogout = () => {
@@ -76,10 +76,11 @@ const DashboardLayout = () => {
 
     const handleConfigToggle = () => setConfigOpen(!configOpen);
 
+    // Cung cấp giá trị mặc định nếu biến không tồn tại
     const mainMenuItems = [
         { id: 'home', text: 'Dashboard', icon: <DashboardIcon />, path: '/' },
         { id: 'device', text: 'Thiết bị', icon: <DevicesIcon />, path: '/device' },
-    ];
+    ] || [];
 
     const configMenuItems = [
         {
@@ -93,9 +94,12 @@ const DashboardLayout = () => {
             ]
         },
         { id: 'historical', text: 'Historical', icon: <HistoryIcon />, path: '/historical' },
-    ];
+    ] || [];
 
-    // === Drawer content ===
+    // Kiểm tra các item có phải là mảng không trước khi sử dụng map()
+    const safeMainMenuItems = Array.isArray(mainMenuItems) ? mainMenuItems : [];
+    const safeConfigMenuItems = Array.isArray(configMenuItems) ? configMenuItems : [];
+
     const drawerContent = (
         <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
             <Toolbar sx={{ px: 1.5, gap: 1, justifyContent: drawerOpen ? 'space-between' : 'center' }}>
@@ -115,40 +119,51 @@ const DashboardLayout = () => {
             <Divider />
 
             <Box sx={{ overflowY: 'auto', flex: 1 }}>
-                {/* Menu chính */}
+                {/* Main */}
                 <Box sx={{ mt: 1 }}>
-                    {drawerOpen && (
-                        <motion.div {...textAnim}>
-                            <Typography variant="caption" sx={{ px: 2, py: 1, color: 'text.secondary', fontWeight: 600, fontSize: 11 }}>
-                                MENU CHÍNH
-                            </Typography>
-                        </motion.div>
-                    )}
+                    <AnimatePresence initial={false}>
+                        {drawerOpen && (
+                            <motion.div {...textAnim}>
+                                <Typography
+                                    variant="caption"
+                                    sx={{ px: 2, py: 1, display: 'block', color: 'text.secondary', fontWeight: 600, fontSize: 11, letterSpacing: 0.5 }}
+                                >
+                                    MENU CHÍNH
+                                </Typography>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
                     <List sx={{ px: 1 }}>
-                        {mainMenuItems.map((item) => {
+                        {safeMainMenuItems.map((item) => {
                             const button = (
                                 <ListItemButton
                                     key={item.id}
                                     selected={currentPage === item.id}
                                     onClick={() => handlePageChange(item.id)}
                                     sx={{
-                                        borderRadius: 1.5,
-                                        mb: 0.5,
+                                        borderRadius: 1.5, mb: 0.5,
                                         '&.Mui-selected': {
                                             backgroundColor: 'rgba(33,150,243,0.08)',
-                                            borderLeft: '3px solid',
-                                            borderColor: 'primary.main',
+                                            borderLeft: '3px solid', borderColor: 'primary.main',
+                                            '&:hover': { backgroundColor: 'rgba(33,150,243,0.12)' },
                                         },
                                     }}
                                 >
                                     <ListItemIcon sx={{ minWidth: 40, color: currentPage === item.id ? 'primary.main' : 'text.secondary' }}>
                                         {item.icon}
                                     </ListItemIcon>
-                                    {drawerOpen && (
-                                        <motion.div style={{ width: '100%' }} {...textAnim}>
-                                            <ListItemText primary={item.text} primaryTypographyProps={{ fontSize: 14 }} />
-                                        </motion.div>
-                                    )}
+
+                                    <AnimatePresence initial={false}>
+                                        {drawerOpen && (
+                                            <motion.div style={{ width: '100%' }} {...textAnim}>
+                                                <ListItemText
+                                                    primary={item.text}
+                                                    primaryTypographyProps={{ fontSize: 14, fontWeight: currentPage === item.id ? 600 : 400 }}
+                                                />
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
                                 </ListItemButton>
                             );
                             return drawerOpen ? button : (
@@ -160,63 +175,75 @@ const DashboardLayout = () => {
                     </List>
                 </Box>
 
-                {/* Menu cấu hình */}
+                {/* Config */}
                 <Box sx={{ mt: 1 }}>
-                    {drawerOpen && (
-                        <motion.div {...textAnim}>
-                            <Typography variant="caption" sx={{ px: 2, py: 1, color: 'text.secondary', fontWeight: 600, fontSize: 11 }}>
-                                CÀI ĐẶT
-                            </Typography>
-                        </motion.div>
-                    )}
+                    <AnimatePresence initial={false}>
+                        {drawerOpen && (
+                            <motion.div {...textAnim}>
+                                <Typography
+                                    variant="caption"
+                                    sx={{ px: 2, py: 1, display: 'block', color: 'text.secondary', fontWeight: 600, fontSize: 11, letterSpacing: 0.5 }}
+                                >
+                                    CÀI ĐẶT
+                                </Typography>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
                     <List sx={{ px: 1 }}>
-                        {configMenuItems.map((item) => (
+                        {safeConfigMenuItems.map((item) => (
                             <Box key={item.id}>
                                 <ListItemButton
                                     selected={!item.hasSubmenu && currentPage === item.id}
                                     onClick={() => item.hasSubmenu ? handleConfigToggle() : handlePageChange(item.id)}
                                     sx={{
-                                        borderRadius: 1.5,
-                                        mb: 0.5,
+                                        borderRadius: 1.5, mb: 0.5,
                                         '&.Mui-selected': {
                                             backgroundColor: 'rgba(33,150,243,0.08)',
-                                            borderLeft: '3px solid',
-                                            borderColor: 'primary.main',
+                                            borderLeft: '3px solid', borderColor: 'primary.main',
                                         },
                                     }}
                                 >
                                     <ListItemIcon sx={{ minWidth: 40, color: 'text.secondary' }}>
                                         {item.icon}
                                     </ListItemIcon>
-                                    {drawerOpen && (
-                                        <motion.div style={{ width: '100%' }} {...textAnim}>
-                                            <ListItemText primary={item.text} primaryTypographyProps={{ fontSize: 14 }} />
-                                        </motion.div>
-                                    )}
+
+                                    <AnimatePresence initial={false}>
+                                        {drawerOpen && (
+                                            <motion.div style={{ width: '100%' }} {...textAnim}>
+                                                <ListItemText primary={item.text} primaryTypographyProps={{ fontSize: 14 }} />
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+
                                     {item.hasSubmenu && drawerOpen && (configOpen ? <ExpandLess /> : <ExpandMore />)}
                                 </ListItemButton>
 
-                                {/* submenu an toàn — có kiểm tra item.submenu */}
-                                <Collapse in={drawerOpen && configOpen && !!item.submenu} timeout="auto" unmountOnExit>
-                                    <List component="div" disablePadding>
-                                        {item.submenu && item.submenu.map((subItem) => (
-                                            <ListItemButton
-                                                key={subItem.id}
-                                                sx={{ pl: 4, borderRadius: 1.5, mb: 0.5 }}
-                                                selected={currentPage === subItem.id}
-                                                onClick={() => handlePageChange(subItem.id)}
-                                            >
-                                                <ListItemIcon sx={{ minWidth: 40, color: currentPage === subItem.id ? 'primary.main' : 'text.secondary' }}>
-                                                    {subItem.icon}
-                                                </ListItemIcon>
-                                                <ListItemText
-                                                    primary={subItem.text}
-                                                    primaryTypographyProps={{ fontSize: 13, fontWeight: currentPage === subItem.id ? 600 : 400 }}
-                                                />
-                                            </ListItemButton>
-                                        ))}
-                                    </List>
-                                </Collapse>
+                                {/* Safe check for submenu */}
+                                {item.submenu && (
+                                    <Collapse in={drawerOpen && configOpen} timeout="auto" unmountOnExit>
+                                        <List component="div" disablePadding>
+                                            {item.submenu.map((subItem) => (
+                                                <ListItemButton
+                                                    key={subItem.id}
+                                                    sx={{ pl: 4, borderRadius: 1.5, mb: 0.5, '&.Mui-selected': { backgroundColor: 'rgba(33,150,243,0.08)' } }}
+                                                    selected={currentPage === subItem.id}
+                                                    onClick={() => handlePageChange(subItem.id)}
+                                                >
+                                                    <ListItemIcon
+                                                        sx={{ minWidth: 40, color: currentPage === subItem.id ? 'primary.main' : 'text.secondary' }}
+                                                    >
+                                                        {subItem.icon}
+                                                    </ListItemIcon>
+                                                    <ListItemText
+                                                        primary={subItem.text}
+                                                        primaryTypographyProps={{ fontSize: 13, fontWeight: currentPage === subItem.id ? 600 : 400 }}
+                                                    />
+                                                </ListItemButton>
+                                            ))}
+                                        </List>
+                                    </Collapse>
+                                )}
                             </Box>
                         ))}
                     </List>
@@ -238,20 +265,34 @@ const DashboardLayout = () => {
 
     return (
         <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-            {/* AppBar */}
             <AppBar
                 position="fixed"
                 sx={{
-                    width: { sm: `calc(100% - ${(drawerOpen ? drawerWidth : miniWidth)}px)` },
+                    width: {
+                        sm: `calc(100% - ${(drawerOpen ? drawerWidth : miniWidth)}px)`
+                    },
                     ml: { sm: `${drawerOpen ? drawerWidth : miniWidth}px` },
                     bgcolor: 'background.paper',
                     color: 'text.primary',
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.12)',
+                    boxShadow: '0 1px 3px rgba(25, 108, 216, 0.93)',
                     borderBottom: 1, borderColor: 'divider',
-                    transition: theme.transitions.create(['width', 'margin-left'], { duration: 250 }),
+                    transition: theme.transitions.create(['width', 'margin-left'], {
+                        duration: 250,
+                        easing: theme.transitions.easing.easeInOut
+                    }),
                 }}
             >
                 <Toolbar>
+                    <IconButton
+                        color="inherit"
+                        edge="start"
+                        onClick={() => (window.innerWidth < 900 ? handleDrawerToggleMobile() : handleDrawerToggleDesktop())}
+                        sx={{ mr: 1 }}
+                        title={drawerOpen ? 'Đóng sidebar' : 'Mở sidebar'}
+                    >
+                        {drawerOpen ? <MenuOpenIcon /> : <MenuIcon />}
+                    </IconButton>
+
                     <Box
                         sx={{
                             position: 'absolute',
@@ -261,11 +302,12 @@ const DashboardLayout = () => {
                         }}
                     >
                         <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                            IOT-DATALOGER
+                            BỘ GIÁM SÁT IOT-DATALOGER
                         </Typography>
                     </Box>
 
                     <Box sx={{ flexGrow: 1 }} />
+
                     <IconButton
                         onClick={colorMode.toggleColorMode}
                         color="inherit"
@@ -273,13 +315,13 @@ const DashboardLayout = () => {
                     >
                         {theme.palette.mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
                     </IconButton>
+
                     <IconButton onClick={handleLogout} color="inherit" sx={{ ml: 1 }} title="Đăng xuất">
                         <LogoutIcon />
                     </IconButton>
                 </Toolbar>
             </AppBar>
 
-            {/* Drawer */}
             <Box component="nav" sx={{ width: { sm: drawerOpen ? drawerWidth : miniWidth }, flexShrink: { sm: 0 } }}>
                 <Drawer
                     variant="temporary"
@@ -288,7 +330,7 @@ const DashboardLayout = () => {
                     ModalProps={{ keepMounted: true }}
                     sx={{
                         display: { xs: 'block', sm: 'none' },
-                        '& .MuiDrawer-paper': { width: drawerWidth }
+                        '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth }
                     }}
                 >
                     {drawerContent}
@@ -300,33 +342,43 @@ const DashboardLayout = () => {
                     sx={{
                         display: { xs: 'none', sm: 'block' },
                         '& .MuiDrawer-paper': {
+                            boxSizing: 'border-box',
                             overflowX: 'hidden',
                             width: drawerOpen ? drawerWidth : miniWidth,
-                            transition: theme.transitions.create('width', { duration: 250 }),
+                            transition: theme.transitions.create('width', {
+                                easing: theme.transitions.easing.easeInOut,
+                                duration: 250,
+                            }),
                             borderRight: 1, borderColor: 'divider'
                         }
                     }}
                 >
                     <Paper elevation={0} square sx={{ height: '100%' }} component={motion.div}
-                        animate={{ x: 0 }} transition={{ type: 'tween', duration: 0.25 }}>
+                        animate={{ x: 0 }} transition={{ type: 'tween', duration: 0.25 }} >
                         {drawerContent}
                     </Paper>
                 </Drawer>
             </Box>
 
-            {/* Main content */}
             <Box
                 component={motion.main}
+                animate={{ marginLeft: 0 }}
                 transition={{ type: 'tween', duration: 0.25 }}
                 sx={{
                     flexGrow: 1,
                     width: { sm: `calc(100% - ${(drawerOpen ? drawerWidth : miniWidth)}px)` },
+                    minHeight: '100vh',
                     bgcolor: 'background.default',
-                    transition: theme.transitions.create(['width'], { duration: 250 }),
+                    transition: theme.transitions.create(['width'], {
+                        duration: 250,
+                        easing: theme.transitions.easing.easeInOut
+                    }),
                 }}
             >
                 <Toolbar />
-                <Box sx={{ p: 3 }}>{renderContent()}</Box>
+                <Box sx={{ p: 3 }}>
+                    {renderContent()}
+                </Box>
             </Box>
         </Box>
     );
