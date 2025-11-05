@@ -1,5 +1,5 @@
 // src/js/Auth/Login.js
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     Box, Paper, TextField, Button, Typography, InputAdornment, IconButton
@@ -16,45 +16,37 @@ const Login = () => {
     });
     const [errors, setErrors] = useState({});
 
+    // ✅ Bảo đảm rỗng khi vào trang + “đè” lại sau 1 tick để thắng Autofill của Chrome
+    useEffect(() => {
+        setFormData({ username: '', password: '' });
+        const t = setTimeout(() => {
+            setFormData({ username: '', password: '' });
+        }, 0);
+        return () => clearTimeout(t);
+    }, []);
+
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
-        // Clear error khi user nhập
-        if (errors[name]) {
-            setErrors(prev => ({
-                ...prev,
-                [name]: ''
-            }));
-        }
+        setFormData(prev => ({ ...prev, [name]: value }));
+        if (errors[name]) setErrors(prev => ({ ...prev, [name]: '' }));
     };
 
     const validate = () => {
         const newErrors = {};
-        if (!formData.username.trim()) {
-            newErrors.username = 'Vui lòng nhập tên đăng nhập';
-        }
-        if (!formData.password) {
-            newErrors.password = 'Vui lòng nhập mật khẩu';
-        }
+        if (!formData.username.trim()) newErrors.username = 'Vui lòng nhập tên đăng nhập';
+        if (!formData.password) newErrors.password = 'Vui lòng nhập mật khẩu';
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
 
     const handleSubmit = (e) => {
         e.preventDefault();
-
         if (!validate()) return;
 
-        // TODO: Thay bằng API call thực tế
-        // Giả lập đăng nhập
+        // Demo login
         if (formData.username === 'admin' && formData.password === 'admin') {
-            // Lưu token/session
             localStorage.setItem('isAuthenticated', 'true');
             localStorage.setItem('username', formData.username);
-
             toast.success('Đăng nhập thành công!');
             navigate('/');
         } else {
@@ -62,9 +54,7 @@ const Login = () => {
         }
     };
 
-    const handleClickShowPassword = () => {
-        setShowPassword(!showPassword);
-    };
+    const handleClickShowPassword = () => setShowPassword(!showPassword);
 
     return (
         <Box
@@ -77,15 +67,7 @@ const Login = () => {
                 padding: 3
             }}
         >
-            <Paper
-                elevation={10}
-                sx={{
-                    padding: 4,
-                    maxWidth: 450,
-                    width: '100%',
-                    borderRadius: 3
-                }}
-            >
+            <Paper elevation={10} sx={{ padding: 4, maxWidth: 450, width: '100%', borderRadius: 3 }}>
                 {/* Logo & Title */}
                 <Box sx={{ textAlign: 'center', mb: 4 }}>
                     <Typography
@@ -107,38 +89,36 @@ const Login = () => {
                     </Typography>
                 </Box>
 
-                {/* Login Form */}
-                <form onSubmit={handleSubmit}>
+                {/* ✅ Chặn Autofill ở form */}
+                <form onSubmit={handleSubmit} autoComplete="off">
                     <TextField
                         fullWidth
                         label="Tên đăng nhập"
-                        name="username"
+                        name="login-username"            // ✅ đặt name “lạ” để tránh password manager
                         value={formData.username}
-                        onChange={handleChange}
+                        onChange={(e) => handleChange({ target: { name: 'username', value: e.target.value } })}
                         error={!!errors.username}
                         helperText={errors.username}
                         sx={{ mb: 2 }}
-                        autoComplete="username"
+                        autoComplete="off"               // ✅ tắt autofill cho ô này
+                        inputProps={{ autoCorrect: 'off', autoCapitalize: 'none' }}
                     />
 
                     <TextField
                         fullWidth
                         label="Mật khẩu"
-                        name="password"
+                        name="login-password"            // ✅ name “lạ”
                         type={showPassword ? 'text' : 'password'}
                         value={formData.password}
-                        onChange={handleChange}
+                        onChange={(e) => handleChange({ target: { name: 'password', value: e.target.value } })}
                         error={!!errors.password}
                         helperText={errors.password}
                         sx={{ mb: 3 }}
-                        autoComplete="current-password"
+                        autoComplete="new-password"      // ✅ cực kỳ quan trọng cho Chrome
                         InputProps={{
                             endAdornment: (
                                 <InputAdornment position="end">
-                                    <IconButton
-                                        onClick={handleClickShowPassword}
-                                        edge="end"
-                                    >
+                                    <IconButton onClick={handleClickShowPassword} edge="end">
                                         {showPassword ? <VisibilityOff /> : <Visibility />}
                                     </IconButton>
                                 </InputAdornment>
@@ -151,19 +131,13 @@ const Login = () => {
                         variant="contained"
                         size="large"
                         type="submit"
-                        sx={{
-                            py: 1.5,
-                            textTransform: 'none',
-                            fontSize: 16,
-                            fontWeight: 600,
-                            borderRadius: 2
-                        }}
+                        sx={{ py: 1.5, textTransform: 'none', fontSize: 16, fontWeight: 600, borderRadius: 2 }}
                     >
                         Đăng nhập
                     </Button>
                 </form>
 
-                {/* Demo Credentials */}
+                {/* Demo Credentials (chỉ hiển thị, KHÔNG ảnh hưởng autofill) */}
                 <Box sx={{ mt: 3, p: 2, bgcolor: 'grey.100', borderRadius: 2 }}>
                     <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
                         <strong>Demo Account:</strong>

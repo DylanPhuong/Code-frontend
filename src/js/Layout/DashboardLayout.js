@@ -1,10 +1,11 @@
 // src/js/Layout/DashboardLayout.js
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
     Box, Drawer, AppBar, Toolbar, List, Typography, IconButton,
     ListItemButton, ListItemIcon, ListItemText, Collapse
 } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import MenuIcon from '@mui/icons-material/Menu';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import DevicesIcon from '@mui/icons-material/Devices';
@@ -17,12 +18,11 @@ import ExpandMore from '@mui/icons-material/ExpandMore';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
 import LogoutIcon from '@mui/icons-material/Logout';
-
-// 🔧 Thêm import toast để fix lỗi no-undef
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import ColorModeContext from '../Theme/ColorModeContext';
 
-// Import các component pages
+// Pages
 import DeviceTab from '../Device/DeviceTab';
 import TagName from '../TagName/TagName';
 import FunctionSettings from '../FunctionSetting/FunctionSettings';
@@ -32,11 +32,13 @@ import HomeLayout from '../HomeLayout/HomeLayout';
 const drawerWidth = 240;
 
 const DashboardLayout = () => {
+    const theme = useTheme();
+    const colorMode = useContext(ColorModeContext);
+
     const navigate = useNavigate();
     const location = useLocation();
     const [mobileOpen, setMobileOpen] = useState(false);
     const [configOpen, setConfigOpen] = useState(false);
-    const [darkMode, setDarkMode] = useState(false);
 
     const handleLogout = () => {
         localStorage.removeItem('isAuthenticated');
@@ -45,30 +47,24 @@ const DashboardLayout = () => {
         toast.info('Đã đăng xuất!');
     };
 
-    // Lấy current page từ URL
+    // current page từ URL
     const currentPage = location.pathname.substring(1) || 'home';
 
-    // Tự động mở submenu nếu đang ở trang con
+    // Tự mở submenu khi ở trang con
     useEffect(() => {
         if (currentPage === 'tagname' || currentPage === 'funcSettings') {
             setConfigOpen(true);
         }
     }, [currentPage]);
 
-    const handleDrawerToggle = () => {
-        setMobileOpen(!mobileOpen);
-    };
+    const handleDrawerToggle = () => setMobileOpen(!mobileOpen);
 
     const handlePageChange = (page) => {
         navigate(`/${page === 'home' ? '' : page}`);
-        if (window.innerWidth < 900) {
-            setMobileOpen(false);
-        }
+        if (window.innerWidth < 900) setMobileOpen(false);
     };
 
-    const handleConfigToggle = () => {
-        setConfigOpen(!configOpen);
-    };
+    const handleConfigToggle = () => setConfigOpen(!configOpen);
 
     const mainMenuItems = [
         { id: 'home', text: 'Dashboard', icon: <DashboardIcon />, path: '/' },
@@ -98,13 +94,13 @@ const DashboardLayout = () => {
                     sx={{
                         color: 'primary.main',
                         fontWeight: 700,
-                        fontSize: 20,
+                        fontSize: 18,
                         display: 'flex',
                         alignItems: 'center',
                         gap: 1
                     }}
                 >
-                    🎯 IOT DATALOGER
+                    🎯 IOT-DATALOGER
                 </Typography>
             </Toolbar>
 
@@ -114,13 +110,8 @@ const DashboardLayout = () => {
                     <Typography
                         variant="caption"
                         sx={{
-                            px: 2,
-                            py: 1,
-                            display: 'block',
-                            color: 'text.secondary',
-                            fontWeight: 600,
-                            fontSize: 11,
-                            letterSpacing: 0.5
+                            px: 2, py: 1, display: 'block',
+                            color: 'text.secondary', fontWeight: 600, fontSize: 11, letterSpacing: 0.5
                         }}
                     >
                         MENU CHÍNH
@@ -132,32 +123,22 @@ const DashboardLayout = () => {
                                 selected={currentPage === item.id}
                                 onClick={() => handlePageChange(item.id)}
                                 sx={{
-                                    borderRadius: 1.5,
-                                    mb: 0.5,
+                                    borderRadius: 1.5, mb: 0.5,
                                     '&.Mui-selected': {
                                         backgroundColor: 'rgba(33, 150, 243, 0.08)',
-                                        borderLeft: '3px solid',
-                                        borderColor: 'primary.main',
-                                        '&:hover': {
-                                            backgroundColor: 'rgba(33, 150, 243, 0.12)',
-                                        },
+                                        borderLeft: '3px solid', borderColor: 'primary.main',
+                                        '&:hover': { backgroundColor: 'rgba(33, 150, 243, 0.12)' },
                                     },
                                 }}
                             >
                                 <ListItemIcon
-                                    sx={{
-                                        minWidth: 40,
-                                        color: currentPage === item.id ? 'primary.main' : 'text.secondary'
-                                    }}
+                                    sx={{ minWidth: 40, color: currentPage === item.id ? 'primary.main' : 'text.secondary' }}
                                 >
                                     {item.icon}
                                 </ListItemIcon>
                                 <ListItemText
                                     primary={item.text}
-                                    primaryTypographyProps={{
-                                        fontSize: 14,
-                                        fontWeight: currentPage === item.id ? 600 : 400
-                                    }}
+                                    primaryTypographyProps={{ fontSize: 14, fontWeight: currentPage === item.id ? 600 : 400 }}
                                 />
                             </ListItemButton>
                         ))}
@@ -169,13 +150,8 @@ const DashboardLayout = () => {
                     <Typography
                         variant="caption"
                         sx={{
-                            px: 2,
-                            py: 1,
-                            display: 'block',
-                            color: 'text.secondary',
-                            fontWeight: 600,
-                            fontSize: 11,
-                            letterSpacing: 0.5
+                            px: 2, py: 1, display: 'block',
+                            color: 'text.secondary', fontWeight: 600, fontSize: 11, letterSpacing: 0.5
                         }}
                     >
                         CÀI ĐẶT
@@ -187,25 +163,18 @@ const DashboardLayout = () => {
                                     selected={!item.hasSubmenu && currentPage === item.id}
                                     onClick={() => item.hasSubmenu ? handleConfigToggle() : handlePageChange(item.id)}
                                     sx={{
-                                        borderRadius: 1.5,
-                                        mb: 0.5,
+                                        borderRadius: 1.5, mb: 0.5,
                                         '&.Mui-selected': {
                                             backgroundColor: 'rgba(33, 150, 243, 0.08)',
-                                            borderLeft: '3px solid',
-                                            borderColor: 'primary.main',
+                                            borderLeft: '3px solid', borderColor: 'primary.main',
                                         },
                                     }}
                                 >
                                     <ListItemIcon sx={{ minWidth: 40, color: 'text.secondary' }}>
                                         {item.icon}
                                     </ListItemIcon>
-                                    <ListItemText
-                                        primary={item.text}
-                                        primaryTypographyProps={{ fontSize: 14 }}
-                                    />
-                                    {item.hasSubmenu && (
-                                        configOpen ? <ExpandLess /> : <ExpandMore />
-                                    )}
+                                    <ListItemText primary={item.text} primaryTypographyProps={{ fontSize: 14 }} />
+                                    {item.hasSubmenu && (configOpen ? <ExpandLess /> : <ExpandMore />)}
                                 </ListItemButton>
 
                                 {item.hasSubmenu && (
@@ -215,30 +184,20 @@ const DashboardLayout = () => {
                                                 <ListItemButton
                                                     key={subItem.id}
                                                     sx={{
-                                                        pl: 4,
-                                                        borderRadius: 1.5,
-                                                        mb: 0.5,
-                                                        '&.Mui-selected': {
-                                                            backgroundColor: 'rgba(33, 150, 243, 0.08)',
-                                                        }
+                                                        pl: 4, borderRadius: 1.5, mb: 0.5,
+                                                        '&.Mui-selected': { backgroundColor: 'rgba(33, 150, 243, 0.08)' }
                                                     }}
                                                     selected={currentPage === subItem.id}
                                                     onClick={() => handlePageChange(subItem.id)}
                                                 >
                                                     <ListItemIcon
-                                                        sx={{
-                                                            minWidth: 40,
-                                                            color: currentPage === subItem.id ? 'primary.main' : 'text.secondary'
-                                                        }}
+                                                        sx={{ minWidth: 40, color: currentPage === subItem.id ? 'primary.main' : 'text.secondary' }}
                                                     >
                                                         {subItem.icon}
                                                     </ListItemIcon>
                                                     <ListItemText
                                                         primary={subItem.text}
-                                                        primaryTypographyProps={{
-                                                            fontSize: 13,
-                                                            fontWeight: currentPage === subItem.id ? 600 : 400
-                                                        }}
+                                                        primaryTypographyProps={{ fontSize: 13, fontWeight: currentPage === subItem.id ? 600 : 400 }}
                                                     />
                                                 </ListItemButton>
                                             ))}
@@ -255,18 +214,12 @@ const DashboardLayout = () => {
 
     const renderContent = () => {
         switch (currentPage) {
-            case 'home':
-                return <HomeLayout />;
-            case 'device':
-                return <DeviceTab />;
-            case 'tagname':
-                return <TagName />;
-            case 'funcSettings':
-                return <FunctionSettings />;
-            case 'historical':
-                return <HistoricalTab />;
-            default:
-                return <HomeLayout />;
+            case 'home': return <HomeLayout />;
+            case 'device': return <DeviceTab />;
+            case 'tagname': return <TagName />;
+            case 'funcSettings': return <FunctionSettings />;
+            case 'historical': return <HistoricalTab />;
+            default: return <HomeLayout />;
         }
     };
 
@@ -280,8 +233,7 @@ const DashboardLayout = () => {
                     bgcolor: 'background.paper',
                     color: 'text.primary',
                     boxShadow: '0 1px 3px rgba(0,0,0,0.12)',
-                    borderBottom: 1,
-                    borderColor: 'divider'
+                    borderBottom: 1, borderColor: 'divider'
                 }}
             >
                 <Toolbar>
@@ -296,31 +248,23 @@ const DashboardLayout = () => {
 
                     <Box sx={{ flexGrow: 1 }} />
 
-                    {/* Nút chuyển theme */}
+                    {/* Nút chuyển theme dùng Context */}
                     <IconButton
-                        onClick={() => setDarkMode(!darkMode)}
+                        onClick={colorMode.toggleColorMode}
                         color="inherit"
-                        title={darkMode ? 'Chuyển sáng' : 'Chuyển tối'}
+                        title={theme.palette.mode === 'dark' ? 'Chuyển sáng' : 'Chuyển tối'}
                     >
-                        {darkMode ? <Brightness7Icon /> : <Brightness4Icon />}
+                        {theme.palette.mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
                     </IconButton>
 
-                    {/* ✅ Nút Đăng xuất để dùng handleLogout & LogoutIcon */}
-                    <IconButton
-                        onClick={handleLogout}
-                        color="inherit"
-                        sx={{ ml: 1 }}
-                        title="Đăng xuất"
-                    >
+                    {/* Đăng xuất */}
+                    <IconButton onClick={handleLogout} color="inherit" sx={{ ml: 1 }} title="Đăng xuất">
                         <LogoutIcon />
                     </IconButton>
                 </Toolbar>
             </AppBar>
 
-            <Box
-                component="nav"
-                sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
-            >
+            <Box component="nav" sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}>
                 <Drawer
                     variant="temporary"
                     open={mobileOpen}
@@ -328,10 +272,7 @@ const DashboardLayout = () => {
                     ModalProps={{ keepMounted: true }}
                     sx={{
                         display: { xs: 'block', sm: 'none' },
-                        '& .MuiDrawer-paper': {
-                            boxSizing: 'border-box',
-                            width: drawerWidth
-                        },
+                        '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
                     }}
                 >
                     {drawer}
