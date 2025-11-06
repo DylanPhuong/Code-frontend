@@ -16,7 +16,7 @@ const Login = () => {
     });
     const [errors, setErrors] = useState({});
 
-    // ✅ Bảo đảm rỗng khi vào trang + “đè” lại sau 1 tick để thắng Autofill của Chrome
+    //  Bảo đảm rỗng khi vào trang + “đè” lại sau 1 tick để thắng Autofill của Chrome
     useEffect(() => {
         setFormData({ username: '', password: '' });
         const t = setTimeout(() => {
@@ -82,39 +82,39 @@ const Login = () => {
                             gap: 1
                         }}
                     >
-                        🎯 SCADA HCMUTE
+                        🎯 IOT-DATALOGER
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
                         Đăng nhập vào hệ thống
                     </Typography>
                 </Box>
 
-                {/* ✅ Chặn Autofill ở form */}
+                {/*  Chặn Autofill ở form */}
                 <form onSubmit={handleSubmit} autoComplete="off">
                     <TextField
                         fullWidth
                         label="Tên đăng nhập"
-                        name="login-username"            // ✅ đặt name “lạ” để tránh password manager
+                        name="login-username"            //  đặt name “lạ” để tránh password manager
                         value={formData.username}
                         onChange={(e) => handleChange({ target: { name: 'username', value: e.target.value } })}
                         error={!!errors.username}
                         helperText={errors.username}
                         sx={{ mb: 2 }}
-                        autoComplete="off"               // ✅ tắt autofill cho ô này
+                        autoComplete="off"               //  tắt autofill cho ô này
                         inputProps={{ autoCorrect: 'off', autoCapitalize: 'none' }}
                     />
 
                     <TextField
                         fullWidth
                         label="Mật khẩu"
-                        name="login-password"            // ✅ name “lạ”
+                        name="login-password"            //  name “lạ”
                         type={showPassword ? 'text' : 'password'}
                         value={formData.password}
                         onChange={(e) => handleChange({ target: { name: 'password', value: e.target.value } })}
                         error={!!errors.password}
                         helperText={errors.password}
                         sx={{ mb: 3 }}
-                        autoComplete="new-password"      // ✅ cực kỳ quan trọng cho Chrome
+                        autoComplete="new-password"      //  cực kỳ quan trọng cho Chrome
                         InputProps={{
                             endAdornment: (
                                 <InputAdornment position="end">

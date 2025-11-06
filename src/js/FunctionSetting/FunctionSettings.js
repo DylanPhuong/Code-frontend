@@ -91,7 +91,7 @@ const FunctionSettings = (props) => {
             socket.off("SERVER SEND HOME DATA");
             socket.disconnect(); // ngắt kết nối khi rời trang
         };
-    }, []);
+    }, []);//là để lấy giá trị real time từ backend
 
     useEffect(() => {
         const init = async () => {

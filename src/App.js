@@ -1,6 +1,6 @@
 // src/App.js
 import { useEffect, useMemo, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ToastContainer, Bounce } from './js/ImportComponents/Imports';
 import { socket } from './js/Ultils/Socket/Socket';
 import DashboardLayout from './js/Layout/DashboardLayout';
@@ -57,7 +57,9 @@ function App() {
             <Routes>
               <Route path="/login" element={<Login />} />
               <Route element={<PrivateRoute />}>
-                <Route path="/" element={<DashboardLayout />} />
+                {/* / -> /home */}
+                <Route path="/" element={<Navigate to="/home" replace />} />
+                <Route path="/home" element={<DashboardLayout />} />
                 <Route path="/device" element={<DashboardLayout />} />
                 <Route path="/tagname" element={<DashboardLayout />} />
                 <Route path="/funcSettings" element={<DashboardLayout />} />
