@@ -58,7 +58,7 @@ const FunctionSettings = (props) => {
                     string_status = "Sample";
                 }
                 return {
-                    id: item.tagnameId || index,
+                    id: item.tagnameId || index,// (index+-1) Id 1->n
                     name: item.tagname,
                     realValue: item.rawValue,
                     value: item.value,
@@ -446,7 +446,7 @@ const FunctionSettings = (props) => {
                     />
                     {loading && <Loading text="Đang tải dữ liệu..." />}
                 </Paper>
-
+                {/* Bảng giá tri funcition settings */}
                 <Paper sx={{ mt: 1 }}>
                     <LinearProgress color="success" />
                     <Box sx={{ mt: 3, fontSize: 25, textAlign: "center", mt: 2, fontWeight: 600 }}>

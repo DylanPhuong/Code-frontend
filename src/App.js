@@ -1,35 +1,33 @@
 // src/App.js
-import { useEffect, useMemo, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { ToastContainer, Bounce } from './js/ImportComponents/Imports';
-import { socket } from './js/Ultils/Socket/Socket';
-import DashboardLayout from './js/Layout/DashboardLayout';
-import Login from './js/Auth/Login';
-import NotFound from './js/Components/NotFound';
-import PrivateRoute from './js/Components/PrivateRoute';
+import { useMemo, useState } from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import { ThemeProvider, createTheme, CssBaseline } from "@mui/material";
+import { ToastContainer, Bounce } from "./js/ImportComponents/Imports";
 
-// Theme
-import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
-import ColorModeContext from './js/Theme/ColorModeContext';
+import ColorModeContext from "./js/Theme/ColorModeContext";
+import PrivateRoute from "./js/Components/PrivateRoute";
+import DashboardLayout from "./js/Layout/DashboardLayout";
+import Login from "./js/Auth/Login";
+import NotFound from "./js/Components/NotFound";
 
 function App() {
-  useEffect(() => {
-    socket.connect();
-    return () => socket.disconnect();
-  }, []);
-
-
+  // ===== Theme mode (light/dark) =====
   const [mode, setMode] = useState(() => {
-    const saved = localStorage.getItem('mui-mode');
-    return saved === 'dark' || saved === 'light' ? saved : 'light';
+    const saved = localStorage.getItem("mui-mode");
+    return saved === "dark" || saved === "light" ? saved : "light";
   });
 
   const colorMode = useMemo(
     () => ({
       toggleColorMode: () => {
-        setMode(prev => {
-          const next = prev === 'light' ? 'dark' : 'light';
-          localStorage.setItem('mui-mode', next);
+        setMode((prev) => {
+          const next = prev === "light" ? "dark" : "light";
+          localStorage.setItem("mui-mode", next);
           return next;
         });
       },
@@ -42,11 +40,16 @@ function App() {
       createTheme({
         palette: { mode },
         components: {
-          MuiPaper: { styleOverrides: { root: { transition: 'background-color .2s ease' } } },
+          MuiPaper: {
+            styleOverrides: { root: { transition: "background-color .2s ease" } },
+          },
         },
       }),
     [mode]
   );
+
+  // ===== Auth guard for /login =====
+  const isAuthed = localStorage.getItem("isAuthenticated") === "true";
 
   return (
     <>
@@ -55,9 +58,15 @@ function App() {
           <CssBaseline />
           <Router>
             <Routes>
-              <Route path="/login" element={<Login />} />
+              {/* Nếu đã đăng nhập thì chặn vào /login */}
+              <Route
+                path="/login"
+                element={isAuthed ? <Navigate to="/home" replace /> : <Login />}
+              />
+
+              {/* Các route cần đăng nhập */}
               <Route element={<PrivateRoute />}>
-                {/* / -> /home */}
+                {/* Root -> /home */}
                 <Route path="/" element={<Navigate to="/home" replace />} />
                 <Route path="/home" element={<DashboardLayout />} />
                 <Route path="/device" element={<DashboardLayout />} />
@@ -66,12 +75,15 @@ function App() {
                 <Route path="/historical" element={<DashboardLayout />} />
                 <Route path="*" element={<NotFound />} />
               </Route>
+
+              {/* Fallback cho các route khác */}
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Router>
         </ThemeProvider>
       </ColorModeContext.Provider>
 
+      {/* Toasts */}
       <ToastContainer
         position="top-center"
         autoClose={3000}

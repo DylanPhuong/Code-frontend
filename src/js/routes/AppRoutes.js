@@ -1,5 +1,4 @@
 
-
 // src/js/routes/AppRoutes.js
 import { Routes, Route } from "react-router-dom";
 import DashboardLayout from "../Layout/DashboardLayout";

@@ -1,321 +1,178 @@
-// // src/js/HomeLayout/HomeLayout.js
-// import React, { useEffect, useState } from 'react';
-
-// import {
-//     Box, Typography, Paper, Table, TableHead, TableBody,
-//     TableRow, TableCell, TableContainer, CircularProgress, Stack,
-// } from '@mui/material';
-
-// import { toast } from 'react-toastify';
-// import { socket } from '../Ultils/Socket/Socket';
-
-// const HomeLayout = () => {
-//     const [loading, setLoading] = useState(true);
-//     const [rows, setRows] = useState([]);
-
-//     useEffect(() => {
-//         // nếu app chưa connect thì mới connect
-//         if (!socket.connected) socket.connect();
-
-//         const onHomeData = (data) => {
-//             // log thẳng raw data nhận từ server
-//             console.log('[HOME] SERVER SEND HOME DATA (raw):', data);
-
-//             const mapped = (Array.isArray(data) ? data : []).map((item, index) => {
-//                 let statusStr;
-//                 if (item.status === 1) statusStr = 'Normal';
-//                 else if (item.status === 2) statusStr = 'Over range';
-//                 else if (item.status === 3) statusStr = 'Disconnect';
-//                 else statusStr = 'Sample';
-
-//                 const row = {
-//                     id: item.tagnameId ?? index,
-//                     name: item.tagname,
-//                     value: item.value,
-//                     rawValue: item.rawValue,
-//                     symbol: item.symbol,
-//                     status: statusStr,
-//                     channel: item.channel,
-//                     deviceId: item.deviceId,
-//                     slaveId: item.slaveId,
-//                     address: item.address,
-//                     functionCode: item.functionCode,
-//                     dataFormat: item.dataFormat,
-//                     dataType: item.dataType,
-//                     permission: item.permission,
-//                 };
-
-//                 // log từng row sau khi map (nếu cần theo dõi chi tiết)
-//                 console.log('[HOME] mapped row:', row);
-//                 return row;
-//             });
-
-//             setRows(mapped);
-//             setLoading(false);
-//         };
-
-//         const onWriteResult = (res) => {
-//             if (res?.success) {
-//                 toast.success(res.message || 'Ghi thành công!');
-//             } else {
-//                 toast.error('Ghi thất bại: ' + (res?.error || 'Unknown error'));
-//             }
-//         };
-
-//         socket.on('SERVER SEND HOME DATA', onHomeData);
-//         socket.on('SERVER WRITE RESULT', onWriteResult);
-
-//         return () => {
-//             socket.off('SERVER SEND HOME DATA', onHomeData);
-//             socket.off('SERVER WRITE RESULT', onWriteResult);
-//             // Nếu muốn giữ kết nối cho trang khác thì KHÔNG disconnect ở đây
-//             // if (socket.connected) socket.disconnect();
-//         };
-//     }, []);
-
-//     return (
-//         <Box
-//             sx={{
-//                 p: 3,
-//                 bgcolor: 'background.default',
-//                 minHeight: 'calc(100vh - 64px)',
-//             }}
-//         >
-//             {/* Tiêu đề góc trái */}
-//             <Box sx={{ mb: 3 }}>
-//                 <Typography variant="h5" sx={{ fontWeight: 700, letterSpacing: 1 }}>
-//                     DASHBOARD
-//                 </Typography>
-//                 <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-//                     Welcome to your dashboard
-//                 </Typography>
-//             </Box>
-
-//             {/* Bảng dữ liệu realtime */}
-//             {loading ? (
-//                 <Stack alignItems="center" justifyContent="center" sx={{ py: 8 }}>
-//                     <CircularProgress />
-//                     <Typography variant="body2" sx={{ mt: 1 }} color="text.secondary">
-//                         Đang tải dữ liệu realtime...
-//                     </Typography>
-//                 </Stack>
-//             ) : (
-//                 <TableContainer component={Paper} variant="outlined">
-//                     <Table size="small" stickyHeader>
-//                         <TableHead>
-//                             <TableRow>
-//                                 <TableCell width={80}>ID</TableCell>
-//                                 <TableCell>Name</TableCell>
-//                                 <TableCell align="right">Value</TableCell>
-//                                 <TableCell align="right">Raw</TableCell>
-//                                 <TableCell>Status</TableCell>
-//                                 <TableCell>Symbol</TableCell>
-//                                 <TableCell>Channel</TableCell>
-//                                 <TableCell>Device</TableCell>
-//                                 <TableCell>Slave</TableCell>
-//                                 <TableCell>Addr</TableCell>
-//                                 <TableCell>FC</TableCell>
-//                             </TableRow>
-//                         </TableHead>
-//                         <TableBody>
-//                             {rows.map((r) => (
-//                                 <TableRow key={r.id}>
-//                                     <TableCell>{r.id}</TableCell>
-//                                     <TableCell>{r.name ?? '--'}</TableCell>
-//                                     <TableCell align="right">
-//                                         {r.value ?? '--'}
-//                                     </TableCell>
-//                                     <TableCell align="right">{r.rawValue ?? '--'}</TableCell>
-//                                     <TableCell>{r.status}</TableCell>
-//                                     <TableCell>{r.symbol ?? ''}</TableCell>
-//                                     <TableCell>{r.channel ?? '--'}</TableCell>
-//                                     <TableCell>{r.deviceId ?? '--'}</TableCell>
-//                                     <TableCell>{r.slaveId ?? '--'}</TableCell>
-//                                     <TableCell>{r.address ?? '--'}</TableCell>
-//                                     <TableCell>{r.functionCode ?? '--'}</TableCell>
-//                                 </TableRow>
-//                             ))}
-//                             {!rows.length && (
-//                                 <TableRow>
-//                                     <TableCell colSpan={11} align="center">
-//                                         Không có dữ liệu.
-//                                     </TableCell>
-//                                 </TableRow>
-//                             )}
-//                         </TableBody>
-//                     </Table>
-//                 </TableContainer>
-//             )}
-//         </Box>
-//     );
-// };
-
-// export default HomeLayout;
-
 // src/js/HomeLayout/HomeLayout.js
-import React, { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
-    Box, Typography, Paper, Table, TableHead, TableBody,
-    TableRow, TableCell, TableContainer, CircularProgress, Stack, Button
+    Box,
+    Typography,
+    Paper,
+    Chip,
 } from '@mui/material';
-import { toast } from 'react-toastify';
+
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import ErrorIcon from '@mui/icons-material/Error';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import SensorsOffIcon from '@mui/icons-material/SensorsOff';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+
+import CustomDataGrid from '../ImportComponents/CustomDataGrid';
 import { socket } from '../Ultils/Socket/Socket';
+import { fetchAllDevices, fetchAllChannels } from '../../Services/APIDevice';
+import Loading from '../Ultils/Loading/Loading';
 
 const HomeLayout = () => {
-    const [loading, setLoading] = useState(true);
     const [rows, setRows] = useState([]);
-    const [connInfo, setConnInfo] = useState('Đang kết nối...');
+    const [loading, setLoading] = useState(true);
+    const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 5 });
 
+    // map deviceId -> deviceName
+    const [deviceMap, setDeviceMap] = useState({});
+    // map tagName -> unit
+    const [unitMap, setUnitMap] = useState({});
+
+    // fetch device list & channel list (để lấy unit)
     useEffect(() => {
-        if (!socket.connected) socket.connect();
+        const init = async () => {
+            try {
+                const devRes = await fetchAllDevices();
+                if (devRes?.EC === 0 && Array.isArray(devRes?.DT?.DT)) {
+                    const dmap = {};
+                    devRes.DT.DT.forEach((d) => {
+                        dmap[d._id] = d.name;
+                    });
+                    setDeviceMap(dmap);
+                }
 
-        const stopper = setTimeout(() => {
-            // nếu 5s chưa có dữ liệu thì tắt loading nhưng giữ ghi chú
-            if (loading) setLoading(false);
-        }, 5000);
+                const chRes = await fetchAllChannels();
+                if (chRes?.EC === 0 && Array.isArray(chRes?.DT?.DT)) {
+                    const umap = {};
+                    chRes.DT.DT.forEach((c) => {
+                        if (c?.name) umap[c.name] = c?.unit || '';
+                    });
+                    setUnitMap(umap);
+                }
+            } catch (e) {
+                // bỏ qua lỗi để không chặn socket
+            }
+        };
+        init();
+    }, []);
 
-        const onConnect = () => {
-            console.log('[HOME] socket connected:', socket.id);
-            setConnInfo('Đã kết nối');
-            // nếu đã kết nối nhưng chưa có data thì tắt spinner để UI không “đứng”
-            if (loading) setLoading(false);
-        };
-        const onConnectError = (err) => {
-            console.error('[HOME] socket connect_error:', err);
-            setConnInfo(`Lỗi kết nối: ${err?.message || err}`);
-            if (loading) setLoading(false);
-        };
-        const onDisconnect = (reason) => {
-            console.warn('[HOME] socket disconnect:', reason);
-            setConnInfo(`Mất kết nối: ${reason}`);
-        };
+    // socket realtime
+    useEffect(() => {
+        socket.connect();
 
         const onHomeData = (data) => {
-            console.log('[HOME] SERVER SEND HOME DATA (raw):', data);
-            const mapped = (Array.isArray(data) ? data : []).map((item, index) => {
-                let statusStr = 'Sample';
-                if (item.status === 1) statusStr = 'Normal';
-                else if (item.status === 2) statusStr = 'Over range';
-                else if (item.status === 3) statusStr = 'Disconnect';
+            // map theo yêu cầu: ID 1..n, Name, Device, Symbol, Value, Unit, Status
+            const mapped = (Array.isArray(data) ? data : []).map((item, idx) => {
+                let statusText = 'Sample';
+                if (item.status === 1) statusText = 'Normal';
+                else if (item.status === 2) statusText = 'Over range';
+                else if (item.status === 3) statusText = 'Disconnect';
 
-                const row = {
-                    id: item.tagnameId ?? index,
+                return {
+                    // ID tăng dần 1..n
+                    id: idx + 1,
                     name: item.tagname,
-                    value: item.value,
-                    rawValue: item.rawValue,
+                    deviceName: deviceMap[item.deviceId] || item.deviceId || '',
                     symbol: item.symbol,
-                    status: statusStr,
-                    channel: item.channel,
-                    deviceId: item.deviceId,
-                    slaveId: item.slaveId,
-                    address: item.address,
-                    functionCode: item.functionCode,
-                    dataFormat: item.dataFormat,
-                    dataType: item.dataType,
-                    permission: item.permission,
+                    value: item.value,
+                    unit: unitMap[item.tagname] || '',
+                    status: statusText,
                 };
-                console.log('[HOME] mapped row:', row);
-                return row;
             });
+
             setRows(mapped);
             setLoading(false);
+            // log ra console như yêu cầu
+            // eslint-disable-next-line no-console
+            console.log('[Dashboard realtime]', mapped);
         };
 
-        const onWriteResult = (res) => {
-            if (res?.success) toast.success(res.message || 'Ghi thành công!');
-            else toast.error('Ghi thất bại: ' + (res?.error || 'Unknown error'));
-        };
-
-        socket.on('connect', onConnect);
-        socket.on('connect_error', onConnectError);
-        socket.on('disconnect', onDisconnect);
         socket.on('SERVER SEND HOME DATA', onHomeData);
-        socket.on('SERVER WRITE RESULT', onWriteResult);
 
         return () => {
-            clearTimeout(stopper);
-            socket.off('connect', onConnect);
-            socket.off('connect_error', onConnectError);
-            socket.off('disconnect', onDisconnect);
             socket.off('SERVER SEND HOME DATA', onHomeData);
-            socket.off('SERVER WRITE RESULT', onWriteResult);
+            socket.disconnect();
         };
-    }, []); // eslint-disable-line
+    }, [deviceMap, unitMap]);
+
+    // render Status chip
+    const renderStatus = (params) => {
+        const val = params.value || 'Unknown';
+        let color = 'default';
+        let icon = <HelpOutlineIcon sx={{ fontSize: 18 }} />;
+
+        if (val === 'Normal') {
+            color = 'success';
+            icon = <CheckCircleIcon sx={{ fontSize: 18 }} />;
+        } else if (val === 'Over range') {
+            color = 'warning';
+            icon = <WarningAmberIcon sx={{ fontSize: 18 }} />;
+        } else if (val === 'Disconnect') {
+            color = 'error';
+            icon = <ErrorIcon sx={{ fontSize: 18 }} />;
+        } else if (val === 'Sample') {
+            color = 'secondary';
+            icon = <SensorsOffIcon sx={{ fontSize: 18 }} />;
+        }
+
+        return (
+            <Chip
+                icon={icon}
+                label={val}
+                color={color}
+                variant="filled"
+                sx={{
+                    fontWeight: 600,
+                    textTransform: 'capitalize',
+                    minWidth: 120,
+                    justifyContent: 'center',
+                    pl: 1,
+                    '& .MuiChip-icon': { ml: 0.3 },
+                }}
+            />
+        );
+    };
+
+    // cột theo thứ tự: ID, Name, Device, Symbol, Value, Unit, Status
+    const columns = useMemo(
+        () => [
+            { field: 'id', headerName: 'ID', width: 84, headerAlign: 'center', align: 'center' },
+            { field: 'name', headerName: 'Name', flex: 1.2, minWidth: 160, headerAlign: 'center', align: 'center' },
+            { field: 'deviceName', headerName: 'Device', flex: 1.0, minWidth: 150, headerAlign: 'center', align: 'center' },
+            { field: 'symbol', headerName: 'Symbol', flex: 0.9, minWidth: 120, headerAlign: 'center', align: 'center' },
+            { field: 'value', headerName: 'Value', width: 120, headerAlign: 'center', align: 'center' },
+            { field: 'unit', headerName: 'Unit', width: 110, headerAlign: 'center', align: 'center' },
+            { field: 'status', headerName: 'Status', flex: 0.5, minWidth: 160, headerAlign: 'center', align: 'center', renderCell: renderStatus },
+        ],
+        []
+    );
 
     return (
         <Box sx={{ p: 3, bgcolor: 'background.default', minHeight: 'calc(100vh - 64px)' }}>
             {/* Tiêu đề */}
             <Box sx={{ mb: 3 }}>
-                <Typography variant="h5" sx={{ fontWeight: 700, letterSpacing: 1 }}>
+                <Typography variant="h5" sx={{ fontWeight: 700, letterSpacing: 1, color: 'text.primary' }}>
                     DASHBOARD
                 </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                    Welcome to your dashboard — {connInfo}
+                <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.5 }}>
+                    Welcome to your dashboard
                 </Typography>
             </Box>
 
-            {/* Loading */}
-            {loading ? (
-                <Stack alignItems="center" justifyContent="center" sx={{ py: 8 }}>
-                    <CircularProgress />
-                    <Typography variant="body2" sx={{ mt: 1 }} color="text.secondary">
-                        Đang tải dữ liệu realtime...
-                    </Typography>
-                </Stack>
-            ) : (
-                <>
-                    {/* Bảng dữ liệu đơn giản */}
-                    <TableContainer component={Paper} variant="outlined">
-                        <Table size="small" stickyHeader>
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell width={80}>ID</TableCell>
-                                    <TableCell>Name</TableCell>
-                                    <TableCell align="right">Value</TableCell>
-                                    <TableCell align="right">Raw</TableCell>
-                                    <TableCell>Status</TableCell>
-                                    <TableCell>Symbol</TableCell>
-                                    <TableCell>Channel</TableCell>
-                                    <TableCell>Device</TableCell>
-                                    <TableCell>Slave</TableCell>
-                                    <TableCell>Addr</TableCell>
-                                    <TableCell>FC</TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {rows.map((r) => (
-                                    <TableRow key={r.id}>
-                                        <TableCell>{r.id}</TableCell>
-                                        <TableCell>{r.name ?? '--'}</TableCell>
-                                        <TableCell align="right">{r.value ?? '--'}</TableCell>
-                                        <TableCell align="right">{r.rawValue ?? '--'}</TableCell>
-                                        <TableCell>{r.status}</TableCell>
-                                        <TableCell>{r.symbol ?? ''}</TableCell>
-                                        <TableCell>{r.channel ?? '--'}</TableCell>
-                                        <TableCell>{r.deviceId ?? '--'}</TableCell>
-                                        <TableCell>{r.slaveId ?? '--'}</TableCell>
-                                        <TableCell>{r.address ?? '--'}</TableCell>
-                                        <TableCell>{r.functionCode ?? '--'}</TableCell>
-                                    </TableRow>
-                                ))}
-                                {!rows.length && (
-                                    <TableRow>
-                                        <TableCell colSpan={11} align="center">
-                                            Chưa nhận được dữ liệu từ server.
-                                        </TableCell>
-                                    </TableRow>
-                                )}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
-
-                    <Stack direction="row" justifyContent="flex-end" sx={{ mt: 1 }}>
-                        <Button size="small" onClick={() => socket.connected || socket.connect()}>
-                            Thử kết nối lại
-                        </Button>
-                    </Stack>
-                </>
-            )}
+            {/* Bảng realtime */}
+            <Paper sx={{ p: 2 }}>
+                <CustomDataGrid
+                    rows={rows}
+                    columns={columns}
+                    paginationModel={paginationModel}
+                    onPaginationModelChange={setPaginationModel}
+                    pageSizeOptions={[5, 10, 20]}
+                    pagination
+                    hideFooterSelectedRowCount
+                    loading={loading}
+                />
+                {loading && <Loading text="Đang tải dữ liệu realtime..." />}
+            </Paper>
         </Box>
     );
 };
