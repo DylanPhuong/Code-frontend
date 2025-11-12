@@ -1,27 +1,33 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
-    Box,
-    Grid,
-    Paper,
-    TextField,
-    Button,
-    Typography,
-    Checkbox,
-    FormControlLabel,
-    Link,
-    Divider,
-    Stack,
+    Box, Grid, Paper, TextField, Button, Typography,
+    Checkbox, FormControlLabel, Link, Stack, InputAdornment, IconButton
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import axios from '../../Setup/Axios';
 
-// Icons (Material UI)
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import BoltOutlinedIcon from '@mui/icons-material/BoltOutlined';
 import ThumbUpAltOutlinedIcon from '@mui/icons-material/ThumbUpAltOutlined';
 import AutoAwesomeOutlinedIcon from '@mui/icons-material/AutoAwesomeOutlined';
 import GoogleIcon from '@mui/icons-material/Google';
 import FacebookIcon from '@mui/icons-material/Facebook';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
+
+function createDummyToken(email, hours = 24) {
+    // JWT giả: header.alg = "none", có exp để PrivateRoute kiểm tra hạn
+    const header = { alg: 'none', typ: 'JWT' };
+    const payload = {
+        sub: email,
+        name: email.split('@')[0] || 'User',
+        iat: Math.floor(Date.now() / 1000),
+        exp: Math.floor(Date.now() / 1000) + hours * 3600,
+    };
+    const b64 = (obj) => btoa(unescape(encodeURIComponent(JSON.stringify(obj))));
+    return `${b64(header)}.${b64(payload)}.`; // chữ ký rỗng
+}
 
 export default function Login() {
     const navigate = useNavigate();
@@ -29,29 +35,67 @@ export default function Login() {
     const [password, setPassword] = useState('');
     const [remember, setRemember] = useState(true);
     const [loading, setLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const pwdRef = useRef(null);
+
+    const doSuccess = (token, userName) => {
+        localStorage.setItem('access_token', token);
+        localStorage.setItem('username', userName || email.split('@')[0] || 'User');
+        localStorage.setItem('isAuthenticated', 'true'); // nếu nơi khác còn dùng
+        if (remember) localStorage.setItem('remember_me', '1');
+        else localStorage.removeItem('remember_me');
+        toast.success('Đăng nhập thành công');
+        navigate('/home', { replace: true });
+    };
+
+    const clearPassword = () => {
+        setPassword('');
+        // focus lại vào ô password cho nhập lại nhanh
+        setTimeout(() => pwdRef.current?.focus(), 0);
+    };
+
+    const tryFallbackLogin = () => {
+        // --- F A L L B A C K --- (XÓA/COMMENT khi backend sẵn sàng)
+        if (email.toLowerCase() === 'admin' && password === 'admin') {
+            const token = createDummyToken(email, 24);
+            const userName = 'admin';
+            doSuccess(token, userName);
+            return true;
+        } else {
+            toast.error('Email hoặc mật khẩu không đúng (fallback)');
+            clearPassword();
+            return false;
+        }
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!email || !password) {
+        if (!email.trim() || !password) {
             toast.error('Vui lòng nhập email và mật khẩu');
             return;
         }
+
         try {
             setLoading(true);
 
-            // TODO: gọi API thật tại đây
-            await new Promise((r) => setTimeout(r, 600));
+            // TODO: đổi đúng endpoint backend khi có
+            // backend nên trả { EC: 0, EM: 'OK', DT: { token, user: { username, ... } } }
+            const res = await axios.post('/api/v1/auth/login', { email, password });
 
-            // Giả lập đăng nhập OK
-            localStorage.setItem('isAuthenticated', 'true');
-            localStorage.setItem('username', email.split('@')[0] || 'User');
-            if (remember) localStorage.setItem('remember_me', '1');
-            else localStorage.removeItem('remember_me');
-
-            navigate('/home', { replace: true });
-            toast.success('Đăng nhập thành công');
+            if (res && +res.EC === 0 && res.DT?.token) {
+                const { token, user } = res.DT;
+                doSuccess(token, user?.username || email.split('@')[0]);
+            } else {
+                // API có nhưng trả lỗi → fallback
+                tryFallbackLogin();
+            }
         } catch (err) {
-            toast.error('Đăng nhập thất bại');
+            // API không tồn tại/404/Network error → fallback
+            const ok = tryFallbackLogin();
+            if (!ok) {
+                // giữ toast lỗi server nếu bạn muốn hiển thị kèm
+                toast.error('Lỗi Server (404)');
+            }
         } finally {
             setLoading(false);
         }
@@ -62,13 +106,10 @@ export default function Login() {
             container
             sx={{
                 minHeight: '100vh',
-                bgcolor: (t) =>
-                    t.palette.mode === 'light'
-                        ? 'rgba(2,132,199,0.03)' // very light background
-                        : 'background.default',
+                bgcolor: (t) => t.palette.mode === 'light' ? 'rgba(2,132,199,0.03)' : 'background.default',
             }}
         >
-            {/* Cột trái – giới thiệu */}
+            {/* Bên trái: điểm mạnh sản phẩm */}
             <Grid
                 item
                 xs={12}
@@ -76,69 +117,61 @@ export default function Login() {
                 sx={{
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: { xs: 'center', md: 'flex-end' },
-                    pr: { md: 6 },
-                    pl: { xs: 3, md: 8 },
+                    justifyContent: 'center',
+                    px: { xs: 3, md: 8 },
                     py: { xs: 6, md: 0 },
                 }}
             >
-                <Box sx={{ maxWidth: 560, width: '100%' }}>
-                    <Typography
-                        variant="h4"
-                        sx={{ fontWeight: 800, mb: 4, letterSpacing: 0.2 }}
-                    >
+                <Box sx={{ maxWidth: 520, width: '100%' }}>
+                    <Typography variant="h3" fontWeight={800} sx={{ mb: 3 }}>
                         Sitemark
                     </Typography>
 
-                    <Stack spacing={3}>
-                        <Stack direction="row" spacing={2}>
+                    <Box sx={{ display: 'grid', gap: 3 }}>
+                        <Box sx={{ display: 'flex', gap: 2 }}>
                             <SettingsOutlinedIcon color="primary" />
                             <Box>
                                 <Typography fontWeight={700}>Adaptable performance</Typography>
                                 <Typography variant="body2" color="text.secondary">
-                                    Our product effortlessly adjusts to your needs, boosting
-                                    efficiency and simplifying your tasks.
+                                    Our product effortlessly adjusts to your needs, boosting efficiency and simplifying your tasks.
                                 </Typography>
                             </Box>
-                        </Stack>
+                        </Box>
 
-                        <Stack direction="row" spacing={2}>
+                        <Box sx={{ display: 'flex', gap: 2 }}>
                             <BoltOutlinedIcon color="primary" />
                             <Box>
                                 <Typography fontWeight={700}>Built to last</Typography>
                                 <Typography variant="body2" color="text.secondary">
-                                    Experience unmatched durability that goes above and beyond
-                                    with lasting investment.
+                                    Experience unmatched durability that goes above and beyond with lasting investment.
                                 </Typography>
                             </Box>
-                        </Stack>
+                        </Box>
 
-                        <Stack direction="row" spacing={2}>
+                        <Box sx={{ display: 'flex', gap: 2 }}>
                             <ThumbUpAltOutlinedIcon color="primary" />
                             <Box>
                                 <Typography fontWeight={700}>Great user experience</Typography>
                                 <Typography variant="body2" color="text.secondary">
-                                    Integrate our product into your routine with an intuitive and
-                                    easy-to-use interface.
+                                    Integrate our product into your routine with an intuitive and easy-to-use interface.
                                 </Typography>
                             </Box>
-                        </Stack>
+                        </Box>
 
-                        <Stack direction="row" spacing={2}>
+                        <Box sx={{ display: 'flex', gap: 2 }}>
                             <AutoAwesomeOutlinedIcon color="primary" />
                             <Box>
                                 <Typography fontWeight={700}>Innovative functionality</Typography>
                                 <Typography variant="body2" color="text.secondary">
-                                    Stay ahead with features that set new standards, addressing
-                                    your evolving needs better than the rest.
+                                    Stay ahead with features that set new standards, addressing your evolving needs better than the rest.
                                 </Typography>
                             </Box>
-                        </Stack>
-                    </Stack>
+                        </Box>
+                    </Box>
                 </Box>
             </Grid>
 
-            {/* Cột phải – form đăng nhập */}
+            {/* Bên phải: form đăng nhập */}
             <Grid
                 item
                 xs={12}
@@ -152,15 +185,7 @@ export default function Login() {
                     py: { xs: 6, md: 0 },
                 }}
             >
-                <Paper
-                    elevation={8}
-                    sx={{
-                        width: '100%',
-                        maxWidth: 460,
-                        p: { xs: 3, sm: 4 },
-                        borderRadius: 3,
-                    }}
-                >
+                <Paper elevation={8} sx={{ width: '100%', maxWidth: 460, p: { xs: 3, sm: 4 }, borderRadius: 3 }}>
                     <Typography variant="h5" fontWeight={800} sx={{ mb: 3 }}>
                         Sign in
                     </Typography>
@@ -176,38 +201,37 @@ export default function Login() {
                             sx={{ mb: 2 }}
                             autoComplete="email"
                         />
+
                         <TextField
+                            inputRef={pwdRef}
                             label="Password"
-                            type="password"
+                            type={showPassword ? 'text' : 'password'}
                             fullWidth
                             size="medium"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             autoComplete="current-password"
+                            InputProps={{
+                                endAdornment: (
+                                    <InputAdornment position="end">
+                                        <IconButton
+                                            aria-label="toggle password visibility"
+                                            onClick={() => setShowPassword((v) => !v)}
+                                            edge="end"
+                                        >
+                                            {showPassword ? <VisibilityOff /> : <Visibility />}
+                                        </IconButton>
+                                    </InputAdornment>
+                                ),
+                            }}
                         />
 
-                        <Stack
-                            direction="row"
-                            alignItems="center"
-                            justifyContent="space-between"
-                            sx={{ mt: 1 }}
-                        >
+                        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mt: 1 }}>
                             <FormControlLabel
-                                control={
-                                    <Checkbox
-                                        checked={remember}
-                                        onChange={(e) => setRemember(e.target.checked)}
-                                        size="small"
-                                    />
-                                }
+                                control={<Checkbox checked={remember} onChange={(e) => setRemember(e.target.checked)} size="small" />}
                                 label="Remember me"
                             />
-                            <Link
-                                component="button"
-                                type="button"
-                                onClick={() => toast.info('Chức năng quên mật khẩu (demo)')}
-                                underline="hover"
-                            >
+                            <Link component="button" type="button" onClick={() => toast.info('Chức năng quên mật khẩu (demo)')} underline="hover">
                                 Forgot your password?
                             </Link>
                         </Stack>
@@ -217,64 +241,21 @@ export default function Login() {
                             fullWidth
                             variant="contained"
                             disabled={loading}
-                            sx={{
-                                mt: 2,
-                                py: 1.2,
-                                fontWeight: 700,
-                                borderRadius: 2,
-                                // Nút gradient giống demo
-                                background:
-                                    'linear-gradient(180deg, #1e3a8a 0%, #111827 100%)',
-                                boxShadow:
-                                    '0 6px 14px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.06)',
-                                '&:hover': {
-                                    background:
-                                        'linear-gradient(180deg, #1f2a6d 0%, #0b1220 100%)',
-                                },
-                            }}
+                            sx={{ mt: 2, py: 1.2, fontWeight: 700, borderRadius: 2 }}
                         >
                             {loading ? 'Signing in…' : 'Sign in'}
                         </Button>
                     </Box>
 
-                    <Stack
-                        direction="row"
-                        spacing={1}
-                        justifyContent="center"
-                        sx={{ mt: 2 }}
-                    >
-                        <Typography variant="body2" color="text.secondary">
-                            Don&apos;t have an account?
-                        </Typography>
-                        <Link
-                            component="button"
-                            type="button"
-                            underline="hover"
-                            onClick={() => toast.info('Chức năng đăng ký (demo)')}
-                        >
-                            Sign up
-                        </Link>
-                    </Stack>
+                    <Typography align="center" sx={{ my: 2, color: 'text.secondary' }}>
+                        or
+                    </Typography>
 
-                    <Divider sx={{ my: 2 }}>or</Divider>
-
-                    <Stack spacing={1.2}>
-                        <Button
-                            fullWidth
-                            variant="outlined"
-                            startIcon={<GoogleIcon />}
-                            onClick={() => toast.info('Sign in with Google (demo)')}
-                            sx={{ py: 1, borderRadius: 2 }}
-                        >
+                    <Stack spacing={1.5}>
+                        <Button variant="outlined" fullWidth startIcon={<GoogleIcon />}>
                             Sign in with Google
                         </Button>
-                        <Button
-                            fullWidth
-                            variant="outlined"
-                            startIcon={<FacebookIcon />}
-                            onClick={() => toast.info('Sign in with Facebook (demo)')}
-                            sx={{ py: 1, borderRadius: 2 }}
-                        >
+                        <Button variant="outlined" fullWidth startIcon={<FacebookIcon />}>
                             Sign in with Facebook
                         </Button>
                     </Stack>
