@@ -1,4 +1,3 @@
-// src/App.js
 import { useMemo, useState } from "react";
 import {
   BrowserRouter as Router,
