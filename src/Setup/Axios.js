@@ -2,7 +2,7 @@
 import axios from "axios";
 import { toast } from '../js/ImportComponents/Imports';
 const instance = axios.create({
-    baseURL: 'http://100.75.114.18:8080'
+    baseURL: 'http://100.76.111.32:8080'
 
     //'http://localhost:8080'
 });
