@@ -179,15 +179,36 @@ const HomeLayout = () => {
         );
     };
 
-    // cột table: ID, Name, Device, Symbol, Value, Unit, Status
+    // cột table: ID, Channel, Name, Device, Symbol, Value, Unit, Status
+    // const columns = useMemo(() => [
+    //     { field: 'id', headerName: 'ID', width: 84, headerAlign: 'center', align: 'center' },
+    //     { field: 'channel', headerName: 'Channel', width: 110, headerAlign: 'center', align: 'center' },
+    //     { field: 'name', headerName: 'Name', flex: 1.2, minWidth: 160, headerAlign: 'center', align: 'center' },
+    //     { field: 'deviceName', headerName: 'Device', flex: 1.0, minWidth: 150, headerAlign: 'center', align: 'center' },
+    //     { field: 'symbol', headerName: 'Symbol', flex: .9, minWidth: 120, headerAlign: 'center', align: 'center' },
+    //     { field: 'value', headerName: 'Value', width: 120, headerAlign: 'center', align: 'center' },
+    //     { field: 'unit', headerName: 'Unit', width: 110, headerAlign: 'center', align: 'center' },
+    //     { field: 'status', headerName: 'Status', flex: .6, minWidth: 170, headerAlign: 'center', align: 'center', renderCell: renderStatus },
+    // ], []);
+
+    // 8 cột: ID, Channel, Name, Device, Symbol, Value, Unit, Status
     const columns = useMemo(() => [
-        { field: 'id', headerName: 'ID', width: 84, headerAlign: 'center', align: 'center' },
-        { field: 'name', headerName: 'Name', flex: 1.2, minWidth: 160, headerAlign: 'center', align: 'center' },
-        { field: 'deviceName', headerName: 'Device', flex: 1.0, minWidth: 150, headerAlign: 'center', align: 'center' },
-        { field: 'symbol', headerName: 'Symbol', flex: .9, minWidth: 120, headerAlign: 'center', align: 'center' },
-        { field: 'value', headerName: 'Value', width: 120, headerAlign: 'center', align: 'center' },
-        { field: 'unit', headerName: 'Unit', width: 110, headerAlign: 'center', align: 'center' },
-        { field: 'status', headerName: 'Status', flex: .6, minWidth: 170, headerAlign: 'center', align: 'center', renderCell: renderStatus },
+        { field: 'id', headerName: 'ID', flex: 1, headerAlign: 'center', align: 'center', minWidth: 110 },
+        { field: 'channel', headerName: 'Channel', flex: 1, headerAlign: 'center', align: 'center', minWidth: 110 },
+        { field: 'name', headerName: 'Name', flex: 1, headerAlign: 'center', align: 'center', minWidth: 140 },
+        { field: 'deviceName', headerName: 'Device', flex: 1, headerAlign: 'center', align: 'center', minWidth: 140 },
+        { field: 'symbol', headerName: 'Symbol', flex: 1, headerAlign: 'center', align: 'center', minWidth: 120 },
+        { field: 'value', headerName: 'Value', flex: 1, headerAlign: 'center', align: 'center', minWidth: 120 },
+        { field: 'unit', headerName: 'Unit', flex: 1, headerAlign: 'center', align: 'center', minWidth: 110 },
+        {
+            field: 'status',
+            headerName: 'Status',
+            flex: 1,
+            headerAlign: 'center',
+            align: 'center',
+            minWidth: 160,
+            renderCell: renderStatus,
+        },
     ], []);
 
     return (
