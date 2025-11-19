@@ -6,25 +6,35 @@ import {
     Chip,
     Grid,
     IconButton,
-} from '@mui/material';
-
+}
+    from '@mui/material';
 import ViewModuleIcon from '@mui/icons-material/ViewModule';
 import TableRowsIcon from '@mui/icons-material/TableRows';
+import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
+import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import SensorsOffIcon from '@mui/icons-material/SensorsOff';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
-
 import CustomDataGrid from '../ImportComponents/CustomDataGrid';
 import { socket } from '../Ultils/Socket/Socket';
 import { fetchAllDevices, fetchAllChannels } from '../../Services/APIDevice';
 import Loading from '../Ultils/Loading/Loading';
 
-/* ===== Mini Gauge (SVG 2 nửa vòng xanh) ===== */
-const GaugeMini = ({ value, unit, channel, name }) => {
-    const S = 120;                 // canvas size
+
+const GAUGE_ARC_COLOR = 'rgba(23, 185, 31, 0.63)'; // màu của 2 cung tròn
+const GAUGE_ARC_WIDTH = 10;        // độ dày của 2 cung tròn
+
+
+const GaugeMini = ({ value, unit, channel, name, status }) => {
+    const S = 120; // canvas size
     const cx = 60, cy = 60, r = 52;
+
+    // NỀN THEO STATUS: Normal = xanh, còn lại = đỏ
+    const isNormal = status === 'Normal';
+    const paperBg = isNormal ? '#81c784' : '#ef9a9a';  // << NỀN ĐẬM
+    const paperBorder = isNormal ? '#2e7d32' : '#d32f2f';  // << VIỀN ĐẬM
 
     // helper tạo path cung tròn
     const arc = (startDeg, endDeg) => {
@@ -44,7 +54,8 @@ const GaugeMini = ({ value, unit, channel, name }) => {
                 borderRadius: 3,
                 p: 2,
                 border: '1px solid',
-                borderColor: 'divider',
+                borderColor: paperBorder,
+                bgcolor: paperBg,
                 height: '100%',
                 display: 'flex',
                 flexDirection: 'column',
@@ -54,18 +65,17 @@ const GaugeMini = ({ value, unit, channel, name }) => {
             {/* header nhỏ: channel */}
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Chip label={`CH ${channel ?? '-'}`} size="small" variant="outlined" sx={{ fontWeight: 600 }} />
-                <Box sx={{ width: 24 }} /> {/* chừa chỗ cho cân đối */}
+                <Box sx={{ width: 24 }} />
             </Box>
 
             {/* Vòng gauge */}
             <Box sx={{ display: 'grid', placeItems: 'center', mt: 0.5 }}>
                 <svg width={S} height={S} viewBox={`0 0 ${S} ${S}`}>
-                    {/* vòng nền */}
-                    <circle cx={cx} cy={cy} r={r} fill="none" stroke="rgba(0,0,0,0.08)" strokeWidth="10" />
-
-                    {/* 2 cung xanh (trên & dưới) */}
-                    <path d={arc(30, 150)} stroke="#31bb31ff" strokeWidth="10" fill="none" strokeLinecap="round" />
-                    <path d={arc(210, 330)} stroke="#31bb31ff" strokeWidth="10" fill="none" strokeLinecap="round" />
+                    {/* vòng nền xám nhạt */}
+                    <circle cx={cx} cy={cy} r={r} fill="none" stroke="#e0e0e0" strokeWidth="10" />
+                    {/* 2 cung tròn — màu/độ dày chỉnh ở hằng số phía trên */}
+                    <path d={arc(30, 150)} stroke={GAUGE_ARC_COLOR} strokeWidth={GAUGE_ARC_WIDTH} fill="none" strokeLinecap="round" />
+                    <path d={arc(210, 330)} stroke={GAUGE_ARC_COLOR} strokeWidth={GAUGE_ARC_WIDTH} fill="none" strokeLinecap="round" />
 
                     {/* Giá trị trung tâm */}
                     <text x="50%" y="52%" dominantBaseline="middle" textAnchor="middle"
@@ -81,16 +91,24 @@ const GaugeMini = ({ value, unit, channel, name }) => {
             </Box>
 
             {/* tên tag */}
-            <Typography variant="subtitle2" sx={{ mt: 'auto', textAlign: 'center', fontWeight: 600, color: 'text.secondary' }}>
+            <Typography
+                variant="subtitle2"
+                sx={{ mt: 'auto', textAlign: 'center', fontWeight: 600, color: 'rgba(0, 0, 0, 0.85)' }}
+            >
                 {name || ''}
             </Typography>
         </Paper>
     );
 };
 
+/* ===================== Main Component ===================== */
+const PAGE_SIZE_GRID = 12; // 4 x 3
+
 const HomeLayout = () => {
     const [rows, setRows] = useState([]);
     const [loading, setLoading] = useState(true);
+
+    // DataGrid pagination model
     const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 5 });
 
     // map deviceId -> deviceName
@@ -99,8 +117,26 @@ const HomeLayout = () => {
     const [unitMap, setUnitMap] = useState({});
 
     // ==== Chỉ 1 nút toggle: table <-> grid ====
-    const [isGrid, setIsGrid] = useState(true); // mặc định mở Grid đẹp
+    const [isGrid, setIsGrid] = useState(true); // mặc định mở Grid
     const toggleView = () => setIsGrid((v) => !v);
+
+    // Grid pagination (4x3)
+    const [gridPage, setGridPage] = useState(0);
+    const startIdx = gridPage * PAGE_SIZE_GRID;
+    const endIdx = Math.min(startIdx + PAGE_SIZE_GRID, rows.length);
+    const pageRows = rows.slice(startIdx, endIdx);
+
+    const canPrev = gridPage > 0;
+    const canNext = endIdx < rows.length;
+
+    const handlePrev = () => canPrev && setGridPage((p) => p - 1);
+    const handleNext = () => canNext && setGridPage((p) => p + 1);
+
+    // nếu dữ liệu thay đổi mà page vượt quá thì reset
+    useEffect(() => {
+        if (gridPage > 0 && startIdx >= rows.length) setGridPage(0);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [rows.length]);
 
     // fetch device & channel để lấy deviceName + unit
     useEffect(() => {
@@ -118,7 +154,9 @@ const HomeLayout = () => {
                     chRes.DT.DT.forEach((c) => { if (c?.name) umap[c.name] = c?.unit || ''; });
                     setUnitMap(umap);
                 }
-            } catch { }
+            } catch {
+                // bỏ qua lỗi để không cản socket
+            }
         };
         init();
     }, []);
@@ -148,7 +186,6 @@ const HomeLayout = () => {
 
             setRows(mapped);
             setLoading(false);
-            console.log('[Dashboard realtime]', mapped);
         };
 
         socket.on('SERVER SEND HOME DATA', onHomeData);
@@ -179,19 +216,7 @@ const HomeLayout = () => {
         );
     };
 
-    // cột table: ID, Channel, Name, Device, Symbol, Value, Unit, Status
-    // const columns = useMemo(() => [
-    //     { field: 'id', headerName: 'ID', width: 84, headerAlign: 'center', align: 'center' },
-    //     { field: 'channel', headerName: 'Channel', width: 110, headerAlign: 'center', align: 'center' },
-    //     { field: 'name', headerName: 'Name', flex: 1.2, minWidth: 160, headerAlign: 'center', align: 'center' },
-    //     { field: 'deviceName', headerName: 'Device', flex: 1.0, minWidth: 150, headerAlign: 'center', align: 'center' },
-    //     { field: 'symbol', headerName: 'Symbol', flex: .9, minWidth: 120, headerAlign: 'center', align: 'center' },
-    //     { field: 'value', headerName: 'Value', width: 120, headerAlign: 'center', align: 'center' },
-    //     { field: 'unit', headerName: 'Unit', width: 110, headerAlign: 'center', align: 'center' },
-    //     { field: 'status', headerName: 'Status', flex: .6, minWidth: 170, headerAlign: 'center', align: 'center', renderCell: renderStatus },
-    // ], []);
-
-    // 8 cột: ID, Channel, Name, Device, Symbol, Value, Unit, Status
+    // 8 cột (chia đều): ID, Channel, Name, Device, Symbol, Value, Unit, Status
     const columns = useMemo(() => [
         { field: 'id', headerName: 'ID', flex: 1, headerAlign: 'center', align: 'center', minWidth: 110 },
         { field: 'channel', headerName: 'Channel', flex: 1, headerAlign: 'center', align: 'center', minWidth: 110 },
@@ -200,15 +225,7 @@ const HomeLayout = () => {
         { field: 'symbol', headerName: 'Symbol', flex: 1, headerAlign: 'center', align: 'center', minWidth: 120 },
         { field: 'value', headerName: 'Value', flex: 1, headerAlign: 'center', align: 'center', minWidth: 120 },
         { field: 'unit', headerName: 'Unit', flex: 1, headerAlign: 'center', align: 'center', minWidth: 110 },
-        {
-            field: 'status',
-            headerName: 'Status',
-            flex: 1,
-            headerAlign: 'center',
-            align: 'center',
-            minWidth: 160,
-            renderCell: renderStatus,
-        },
+        { field: 'status', headerName: 'Status', flex: 1, headerAlign: 'center', align: 'center', minWidth: 160, renderCell: renderStatus },
     ], []);
 
     return (
@@ -232,18 +249,39 @@ const HomeLayout = () => {
             {/* Nội dung: Grid Gauge hoặc Table */}
             {isGrid ? (
                 <Box>
+                    {/* Grid 4x3 */}
                     <Grid container spacing={2}>
-                        {rows.map((r) => (
+                        {pageRows.map((r) => (
                             <Grid item key={r.id} xs={12} sm={6} md={4} lg={3}>
+                                {/* lg={4} vẫn ra 3 cột trên màn lớn; xs/sm/md giữ responsive ổn */}
                                 <GaugeMini
                                     channel={r.channel}
                                     name={r.name}
                                     value={r.value}
                                     unit={r.unit}
+                                    status={r.status}
                                 />
                             </Grid>
                         ))}
+                        {/* nếu ít hơn 12 ô thì chèn ô trống để giữ layout 4x3 ổn định */}
+                        {pageRows.length < PAGE_SIZE_GRID &&
+                            Array.from({ length: PAGE_SIZE_GRID - pageRows.length }).map((_, i) => (
+                                <Grid item key={`empty-${i}`} xs={12} sm={6} md={4} lg={3} />
+                            ))}
                     </Grid>
+
+                    {/* Điều khiển trang của Grid */}
+                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 1, mt: 2 }}>
+                        <Typography variant="body2" sx={{ mr: 0.5 }}>
+                            {rows.length === 0 ? '0 – 0 / 0' : `${startIdx + 1} – ${endIdx} / ${rows.length}`}
+                        </Typography>
+                        <IconButton size="small" onClick={handlePrev} disabled={!canPrev}>
+                            <NavigateBeforeIcon />
+                        </IconButton>
+                        <IconButton size="small" onClick={handleNext} disabled={!canNext}>
+                            <NavigateNextIcon />
+                        </IconButton>
+                    </Box>
 
                     {loading && (
                         <Paper sx={{ p: 2, mt: 2 }}>
