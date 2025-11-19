@@ -101,7 +101,6 @@ const GaugeMini = ({ value, unit, channel, name, status }) => {
     );
 };
 
-/* ===================== Main Component ===================== */
 const PAGE_SIZE_GRID = 12; // 4 x 3
 
 const HomeLayout = () => {
