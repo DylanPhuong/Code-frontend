@@ -16,6 +16,7 @@ import FacebookIcon from '@mui/icons-material/Facebook';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
+
 function createDummyToken(email, hours = 24) {
     // JWT giả: header.alg = "none", có exp để PrivateRoute kiểm tra hạn
     const header = { alg: 'none', typ: 'JWT' };
@@ -62,7 +63,7 @@ export default function Login() {
             doSuccess(token, userName);
             return true;
         } else {
-            toast.error('Email hoặc mật khẩu không đúng (fallback)');
+            toast.error('Email hoặc mật khẩu không đúng ⚠️');
             clearPassword();
             return false;
         }
@@ -264,3 +265,4 @@ export default function Login() {
         </Grid>
     );
 }
+
