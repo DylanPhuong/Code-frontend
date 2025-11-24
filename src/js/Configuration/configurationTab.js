@@ -1,7 +1,7 @@
 import { useState, Tabs, Paper, Tab, Box } from '../ImportComponents/Imports';
-import ListChannels from "./Components/Monitoring/ListChannels";
-import ListHistorical from "./Components/Histotical/ListHistorical";
-import ListAlarm from "./Components/Alarm/ListAlarm";
+import ListFTP from './FTP/FTP';
+import ListMySQL from './MySQL/MySQl';
+import ListSQL from './SQL/SQL';
 
 const TabPanel = (props) => {
     const { children, value, index, ...other } = props;
@@ -20,7 +20,7 @@ const TabPanel = (props) => {
     );
 };
 
-const SetupTab = () => {
+const SendTab = () => {
     const [tabValue, setTabValue] = useState(0);
 
     const handleChange = (event, newValue) => {
@@ -43,25 +43,25 @@ const SetupTab = () => {
                         variant="fullWidth"
                         sx={{ width: '100%' }}
                     >
-                        <Tab sx={{ textTransform: 'none', fontWeight: 'bold', fontSize: 15, whiteSpace: 'nowrap' }} label="Cấu hình Tagname" />
-                        <Tab sx={{ textTransform: 'none', fontWeight: 'bold', fontSize: 15, whiteSpace: 'nowrap' }} label="Cấu hình Historical" />
-                        <Tab sx={{ textTransform: 'none', fontWeight: 'bold', fontSize: 15, whiteSpace: 'nowrap' }} label="Cấu hình Alarm" />
+                        <Tab sx={{ textTransform: 'none', fontWeight: 'bold', fontSize: 15, whiteSpace: 'nowrap' }} label="Cấu hình FTP" />
+                        <Tab sx={{ textTransform: 'none', fontWeight: 'bold', fontSize: 15, whiteSpace: 'nowrap' }} label="Cấu hình MySQL" />
+                        <Tab sx={{ textTransform: 'none', fontWeight: 'bold', fontSize: 15, whiteSpace: 'nowrap' }} label="Cấu hình SQL" />
                     </Tabs>
                 </Box>
             </Paper>
 
             <TabPanel value={tabValue} index={0}>
-                <ListChannels />
+                <ListFTP />
             </TabPanel>
             <TabPanel value={tabValue} index={1}>
-                <ListHistorical />
+                <ListMySQL />
             </TabPanel>
             <TabPanel value={tabValue} index={2}>
-                <ListAlarm />
+                <ListSQL />
             </TabPanel>
 
         </div>
     );
 };
 
-export default SetupTab;
+export default SendTab;

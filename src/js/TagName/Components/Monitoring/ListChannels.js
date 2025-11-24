@@ -1,21 +1,23 @@
 import {
-    useState, useEffect,
-    Paper, Button, IconButton,
-    AddCardIcon, BorderColorIcon, DeleteForeverIcon, SettingsApplicationsIcon, toast
+    useState, useEffect, Paper, Button, Box,
+    AddCardIcon, BorderColorIcon, DeleteForeverIcon, SettingsApplicationsIcon, toast,
+    ModalChannel, ModalDelete, Loading, CustomDataGrid
 } from '../../../ImportComponents/Imports';
-// import { Android12Switch } from '../../../Ultils/Switch/IconSwitch'
-import { fetchAllDevices, fetchAllChannels, fetchAllDataFormat, fetchAllDataType, fetchAllFunctionCode, deleteChannel } from '../../../../Services/APIDevice';
-import ModalChannel from '../../../Ultils/Modal/TagName/ModalChannel';
-import ModalDelete from '../../../Ultils/Modal/Delete/ModalDelete';
-import Loading from '../../../Ultils/Loading/Loading';
-import CustomDataGrid from '../../../ImportComponents/CustomDataGrid'
+import {
+    fetchAllDevices,
+    fetchAllChannels,
+    fetchAllDataFormat,
+    fetchAllDataType,
+    fetchAllFunctionCode,
+    deleteChannel
+} from '../../../../Services/APIDevice';
 
 const ListChannels = (props) => {
     const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 5, });
     const [listChannel, setListChannel] = useState([]);
     const [listDataFormat, setlistDataFormat] = useState([]);
     const [listDataType, setlistDataType] = useState([]);
-    const [listFunctionCode, setlistFunctionCode] = useState([]);
+    const [listFunctionCode, setlistFunctionCode] = useState({ modbus: [], mqtt: [] });
     const [listDevices, setListDevices] = useState([])
     const [actionModalChannel, setactionModalChannel] = useState('CREATE');
     const [actionDeleteChannel, setactionDeleteChannel] = useState('');
@@ -34,45 +36,67 @@ const ListChannels = (props) => {
             const functionCodes = await fetchFunctionCode();
             const dataFormats = await fetchDataFormat();
             const dataTypes = await fetchDataType();
-            await fetchDevices();
-            await fetchChannel(functionCodes, dataFormats, dataTypes);
+            const devices = await fetchDevices(); // Lấy danh sách devices
+            await fetchChannel(functionCodes, dataFormats, dataTypes, devices); // Truyền devices vào fetchChannel
             setLoading(false);
         };
         init();
     }, [isShowModalChannel]);
 
-    const fetchChannel = async (functionCodes = [], dataFormats = [], dataTypes = []) => {
+
+    const fetchChannel = async (functionCodes = { modbus: [], mqtt: [] }, dataFormats = [], dataTypes = [], devices = []) => {
         setLoading(true);
         let response = await fetchAllChannels();
-        // console.log('tag name data: ', response)
+
         if (response && response.EC === 0 && Array.isArray(response.DT?.DT)) {
             const rowsWithId = response.DT.DT.map((item) => {
-                const func = functionCodes.find(f => f.id === item.functionCode);
-                const format = dataFormats.find(f => f.id === item.dataFormat);
-                const type = dataTypes.find(t => t.id === item.dataType);
+                // Sử dụng tham số devices thay vì listDevices từ state
+                const deviceInfo = devices.find(device => device.id === item.device?._id);
+                const deviceProtocol = deviceInfo ? deviceInfo.protocol : null; // Hoặc driverName tùy theo dữ liệu
+
+                let func;
+                if (deviceProtocol === "MQTT") {
+                    func = functionCodes.mqtt.find(f =>
+                        f.id === item.functionCode ||
+                        Number(f.id) === Number(item.functionCode) ||
+                        String(f.id) === String(item.functionCode)
+                    );
+                } else {
+                    func = functionCodes.modbus.find(f =>
+                        f.id === item.functionCode ||
+                        Number(f.id) === Number(item.functionCode) ||
+                        String(f.id) === String(item.functionCode)
+                    );
+                }
+
+                const format = dataFormats.find(f => Number(f.id) === Number(item.dataFormat));
+                const type = dataTypes.find(t => Number(t.id) === Number(item.dataType));
+
                 return {
                     id: item._id,
                     channel: item.channel,
                     name: item.name,
                     deviceId: item.device?._id,
                     deviceName: item.device?.name,
+                    deviceProtocol: deviceProtocol,
                     symbol: item.symbol,
                     unit: item.unit,
                     offset: item.offset,
                     gain: item.gain,
-                    lowSet: item.lowSet,
-                    highSet: item.highSet,
                     slaveId: item.slaveId,
                     address: item.address,
+                    topic: item.topic,
                     functionCodeId: func ? func.id : item.functionCode,
-                    functionCodeName: func ? func.name : '',
+                    functionCodeName: func ? func.name : `Unknown (${item.functionCode})`,
                     dataFormatId: format ? format.id : item.dataFormat,
                     dataFormatName: format ? format.name : '',
                     dataTypeId: type ? type.id : item.dataType,
                     dataTypeName: type ? type.name : '',
                     functionText: item.functionText,
                     permission: item.permission,
-                    selectFTP: item.selectFTP
+                    selectFTP: item.selectFTP,
+                    selectMySQL: item.selectMySQL,
+                    selectSQL: item.selectSQL
                 };
             });
 
@@ -82,18 +106,18 @@ const ListChannels = (props) => {
         setSelectedCount(0);
         setLoading(false);
     };
-
-
     const fetchDevices = async () => {
         let response = await fetchAllDevices();
-        // console.log('Check Lisst COM: ', response)
         if (response && response.EC === 0 && response.DT?.DT) {
             const listDevices = response.DT.DT.map((item, index) => ({
                 id: item._id,
                 name: item.name,
+                protocol: item.protocol, // hoặc driverName tùy theo dữ liệu
             }));
-            setListDevices(listDevices);
+            setListDevices(listDevices); // Vẫn set state để sử dụng ở nơi khác
+            return listDevices; // Trả về danh sách devices
         }
+        return []; // Trả về mảng rỗng nếu có lỗi
     };
 
     const fetchDataFormat = async () => {
@@ -125,15 +149,28 @@ const ListChannels = (props) => {
 
     const fetchFunctionCode = async () => {
         let response = await fetchAllFunctionCode();
-        if (response && response.EC === 0 && Array.isArray(response.DT?.DT)) {
-            const listFunctions = response.DT.DT.map((item) => ({
+        if (response && response.EC === 0 && response.DT) {
+            const listFuncModbus = response.DT.Modbus?.map(item => ({
                 id: item._id,
-                name: item.name
-            }));
-            setlistFunctionCode(listFunctions);
-            return listFunctions;
+                name: item.name,
+            })) || [];
+
+            const listFuncMQTT = response.DT.MQTT?.map(item => ({
+                id: item._id,
+                name: item.name,
+            })) || [];
+
+            setlistFunctionCode({
+                modbus: listFuncModbus,
+                mqtt: listFuncMQTT
+            });
+
+            return {
+                modbus: listFuncModbus,
+                mqtt: listFuncMQTT
+            };
         }
-        return [];
+        return { modbus: [], mqtt: [] };
     };
 
     const handleCloseModalChannel = () => {
@@ -148,7 +185,6 @@ const ListChannels = (props) => {
     };
 
     const handleEditChannel = (device) => {
-        // console.log('Check channel update: ', device)
         setSelectionChannel([device.id]);
         setactionModalChannel("EDIT");
         setdataModalChannel(device);
@@ -198,25 +234,35 @@ const ListChannels = (props) => {
         {
             field: "acction",
             headerName: "Action",
-            flex: 1,
+            width: 190,
             headerAlign: 'center',
             align: 'center',
             sortable: false,
             filterable: false,
             renderCell: (params) => (
                 <>
-                    <IconButton
-                        color="primary"
-                        onClick={(e) => { e.stopPropagation(); handleEditChannel(params.row); }}
-                    >
-                        <BorderColorIcon />
-                    </IconButton>
-                    <IconButton
-                        color="error"
-                        onClick={(e) => { e.stopPropagation(); handleDeleteDevice(params.row); }}
-                    >
-                        <DeleteForeverIcon />
-                    </IconButton>
+                    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 1, height: '100%', }}  >
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            startIcon={<BorderColorIcon />}
+                            sx={{ textTransform: 'none', minWidth: 80 }}
+                            onClick={(e) => { e.stopPropagation(); handleEditChannel(params.row); }}
+                        >
+                            Sửa
+                        </Button>
+
+                        <Button
+                            variant="contained"
+                            color="error"
+                            startIcon={<DeleteForeverIcon />}
+                            sx={{ textTransform: 'none', minWidth: 80 }}
+                            onClick={(e) => { e.stopPropagation(); handleDeleteDevice(params.row); }}
+                        >
+                            Xóa
+                        </Button>
+                    </Box>
+
                 </>
             ),
         },
@@ -246,7 +292,7 @@ const ListChannels = (props) => {
                     Cấu hình
                 </Button>
 
-                {selectedCount > 0 && (
+                {selectedCount > 1 && (
                     <Button
                         variant="contained"
                         color="error"
@@ -254,7 +300,7 @@ const ListChannels = (props) => {
                         onClick={(e) => { e.stopPropagation(); handleDeleteDevice(); }}
                         sx={{ mb: 1.5, mx: 1.5, textTransform: 'none' }}
                     >
-                        Xóa Tag
+                        Xóa Tags
                     </Button>
                 )}
 
@@ -289,8 +335,10 @@ const ListChannels = (props) => {
                 listDevices={listDevices}
                 listDataFormat={listDataFormat}
                 listDataType={listDataType}
-                listFunctionCode={listFunctionCode}
+                listFunctionCodeModbus={listFunctionCode.modbus}
+                listFunctionCodeMQTT={listFunctionCode.mqtt}
             />
+
             <ModalDelete
                 action={actionDeleteChannel}
                 isShowModalDelete={isShowModalDelete}
