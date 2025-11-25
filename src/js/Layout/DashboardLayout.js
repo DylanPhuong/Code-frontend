@@ -255,6 +255,22 @@ export default function DashboardLayout() {
         }
     };
 
+    /* ---------- NỀN CHUNG CHO MỌI TRANG ---------- */
+    const isLight = theme.palette.mode === 'light';
+    const baseGradient = isLight
+        ? 'linear-gradient(180deg, #c2cee083 0%, #bddde0ff 100%)'// đổi nền background
+        : 'linear-gradient(180deg, #0b1220 0%, #0e172a 100%)';
+
+    const dotColorA = isLight ? 'rgba(2,6,23,0.04)' : 'rgba(255,255,255,0.04)';
+    const dotColorB = isLight ? 'rgba(2,6,23,0.03)' : 'rgba(255,255,255,0.03)';
+    const bgImage = `
+    radial-gradient(${dotColorA} 1px, transparent 1px),
+    radial-gradient(${dotColorB} 1px, transparent 1px),
+    ${baseGradient}
+  `;
+    // const bgSize = '20px 20px, 40px 40px, 100% 100%';
+    // const bgPosition = '0 0, 10px 10px, 0 0';
+
     return (
         <Box sx={{ display: 'flex', minHeight: '100vh' }}>
             {/* APP BAR */}
@@ -293,30 +309,18 @@ export default function DashboardLayout() {
 
                     {/* Real-time Clock */}
                     <Box
-                        sx={{
-                            mr: 1,
-                            textAlign: 'right',
-                            display: { xs: 'none', sm: 'block' },
-                        }}
+                        sx={{ mr: 1, textAlign: 'right', display: { xs: 'none', sm: 'block' } }}
                         aria-label="current time"
                     >
                         <Typography
                             variant="body2"
-                            sx={{
-                                fontFamily: 'Roboto Mono, monospace',
-                                lineHeight: 1.1,
-                                color: 'text.secondary',
-                            }}
+                            sx={{ fontFamily: 'Roboto Mono, monospace', lineHeight: 1.1, color: 'text.secondary' }}
                         >
                             {timeLabel}
                         </Typography>
                         <Typography
                             variant="caption"
-                            sx={{
-                                fontFamily: 'Roboto Mono, monospace',
-                                color: 'text.secondary',
-                                opacity: 0.9,
-                            }}
+                            sx={{ fontFamily: 'Roboto Mono, monospace', color: 'text.secondary', opacity: 0.9 }}
                         >
                             {dateLabel}
                         </Typography>
@@ -361,12 +365,8 @@ export default function DashboardLayout() {
                         PaperProps={{ elevation: 4, sx: { mt: 1, minWidth: 220 } }}
                     >
                         <Box sx={{ px: 2, py: 1 }}>
-                            <Typography variant="subtitle2" sx={{ lineHeight: 1 }}>
-                                {username}
-                            </Typography>
-                            <Typography variant="caption" color="text.secondary">
-                                @{username}
-                            </Typography>
+                            <Typography variant="subtitle2" sx={{ lineHeight: 1 }}>{username}</Typography>
+                            <Typography variant="caption" color="text.secondary">@{username}</Typography>
                         </Box>
 
                         <Divider sx={{ my: 0.5 }} />
@@ -432,22 +432,26 @@ export default function DashboardLayout() {
                 </Drawer>
             </Box>
 
-            {/* MAIN */}
+            {/* MAIN – áp dụng nền CHUNG ở đây */}
             <Box
                 component="main"
                 sx={{
                     flexGrow: 1,
                     width: { sm: `calc(100% - ${(drawerOpen ? drawerWidth : miniWidth)}px)` },
                     minHeight: '100vh',
-                    bgcolor: 'background.default',
                     transition: theme.transitions.create(['width'], {
                         duration: 250,
                         easing: theme.transitions.easing.easeInOut,
                     }),
+
+                    // Background cho toàn bộ trang con
+                    backgroundImage: bgImage,
+                    backgroundSize: '20px 20px, 40px 40px, 100% 100%',
+                    backgroundPosition: '0 0, 10px 10px, 0 0',
                 }}
             >
                 <Toolbar />
-                <Box sx={{ p: 0.5 }}>{renderContent()}</Box>
+                <Box sx={{ p: 2 }}>{renderContent()}</Box>
             </Box>
         </Box>
     );

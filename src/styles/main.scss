@@ -1,0 +1,87 @@
+/* ========= Global App Surface (light + dark, fixed, subtle dots) ========= */
+
+:root {
+    /* Light mode palette */
+    --app-bg-top: #eaf2ff;
+    --app-bg-mid: #f1f6ff;
+    --app-bg-bot: #f7fafc;
+    --app-dot-color: rgba(45, 55, 72, 0.08);
+    --app-surface-blur: 8px;
+    --app-surface-bg: rgba(255, 255, 255, 0.78);
+    --app-surface-border: rgba(0, 0, 0, 0.06);
+}
+
+/* Dark mode (tự động theo hệ điều hành) */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --app-bg-top: #0f172a;
+        --app-bg-mid: #0b1220;
+        --app-bg-bot: #0a101a;
+        --app-dot-color: rgba(255, 255, 255, 0.06);
+        --app-surface-bg: rgba(15, 23, 42, 0.55);
+        --app-surface-border: rgba(255, 255, 255, 0.08);
+    }
+}
+
+/* (Tuỳ chọn) Cho phép ép mode qua data-theme="dark" hoặc "light" trên <html> */
+html[data-theme="dark"] {
+    --app-bg-top: #0f172a;
+    --app-bg-mid: #0b1220;
+    --app-bg-bot: #0a101a;
+    --app-dot-color: rgba(255, 255, 255, 0.06);
+    --app-surface-bg: rgba(15, 23, 42, 0.55);
+    --app-surface-border: rgba(255, 255, 255, 0.08);
+}
+
+html[data-theme="light"] {
+    --app-bg-top: #eaf2ff;
+    --app-bg-mid: #f1f6ff;
+    --app-bg-bot: #f7fafc;
+    --app-dot-color: rgba(45, 55, 72, 0.08);
+    --app-surface-bg: rgba(255, 255, 255, 0.78);
+    --app-surface-border: rgba(0, 0, 0, 0.06);
+}
+
+/* Nền toàn cục: gradient + lớp chấm li ti */
+html,
+body,
+#root {
+    height: 100%;
+}
+
+body {
+    margin: 0;
+    /* Lớp gradient ba dải màu */
+    background:
+        linear-gradient(180deg, var(--app-bg-top) 0%, var(--app-bg-mid) 45%, var(--app-bg-bot) 100%),
+        /* Lớp chấm li ti (grid dots) */
+        radial-gradient(circle at 1px 1px, var(--app-dot-color) 1px, transparent 0);
+    background-size:
+        100% 100%,
+        20px 20px;
+    /* kích thước ô chấm */
+    background-attachment: fixed;
+}
+
+/* Cards/Paper trong toàn app nhìn “mềm” hơn: kính mờ + viền nhẹ */
+.MuiPaper-root {
+    backdrop-filter: blur(var(--app-surface-blur));
+    background-color: var(--app-surface-bg) !important;
+    border: 1px solid var(--app-surface-border);
+}
+
+/* (Tuỳ chọn) Làm AppBar nổi hơn chút xíu */
+.MuiAppBar-root {
+    backdrop-filter: blur(6px);
+}
+
+/* Đừng để container chính dính sát màn hình */
+main,
+.app-main-wrapper {
+    padding: 12px;
+}
+
+/* Giữ DataGrid hài hoà với nền */
+.MuiDataGrid-root {
+    background: transparent;
+}
