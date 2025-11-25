@@ -1,15 +1,15 @@
 import {
     useState, useEffect,
-    Paper, IconButton,
+    Paper, Button,            // 
     BorderColorIcon
 } from '../../../ImportComponents/Imports';
-import { fetchAllComs } from '../../../../Services/APIDevice'
+import { fetchAllComs } from '../../../../Services/APIDevice';
 import ModalCom from '../../../Ultils/Modal/Com/ModalCom';
 import Loading from '../../../Ultils/Loading/Loading';
 import CustomDataGrid from '../../../ImportComponents/CustomDataGrid';
 
-const ListCom = (props) => {
-    const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 5, });
+const ListCom = () => {
+    const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 5 });
     const [listComs, setListComs] = useState([]);
     const [dataModalCom, setdataModalCom] = useState([]);
     const [isShowModalCom, setisShowModalCom] = useState(false);
@@ -21,10 +21,9 @@ const ListCom = (props) => {
 
     const fetchComs = async () => {
         setLoading(true);
-        let response = await fetchAllComs();
-        console.log('check data com read: ', response)
+        const response = await fetchAllComs();
         if (response && response.EC === 0 && response.DT?.DT) {
-            const rowsWithId = response.DT.DT.map((item, index) => ({
+            const rowsWithId = response.DT.DT.map((item) => ({
                 id: item._id,
                 name: item.name,
                 type: item.type,
@@ -38,13 +37,14 @@ const ListCom = (props) => {
         }
         setLoading(false);
     };
+
     const handleCloseModalCom = () => {
         setisShowModalCom(false);
         fetchComs();
-    }
+    };
 
     const handleEditCom = (com) => {
-        setdataModalCom(com)
+        setdataModalCom(com);
         setisShowModalCom(true);
     };
 
@@ -60,42 +60,44 @@ const ListCom = (props) => {
             field: 'action',
             headerName: 'Action',
             flex: 1,
-            headerAlign: 'center', align: 'center',
+            headerAlign: 'center',
+            align: 'center',
+            sortable: false,
+            filterable: false,
+            disableColumnMenu: true,
             renderCell: (params) => (
-                <>
-                    {/* stopPropagation để không làm DataGrid thay đổi selection */}
-                    <IconButton
-                        color="primary"
-                        onClick={(e) => { e.stopPropagation(); handleEditCom(params.row); }}
-                    >
-                        <BorderColorIcon />
-                    </IconButton>
-                </>
+                <Button
+                    variant="contained"
+                    size="small"
+                    color="primary"
+                    startIcon={<BorderColorIcon />}
+                    onClick={(e) => {
+                        e.stopPropagation(); // tránh trigger select row
+                        handleEditCom(params.row);
+                    }}
+                    sx={{ fontWeight: 600, textTransform: 'none', px: 2 }}
+                >
+                    Sửa
+                </Button>
             ),
         },
     ];
 
     return (
         <>
-            <div >
-
-                <Paper sx={{ height: 400, width: '100%' }}>
-                    <CustomDataGrid
-                        rows={listComs}
-                        columns={columns}
-                        paginationModel={paginationModel}
-                        onPaginationModelChange={setPaginationModel}
-                        pageSizeOptions={[5, 10, 20]}
-                        pagination
-                        hideFooterSelectedRowCount={true}
-                        loading={loading}
-                    // Có thể override styles nếu cần
-                    />
-                    {loading && (
-                        <Loading text="Đang tải dữ liệu..." />
-                    )}
-                </Paper>
-            </div>
+            <Paper sx={{ height: 400, width: '100%' }}>
+                <CustomDataGrid
+                    rows={listComs}
+                    columns={columns}
+                    paginationModel={paginationModel}
+                    onPaginationModelChange={setPaginationModel}
+                    pageSizeOptions={[5, 10, 20]}
+                    pagination
+                    hideFooterSelectedRowCount
+                    loading={loading}
+                />
+                {loading && <Loading text="Đang tải dữ liệu..." />}
+            </Paper>
 
             <ModalCom
                 handleCloseModalCom={handleCloseModalCom}

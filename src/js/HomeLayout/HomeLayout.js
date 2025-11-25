@@ -1,4 +1,3 @@
-/* src/js/HomeLayout/HomeLayout.js */
 import { useEffect, useMemo, useState } from 'react';
 import {
     Box,
@@ -27,24 +26,15 @@ import Loading from '../Ultils/Loading/Loading';
 
 /* ===================== Mini Gauge (SVG) ===================== */
 const GaugeMini = ({ value, unit, channel, name, status }) => {
-    const S = 120; // canvas size
-    const cx = 60, cy = 60, r = 52;
+    // Kích thước vòng
+    const S = 120;            // kích thước canvas
+    const cx = 60, cy = 60;   // tâm
+    const r = 52;            // bán kính
 
+    // Nền thẻ theo trạng thái
     const isNormal = status === 'Normal';
-    const paperBg = isNormal ? 'rgba(46,125,50,.92)' : 'rgba(211,47,47,.92)'; // nền đậm
+    const paperBg = isNormal ? 'rgba(85, 170, 70, 1)' : 'rgba(230, 48, 48, 0.92)'; // nền đậm xanh/đỏ
     const paperBorder = isNormal ? 'rgba(46,125,50,1)' : 'rgba(211,47,47,1)';
-    const ringColor = 'rgba(255,255,255,.9)'; // 2 cung tròn màu trắng ngà
-    const trackColor = 'rgba(255, 255, 255, 1)'; // vòng nền mờ
-
-    const arc = (startDeg, endDeg) => {
-        const toRad = (d) => (Math.PI / 180) * d;
-        const sx = cx + r * Math.cos(toRad(startDeg));
-        const sy = cy + r * Math.sin(toRad(startDeg));
-        const ex = cx + r * Math.cos(toRad(endDeg));
-        const ey = cy + r * Math.sin(toRad(endDeg));
-        const large = endDeg - startDeg <= 180 ? 0 : 1;
-        return `M ${sx} ${sy} A ${r} ${r} 0 ${large} 1 ${ex} ${ey}`;
-    };
 
     return (
         <Paper
@@ -72,29 +62,37 @@ const GaugeMini = ({ value, unit, channel, name, status }) => {
                 <Box sx={{ width: 24 }} />
             </Box>
 
-            {/* Gauge */}
+            {/* Gauge: 1 vòng tròn trắng, text đen */}
             <Box sx={{ display: 'grid', placeItems: 'center', mt: 0.5 }}>
                 <svg width={S} height={S} viewBox={`0 0 ${S} ${S}`}>
-                    {/* vòng nền */}
-                    <circle cx={cx} cy={cy} r={r} fill="none" stroke={trackColor} strokeWidth="10" />
-                    {/* 2 cung màu */}
-                    <path d={arc(30, 150)} stroke={ringColor} strokeWidth="10" fill="none" strokeLinecap="round" />
-                    <path d={arc(210, 330)} stroke={ringColor} strokeWidth="10" fill="none" strokeLinecap="round" />
+                    {/* Vòng tròn trắng (fill trắng hoàn toàn) */}
+                    <circle cx={cx} cy={cy} r={r} fill="#fff" />
 
                     {/* Giá trị */}
-                    <text x="50%" y="52%" dominantBaseline="middle" textAnchor="middle"
-                        style={{ fontSize: 28, fontWeight: 800, fill: '#fff' }}>
+                    <text
+                        x="50%"
+                        y="50%"
+                        dominantBaseline="middle"
+                        textAnchor="middle"
+                        style={{ fontSize: 28, fontWeight: 800, fill: '#000' }}
+                    >
                         {value ?? '--'}
                     </text>
-                    {/* đơn vị */}
-                    <text x="50%" y="66%" dominantBaseline="middle" textAnchor="middle"
-                        style={{ fontSize: 12, fill: 'rgba(255,255,255,.85)' }}>
+
+                    {/* Đơn vị */}
+                    <text
+                        x="50%"
+                        y="66%"
+                        dominantBaseline="middle"
+                        textAnchor="middle"
+                        style={{ fontSize: 12, fill: '#000' }}
+                    >
                         {unit || ''}
                     </text>
                 </svg>
             </Box>
 
-            {/* tên tag */}
+            {/* Tên tag */}
             <Typography
                 variant="subtitle2"
                 sx={{ mt: 'auto', textAlign: 'center', fontWeight: 700, color: '#fff' }}
@@ -112,21 +110,23 @@ const HomeLayout = () => {
     const [rows, setRows] = useState([]);
     const [loading, setLoading] = useState(true);
 
+    // DataGrid pagination model
     const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 5 });
 
+    // map deviceId -> deviceName
     const [deviceMap, setDeviceMap] = useState({});
+    // map tagName -> unit
     const [unitMap, setUnitMap] = useState({});
 
+    // Toggle: grid <-> table
     const [isGrid, setIsGrid] = useState(true);
     const toggleView = () => setIsGrid((v) => !v);
 
-    // Grid pagination
+    // Grid pagination (4x3)
     const [gridPage, setGridPage] = useState(0);
-    // const totalGridPages = Math.ceil(rows.length / PAGE_SIZE_GRID) || 1;
     const startIdx = gridPage * PAGE_SIZE_GRID;
     const endIdx = Math.min(startIdx + PAGE_SIZE_GRID, rows.length);
     const pageRows = rows.slice(startIdx, endIdx);
-
     const canPrev = gridPage > 0;
     const canNext = endIdx < rows.length;
     const handlePrev = () => canPrev && setGridPage((p) => p - 1);
@@ -134,9 +134,9 @@ const HomeLayout = () => {
 
     useEffect(() => {
         if (gridPage > 0 && startIdx >= rows.length) setGridPage(0);
-    }, [rows.length]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [rows.length, gridPage, startIdx]);
 
-    // fetch map
+    // fetch device & channel để lấy deviceName + unit
     useEffect(() => {
         const init = async () => {
             try {
@@ -181,7 +181,8 @@ const HomeLayout = () => {
             });
 
             // Sắp xếp theo Channel tăng dần rồi gán lại id 1..n
-            const sorted = mapped.sort((a, b) => a.channel - b.channel)
+            const sorted = mapped
+                .sort((a, b) => a.channel - b.channel)
                 .map((it, idx) => ({ ...it, id: idx + 1 }));
 
             setRows(sorted);
@@ -195,7 +196,7 @@ const HomeLayout = () => {
         };
     }, [deviceMap, unitMap]);
 
-    // status chip
+    // render chip trạng thái
     const renderStatus = (params) => {
         const val = params.value || 'Unknown';
         let color = 'default';
@@ -216,7 +217,7 @@ const HomeLayout = () => {
         );
     };
 
-    // 8 cột chia đều
+    // 8 cột (chia đều)
     const columns = useMemo(() => [
         { field: 'id', headerName: 'ID', flex: 1, headerAlign: 'center', align: 'center', minWidth: 110 },
         { field: 'channel', headerName: 'Channel', flex: 1, headerAlign: 'center', align: 'center', minWidth: 110, sortComparator: (v1, v2) => Number(v1) - Number(v2) },
@@ -229,7 +230,7 @@ const HomeLayout = () => {
     ], []); // eslint-disable-line react-hooks/exhaustive-deps
 
     return (
-        <Box sx={{ p: 3, bgcolor: 'background.default', minHeight: 'calc(100vh - 64px)' }}>
+        <Box sx={{ p: 0.5, bgcolor: 'background.default', minHeight: 'calc(100vh - 64px)' }}>
             {/* Header + toggle */}
             <Box sx={{ mb: 2.5, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Box>
@@ -252,7 +253,7 @@ const HomeLayout = () => {
                     <Grid
                         container
                         spacing={2}
-                        justifyContent="center"         // <-- canh giữa các item
+                        justifyContent="center"         // canh giữa các item
                     >
                         {pageRows.map((r) => (
                             <Grid item key={r.id} xs={12} sm={6} md={4} lg={3}>
@@ -265,9 +266,11 @@ const HomeLayout = () => {
                                 />
                             </Grid>
                         ))}
+                        {/* Nếu trang hiện có < PAGE_SIZE_GRID item thì không cần padding ô trống nữa
+                vì justifyContent="center" đã canh giữa hàng cuối. */}
                     </Grid>
 
-                    {/* Điều khiển trang */}
+                    {/* Điều khiển trang của Grid */}
                     <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 1, mt: 2 }}>
                         <Typography variant="body2" sx={{ mr: 0.5 }}>
                             {rows.length === 0 ? '0 – 0 / 0' : `${startIdx + 1} – ${endIdx} / ${rows.length}`}
@@ -298,7 +301,7 @@ const HomeLayout = () => {
                         hideFooterSelectedRowCount
                         loading={loading}
                         initialState={{
-                            sorting: { sortModel: [{ field: 'channel', sort: 'asc' }] }
+                            sorting: { sortModel: [{ field: 'channel', sort: 'asc' }] },
                         }}
                     />
                     {loading && <Loading text="Đang tải dữ liệu realtime..." />}

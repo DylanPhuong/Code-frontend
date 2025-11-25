@@ -447,7 +447,7 @@ export default function DashboardLayout() {
                 }}
             >
                 <Toolbar />
-                <Box sx={{ p: 3 }}>{renderContent()}</Box>
+                <Box sx={{ p: 0.5 }}>{renderContent()}</Box>
             </Box>
         </Box>
     );
