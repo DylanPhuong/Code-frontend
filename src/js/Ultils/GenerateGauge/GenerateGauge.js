@@ -31,23 +31,19 @@ const GaugeCard = ({ id, name, unit, value, color = "green" }) => {
                     transform: "rotate(135deg)",
                 }}
             />
-
             {/* Nội dung giá trị */}
-            <Typography variant="h5" fontWeight="bold" sx={{ mt: 2, zIndex: 1 }}>
-                {value}
-            </Typography>
-            <Typography variant="body1" color="text.secondary" sx={{ zIndex: 1 }}>
-                {unit}
-            </Typography>
             <Typography
-                variant="h6"
-                sx={{ mt: 1, fontWeight: "bold", textTransform: "uppercase", zIndex: 1 }}
-            >
-                {name}
+                variant="h5" fontWeight="bold" sx={{ mt: 2, zIndex: 1 }}>{value}
+            </Typography>
+
+            <Typography
+                variant="body1" color="text.secondary" sx={{ zIndex: 1 }}> {unit}
+            </Typography>
+
+            <Typography
+                variant="h6" sx={{ mt: 1, fontWeight: "bold", textTransform: "uppercase", zIndex: 1 }} > {name}
             </Typography>
         </Box>
     );
 }
-
-
 export default GaugeCard
