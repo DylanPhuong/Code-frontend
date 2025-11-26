@@ -1,87 +1,146 @@
-// /* ========= Global App Surface (light + dark, fixed, subtle dots) ========= */
+/* ========= Global App Surface (light + dark, fixed, subtle dots) ========= */
 
-// :root {
-//     /* Light mode palette */
-//     --app-bg-top: #eaf2ff;
-//     --app-bg-mid: #f1f6ff;
-//     --app-bg-bot: #f7fafc;
-//     --app-dot-color: rgba(45, 55, 72, 0.08);
-//     --app-surface-blur: 8px;
-//     --app-surface-bg: rgba(255, 255, 255, 0.78);
-//     --app-surface-border: rgba(0, 0, 0, 0.06);
-// }
+:root {
+    /* Light mode palette */
+    --app-bg-top: #eaf2ff;
+    --app-bg-mid: #f1f6ff;
+    --app-bg-bot: #f7fafc;
+    --app-dot-color: rgba(45, 55, 72, 0.08);
+    --app-surface-blur: 8px;
+    --app-surface-bg: rgba(255, 255, 255, 0.78);
+    --app-surface-border: rgba(0, 0, 0, 0.06);
+}
 
-// /* Dark mode (tự động theo hệ điều hành) */
-// @media (prefers-color-scheme: dark) {
-//     :root {
-//         --app-bg-top: #0f172a;
-//         --app-bg-mid: #0b1220;
-//         --app-bg-bot: #0a101a;
-//         --app-dot-color: rgba(255, 255, 255, 0.06);
-//         --app-surface-bg: rgba(15, 23, 42, 0.55);
-//         --app-surface-border: rgba(255, 255, 255, 0.08);
-//     }
-// }
+/* Dark mode (tự động theo hệ điều hành) */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --app-bg-top: #0f172a;
+        --app-bg-mid: #0b1220;
+        --app-bg-bot: #0a101a;
+        --app-dot-color: rgba(255, 255, 255, 0.06);
+        --app-surface-bg: rgba(15, 23, 42, 0.55);
+        --app-surface-border: rgba(255, 255, 255, 0.08);
+    }
+}
 
-// /* (Tuỳ chọn) Cho phép ép mode qua data-theme="dark" hoặc "light" trên <html> */
-// html[data-theme="dark"] {
-//     --app-bg-top: #0f172a;
-//     --app-bg-mid: #0b1220;
-//     --app-bg-bot: #0a101a;
-//     --app-dot-color: rgba(255, 255, 255, 0.06);
-//     --app-surface-bg: rgba(15, 23, 42, 0.55);
-//     --app-surface-border: rgba(255, 255, 255, 0.08);
-// }
+/* (Tuỳ chọn) Cho phép ép mode qua data-theme="dark" hoặc "light" trên <html> */
+html[data-theme="dark"] {
+    --app-bg-top: #0f172a;
+    --app-bg-mid: #0b1220;
+    --app-bg-bot: #0a101a;
+    --app-dot-color: rgba(255, 255, 255, 0.06);
+    --app-surface-bg: rgba(15, 23, 42, 0.55);
+    --app-surface-border: rgba(255, 255, 255, 0.08);
+}
 
-// html[data-theme="light"] {
-//     --app-bg-top: #eaf2ff;
-//     --app-bg-mid: #f1f6ff;
-//     --app-bg-bot: #f7fafc;
-//     --app-dot-color: rgba(45, 55, 72, 0.08);
-//     --app-surface-bg: rgba(255, 255, 255, 0.78);
-//     --app-surface-border: rgba(0, 0, 0, 0.06);
-// }
+html[data-theme="light"] {
+    --app-bg-top: #eaf2ff;
+    --app-bg-mid: #f1f6ff;
+    --app-bg-bot: #f7fafc;
+    --app-dot-color: rgba(45, 55, 72, 0.08);
+    --app-surface-bg: rgba(255, 255, 255, 0.78);
+    --app-surface-border: rgba(0, 0, 0, 0.06);
+}
 
-// /* Nền toàn cục: gradient + lớp chấm li ti */
-// html,
-// body,
-// #root {
-//     height: 100%;
-// }
+/* Nền toàn cục: gradient + lớp chấm li ti */
+html,
+body,
+#root {
+    height: 100%;
+}
 
-// body {
-//     margin: 0;
-//     /* Lớp gradient ba dải màu */
-//     background:
-//         linear-gradient(180deg, var(--app-bg-top) 0%, var(--app-bg-mid) 45%, var(--app-bg-bot) 100%),
-//         /* Lớp chấm li ti (grid dots) */
-//         radial-gradient(circle at 1px 1px, var(--app-dot-color) 1px, transparent 0);
-//     background-size:
-//         100% 100%,
-//         20px 20px;
-//     /* kích thước ô chấm */
-//     background-attachment: fixed;
-// }
+body {
+    margin: 0;
+    /* Lớp gradient ba dải màu */
+    background:
+        linear-gradient(180deg, var(--app-bg-top) 0%, var(--app-bg-mid) 45%, var(--app-bg-bot) 100%),
+        /* Lớp chấm li ti (grid dots) */
+        radial-gradient(circle at 1px 1px, var(--app-dot-color) 1px, transparent 0);
+    background-size:
+        100% 100%,
+        20px 20px;
+    /* kích thước ô chấm */
+    background-attachment: fixed;
+}
 
-// /* Cards/Paper trong toàn app nhìn “mềm” hơn: kính mờ + viền nhẹ */
-// .MuiPaper-root {
-//     backdrop-filter: blur(var(--app-surface-blur));
-//     background-color: var(--app-surface-bg) !important;
-//     border: 1px solid var(--app-surface-border);
-// }
+/* Cards/Paper trong toàn app nhìn “mềm” hơn: kính mờ + viền nhẹ */
+.MuiPaper-root {
+    backdrop-filter: blur(var(--app-surface-blur));
+    background-color: var(--app-surface-bg) !important;
+    border: 1px solid var(--app-surface-border);
+}
 
-// /* (Tuỳ chọn) Làm AppBar nổi hơn chút xíu */
-// .MuiAppBar-root {
-//     backdrop-filter: blur(6px);
-// }
+/* (Tuỳ chọn) Làm AppBar nổi hơn chút xíu */
+.MuiAppBar-root {
+    backdrop-filter: blur(6px);
+}
 
-// /* Đừng để container chính dính sát màn hình */
-// main,
-// .app-main-wrapper {
-//     padding: 12px;
-// }
+/* Đừng để container chính dính sát màn hình */
+main,
+.app-main-wrapper {
+    padding: 12px;
+}
 
-// /* Giữ DataGrid hài hoà với nền */
-// .MuiDataGrid-root {
-//     background: transparent;
-// }
+/* Giữ DataGrid hài hoà với nền */
+.MuiDataGrid-root {
+    background: transparent;
+}
+
+
+
+/* ====== RESET CƠ BẢN ====== */
+html,
+body,
+#root {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+}
+
+/* Font & smoothing */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: #0b1120;
+    /* màu nền mặc định phía sau khung app */
+}
+
+/* ====== KHUNG MÀN 7 INCH 1024x600 ====== */
+/* Mọi thứ trong app (Router) sẽ nằm trong khung này */
+.screen-7inch {
+    display: flex;
+    flex-direction: column;
+
+    width: 1024px;
+    height: 600px;
+
+    max-width: 100vw;
+    /* nếu chạy trên màn nhỏ hơn 1024 */
+    max-height: 100vh;
+    /* nếu chạy trên màn thấp hơn 600 */
+
+    margin: 0 auto;
+    /* canh giữa theo chiều ngang */
+    overflow: hidden;
+    /* không cho tràn ra ngoài khung */
+    box-sizing: border-box;
+    background-color: transparent;
+    /* nền thực tế dùng từ theme MUI */
+}
+
+/* Khi dev trên màn nhỏ hơn 1024 x 600 (ví dụ laptop) thì cho full màn hình */
+@media (max-width: 1024px),
+(max-height: 600px) {
+    .screen-7inch {
+        width: 100vw;
+        height: 100vh;
+    }
+}
+
+/* Đảm bảo các box lớn của MUI không tự “phình” vượt khung */
+.MuiContainer-root {
+    box-sizing: border-box;
+}

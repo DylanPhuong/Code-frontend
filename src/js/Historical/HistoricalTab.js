@@ -1,22 +1,99 @@
-import { Tabs, Tab, Paper, Box, useState } from '../ImportComponents/Imports';
-import HistoricalData from '../Historical/HistoricalData/HistoricalData'
-import HistoricalAlarm from '../Historical/HistoricalAlarm/HistoricalAlarm'
-import HistoricalTrend from '../Historical/HistoricalTrend/HistoricalTrend'
+// import { Tabs, Tab, Paper, Box, useState } from '../ImportComponents/Imports';
+// import HistoricalData from '../Historical/HistoricalData/HistoricalData'
+// import HistoricalAlarm from '../Historical/HistoricalAlarm/HistoricalAlarm'
+// import HistoricalTrend from '../Historical/HistoricalTrend/HistoricalTrend'
+
+// const TabPanel = (props) => {
+//     const { children, value, index, ...other } = props;
+
+//     return (
+//         <div
+//             role="tabpanel"
+//             hidden={value !== index}
+//             id={`simple-tabpanel-${index}`}
+//             aria-labelledby={`simple-tab-${index}`}
+//             {...other}
+//             style={{ width: "100%" }}
+//         >
+//             {value === index && <Box sx={{ p: 2 }}>{children}</Box>}
+//         </div>
+//     );
+// };
+
+// const HistoricalTab = () => {
+//     const [tabValue, setTabValue] = useState(0);
+
+//     const handleChange = (event, newValue) => {
+//         setTabValue(newValue);
+//     };
+
+//     return (
+//         <div className="container">
+//             <Paper sx={{
+//                 p: 2,
+//                 borderRadius: 2,
+//                 filter: 'drop-shadow(0 0 8px rgba(0,0,0,0.25))',
+//                 mt: 2,
+//             }}>
+//                 <Box sx={{ height: 20, display: 'flex', alignItems: 'center' }}>
+//                     {/* Tabs */}
+//                     <Tabs
+//                         value={tabValue}
+//                         onChange={handleChange}
+//                         variant="fullWidth"
+//                         sx={{ width: '100%' }}
+//                     >
+//                         <Tab sx={{ textTransform: 'none', fontWeight: 'bold', fontSize: 15, whiteSpace: 'nowrap' }} label="Historical Trend Data" />
+//                         <Tab sx={{ textTransform: 'none', fontWeight: 'bold', fontSize: 15, whiteSpace: 'nowrap' }} label="Historical Data" />
+//                         <Tab sx={{ textTransform: 'none', fontWeight: 'bold', fontSize: 15, whiteSpace: 'nowrap' }} label="Historical Alarm" />
+//                     </Tabs>
+//                 </Box>
+//             </Paper>
+
+
+//             <TabPanel value={tabValue} index={0}>
+//                 <HistoricalTrend />
+//             </TabPanel>
+//             <TabPanel value={tabValue} index={1}>
+//                 <HistoricalData />
+//             </TabPanel>
+//             <TabPanel value={tabValue} index={2}>
+//                 <HistoricalAlarm />
+//             </TabPanel>
+//         </div>
+//     );
+// };
+
+// export default HistoricalTab;
+
+
+import { Tabs, Tab, Paper, Box, useState } from "../ImportComponents/Imports";
+import HistoricalData from "../Historical/HistoricalData/HistoricalData";
+import HistoricalAlarm from "../Historical/HistoricalAlarm/HistoricalAlarm";
+import HistoricalTrend from "../Historical/HistoricalTrend/HistoricalTrend";
 
 const TabPanel = (props) => {
     const { children, value, index, ...other } = props;
 
+    const active = value === index;
+
     return (
-        <div
+        <Box
             role="tabpanel"
-            hidden={value !== index}
+            hidden={!active}
             id={`simple-tabpanel-${index}`}
             aria-labelledby={`simple-tab-${index}`}
             {...other}
-            style={{ width: "100%" }}
+            sx={{
+                width: "100%",
+                height: "100%",
+                display: active ? "block" : "none",
+                boxSizing: "border-box",
+                p: 1.5,
+            }}
         >
-            {value === index && <Box sx={{ p: 2 }}>{children}</Box>}
-        </div>
+            {active && children}
+        </Box>
     );
 };
 
@@ -28,39 +105,81 @@ const HistoricalTab = () => {
     };
 
     return (
-        <div className="container">
-            <Paper sx={{
-                p: 2,
-                borderRadius: 2,
-                filter: 'drop-shadow(0 0 8px rgba(0,0,0,0.25))',
-                mt: 2,
-            }}>
-                <Box sx={{ height: 20, display: 'flex', alignItems: 'center' }}>
-                    {/* Tabs */}
+        <Box
+            sx={{
+                width: "100%",
+                height: "100%",
+                maxHeight: "100%",
+                display: "flex",
+                flexDirection: "column",
+                boxSizing: "border-box",
+            }}
+        >
+            <Paper
+                sx={{
+                    p: 1,
+                    borderRadius: 2,
+                    filter: "drop-shadow(0 0 8px rgba(0,0,0,0.25))",
+                    mb: 1,
+                }}
+            >
+                <Box
+                    sx={{
+                        height: 32,
+                        display: "flex",
+                        alignItems: "center",
+                    }}
+                >
                     <Tabs
                         value={tabValue}
                         onChange={handleChange}
                         variant="fullWidth"
-                        sx={{ width: '100%' }}
+                        sx={{ width: "100%" }}
                     >
-                        <Tab sx={{ textTransform: 'none', fontWeight: 'bold', fontSize: 15, whiteSpace: 'nowrap' }} label="Historical Trend Data" />
-                        <Tab sx={{ textTransform: 'none', fontWeight: 'bold', fontSize: 15, whiteSpace: 'nowrap' }} label="Historical Data" />
-                        <Tab sx={{ textTransform: 'none', fontWeight: 'bold', fontSize: 15, whiteSpace: 'nowrap' }} label="Historical Alarm" />
+                        <Tab
+                            sx={{
+                                textTransform: "none",
+                                fontWeight: "bold",
+                                fontSize: 15,
+                                whiteSpace: "nowrap",
+                            }}
+                            label="Historical Trend Data"
+                        />
+                        <Tab
+                            sx={{
+                                textTransform: "none",
+                                fontWeight: "bold",
+                                fontSize: 15,
+                                whiteSpace: "nowrap",
+                            }}
+                            label="Historical Data"
+                        />
+                        <Tab
+                            sx={{
+                                textTransform: "none",
+                                fontWeight: "bold",
+                                fontSize: 15,
+                                whiteSpace: "nowrap",
+                            }}
+                            label="Historical Alarm"
+                        />
                     </Tabs>
                 </Box>
             </Paper>
 
-
-            <TabPanel value={tabValue} index={0}>
-                <HistoricalTrend />
-            </TabPanel>
-            <TabPanel value={tabValue} index={1}>
-                <HistoricalData />
-            </TabPanel>
-            <TabPanel value={tabValue} index={2}>
-                <HistoricalAlarm />
-            </TabPanel>
-        </div>
+            {/* Nội dung các tab */}
+            <Box sx={{ flex: 1, minHeight: 0 }}>
+                <TabPanel value={tabValue} index={0}>
+                    <HistoricalTrend />
+                </TabPanel>
+                <TabPanel value={tabValue} index={1}>
+                    <HistoricalData />
+                </TabPanel>
+                <TabPanel value={tabValue} index={2}>
+                    <HistoricalAlarm />
+                </TabPanel>
+            </Box>
+        </Box>
     );
 };
 

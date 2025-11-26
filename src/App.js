@@ -5,7 +5,7 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
-import { ThemeProvider, createTheme, CssBaseline } from "@mui/material";
+import { ThemeProvider, createTheme, CssBaseline, Box } from "@mui/material";
 import { ToastContainer, Bounce } from "./js/ImportComponents/Imports";
 
 import ColorModeContext from "./js/Theme/ColorModeContext";
@@ -40,7 +40,9 @@ function App() {
         palette: { mode },
         components: {
           MuiPaper: {
-            styleOverrides: { root: { transition: "background-color .2s ease" } },
+            styleOverrides: {
+              root: { transition: "background-color .2s ease" },
+            },
           },
         },
       }),
@@ -55,30 +57,36 @@ function App() {
       <ColorModeContext.Provider value={colorMode}>
         <ThemeProvider theme={theme}>
           <CssBaseline />
-          <Router>
-            <Routes>
-              {/* Nếu đã đăng nhập thì chặn vào /login */}
-              <Route
-                path="/login"
-                element={isAuthed ? <Navigate to="/home" replace /> : <Login />}
-              />
 
-              {/* Các route cần đăng nhập */}
-              <Route element={<PrivateRoute />}>
-                {/* Root -> /home */}
-                <Route path="/" element={<Navigate to="/home" replace />} />
-                <Route path="/home" element={<DashboardLayout />} />
-                <Route path="/device" element={<DashboardLayout />} />
-                <Route path="/tagname" element={<DashboardLayout />} />
-                <Route path="/funcSettings" element={<DashboardLayout />} />
-                <Route path="/historical" element={<DashboardLayout />} />
+          {/* Toàn bộ app nằm trong khung 7 inch 1024x600 */}
+          <Box className="screen-7inch">
+            <Router>
+              <Routes>
+                {/* Nếu đã đăng nhập thì chặn vào /login */}
+                <Route
+                  path="/login"
+                  element={
+                    isAuthed ? <Navigate to="/home" replace /> : <Login />
+                  }
+                />
+
+                {/* Các route cần đăng nhập */}
+                <Route element={<PrivateRoute />}>
+                  {/* Root -> /home */}
+                  <Route path="/" element={<Navigate to="/home" replace />} />
+                  <Route path="/home" element={<DashboardLayout />} />
+                  <Route path="/device" element={<DashboardLayout />} />
+                  <Route path="/tagname" element={<DashboardLayout />} />
+                  <Route path="/funcSettings" element={<DashboardLayout />} />
+                  <Route path="/historical" element={<DashboardLayout />} />
+                  <Route path="*" element={<NotFound />} />
+                </Route>
+
+                {/* Fallback cho các route khác */}
                 <Route path="*" element={<NotFound />} />
-              </Route>
-
-              {/* Fallback cho các route khác */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Router>
+              </Routes>
+            </Router>
+          </Box>
         </ThemeProvider>
       </ColorModeContext.Provider>
 

@@ -1,22 +1,104 @@
-import { useState, Tabs, Paper, Tab, Box } from '../ImportComponents/Imports';
-import ListFTP from './FTP/FTP';
-import ListMySQL from './MySQL/MySQl';
-import ListSQL from './SQL/SQL';
+// import { useState, Tabs, Paper, Tab, Box } from '../ImportComponents/Imports';
+// import ListFTP from './FTP/FTP';
+// import ListMySQL from './MySQL/MySQl';
+// import ListSQL from './SQL/SQL';
+
+// const TabPanel = (props) => {
+//     const { children, value, index, ...other } = props;
+
+//     return (
+//         <div
+//             role="tabpanel"
+//             hidden={value !== index}
+//             id={`simple-tabpanel-${index}`}
+//             aria-labelledby={`simple-tab-${index}`}
+//             {...other}
+//             style={{ width: "100%" }}
+//         >
+//             {value === index && <Box sx={{ p: 2 }}>{children}</Box>}
+//         </div>
+//     );
+// };
+
+// const SendTab = () => {
+//     const [tabValue, setTabValue] = useState(0);
+
+//     const handleChange = (event, newValue) => {
+//         setTabValue(newValue);
+//     };
+
+//     return (
+//         <div className="container">
+//             <Paper sx={{
+//                 p: 2,
+//                 borderRadius: 2,
+//                 filter: 'drop-shadow(0 0 8px rgba(0,0,0,0.25))',
+//                 mt: 2,
+//             }}>
+//                 <Box sx={{ height: 20, display: 'flex', alignItems: 'center' }}>
+//                     {/* Tabs */}
+//                     <Tabs
+//                         value={tabValue}
+//                         onChange={handleChange}
+//                         variant="fullWidth"
+//                         sx={{ width: '100%' }}
+//                     >
+//                         <Tab sx={{ textTransform: 'none', fontWeight: 'bold', fontSize: 15, whiteSpace: 'nowrap' }} label="Cấu hình FTP" />
+//                         <Tab sx={{ textTransform: 'none', fontWeight: 'bold', fontSize: 15, whiteSpace: 'nowrap' }} label="Cấu hình MySQL" />
+//                         <Tab sx={{ textTransform: 'none', fontWeight: 'bold', fontSize: 15, whiteSpace: 'nowrap' }} label="Cấu hình SQL" />
+//                     </Tabs>
+//                 </Box>
+//             </Paper>
+
+//             <TabPanel value={tabValue} index={0}>
+//                 <ListFTP />
+//             </TabPanel>
+//             <TabPanel value={tabValue} index={1}>
+//                 <ListMySQL />
+//             </TabPanel>
+//             <TabPanel value={tabValue} index={2}>
+//                 <ListSQL />
+//             </TabPanel>
+
+//         </div>
+//     );
+// };
+
+// export default SendTab;
+
+
+import {
+    useState,
+    Tabs,
+    Paper,
+    Tab,
+    Box,
+} from "../ImportComponents/Imports";
+import ListFTP from "./FTP/FTP";
+import ListMySQL from "./MySQL/MySQl";
+import ListSQL from "./SQL/SQL";
 
 const TabPanel = (props) => {
     const { children, value, index, ...other } = props;
+    const active = value === index;
 
     return (
-        <div
+        <Box
             role="tabpanel"
-            hidden={value !== index}
+            hidden={!active}
             id={`simple-tabpanel-${index}`}
             aria-labelledby={`simple-tab-${index}`}
             {...other}
-            style={{ width: "100%" }}
+            sx={{
+                width: "100%",
+                height: "100%",
+                display: active ? "block" : "none",
+                boxSizing: "border-box",
+                p: 2,
+            }}
         >
-            {value === index && <Box sx={{ p: 2 }}>{children}</Box>}
-        </div>
+            {active && children}
+        </Box>
     );
 };
 
@@ -28,40 +110,82 @@ const SendTab = () => {
     };
 
     return (
-        <div className="container">
-            <Paper sx={{
-                p: 2,
-                borderRadius: 2,
-                filter: 'drop-shadow(0 0 8px rgba(0,0,0,0.25))',
-                mt: 2,
-            }}>
-                <Box sx={{ height: 20, display: 'flex', alignItems: 'center' }}>
-                    {/* Tabs */}
+        <Box
+            sx={{
+                width: "100%",
+                height: "100%",
+                maxHeight: "100%",
+                display: "flex",
+                flexDirection: "column",
+                boxSizing: "border-box",
+            }}
+        >
+            <Paper
+                sx={{
+                    p: 2,
+                    borderRadius: 2,
+                    filter: "drop-shadow(0 0 8px rgba(0,0,0,0.25))",
+                    mb: 1.5,
+                }}
+            >
+                <Box
+                    sx={{
+                        height: 20,
+                        display: "flex",
+                        alignItems: "center",
+                    }}
+                >
                     <Tabs
                         value={tabValue}
                         onChange={handleChange}
                         variant="fullWidth"
-                        sx={{ width: '100%' }}
+                        sx={{ width: "100%" }}
                     >
-                        <Tab sx={{ textTransform: 'none', fontWeight: 'bold', fontSize: 15, whiteSpace: 'nowrap' }} label="Cấu hình FTP" />
-                        <Tab sx={{ textTransform: 'none', fontWeight: 'bold', fontSize: 15, whiteSpace: 'nowrap' }} label="Cấu hình MySQL" />
-                        <Tab sx={{ textTransform: 'none', fontWeight: 'bold', fontSize: 15, whiteSpace: 'nowrap' }} label="Cấu hình SQL" />
+                        <Tab
+                            sx={{
+                                textTransform: "none",
+                                fontWeight: "bold",
+                                fontSize: 15,
+                                whiteSpace: "nowrap",
+                            }}
+                            label="Cấu hình FTP"
+                        />
+                        <Tab
+                            sx={{
+                                textTransform: "none",
+                                fontWeight: "bold",
+                                fontSize: 15,
+                                whiteSpace: "nowrap",
+                            }}
+                            label="Cấu hình MySQL"
+                        />
+                        <Tab
+                            sx={{
+                                textTransform: "none",
+                                fontWeight: "bold",
+                                fontSize: 15,
+                                whiteSpace: "nowrap",
+                            }}
+                            label="Cấu hình SQL"
+                        />
                     </Tabs>
                 </Box>
             </Paper>
 
-            <TabPanel value={tabValue} index={0}>
-                <ListFTP />
-            </TabPanel>
-            <TabPanel value={tabValue} index={1}>
-                <ListMySQL />
-            </TabPanel>
-            <TabPanel value={tabValue} index={2}>
-                <ListSQL />
-            </TabPanel>
-
-        </div>
+            <Box sx={{ flex: 1, minHeight: 0 }}>
+                <TabPanel value={tabValue} index={0}>
+                    <ListFTP />
+                </TabPanel>
+                <TabPanel value={tabValue} index={1}>
+                    <ListMySQL />
+                </TabPanel>
+                <TabPanel value={tabValue} index={2}>
+                    <ListSQL />
+                </TabPanel>
+            </Box>
+        </Box>
     );
 };
 
 export default SendTab;
+
