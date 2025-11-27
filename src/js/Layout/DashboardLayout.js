@@ -1,27 +1,15 @@
-import { useState, useEffect, useContext } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
 import {
-    AppBar, Box, Drawer, Toolbar, List, ListItemButton, ListItemIcon,
-    ListItemText, Collapse, Typography, IconButton, Tooltip,
-    Divider, Avatar, Menu, MenuItem, ListItemIcon as MenuItemIcon, Paper,
-} from "@mui/material";
-import { useTheme } from "@mui/material/styles";
-import MenuIcon from "@mui/icons-material/Menu";
-import MenuOpenIcon from "@mui/icons-material/MenuOpen";
-import DashboardIcon from "@mui/icons-material/Dashboard";
-import DevicesIcon from "@mui/icons-material/Devices";
-import SettingsIcon from "@mui/icons-material/Settings";
-import HistoryIcon from "@mui/icons-material/History";
-import LabelIcon from "@mui/icons-material/Label";
-import FunctionsIcon from "@mui/icons-material/Functions";
-import ExpandLess from "@mui/icons-material/ExpandLess";
-import ExpandMore from "@mui/icons-material/ExpandMore";
-import Brightness4Icon from "@mui/icons-material/Brightness4";
-import Brightness7Icon from "@mui/icons-material/Brightness7";
-import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
-import ShieldOutlinedIcon from "@mui/icons-material/ShieldOutlined";
-import LogoutIcon from "@mui/icons-material/Logout";
-import { toast } from "react-toastify";
+    useState, useEffect, useContext, useTheme, useNavigate, useLocation,
+    AppBar, Box, Drawer, Toolbar, List, ListItemButton, ListItemText, ListItemIcon,
+    Collapse, Typography, IconButton, Tooltip, Divider, Avatar,
+    Menu, MenuItem,
+    Paper, ListItemIcon as MenuItemIcon,
+    // Icons
+    MenuIcon, MenuOpenIcon, DashboardIcon, DevicesIcon, SettingsIcon,
+    HistoryIcon, LabelIcon, FunctionsIcon, ExpandLess, ExpandMore,
+    Brightness4Icon, Brightness7Icon, PersonOutlineIcon,
+    ShieldOutlinedIcon, LogoutIcon, toast,
+} from "../ImportComponents/Imports";
 
 import ColorModeContext from "../Theme/ColorModeContext";
 import DeviceTab from "../Device/DeviceTab";
@@ -360,7 +348,7 @@ export default function DashboardLayout() {
     /* ---------- NỀN CHUNG CHO MỌI TRANG ---------- */
     const isLight = theme.palette.mode === "light";
     const baseGradient = isLight
-        ? "linear-gradient(180deg, #c2cee083 0%, #bddde0ff 100%)"
+        ? "linear-gradient(180deg, #d2dff1e5 0%, #e9efd4ff 100%)"
         : "linear-gradient(180deg, #0b1220 0%, #0e172a 100%)";
 
     const dotColorA = isLight ? "rgba(2,6,23,0.04)" : "rgba(255,255,255,0.04)";

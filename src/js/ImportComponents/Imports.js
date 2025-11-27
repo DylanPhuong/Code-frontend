@@ -1,5 +1,5 @@
 
-export { default as React, useState, useEffect, useRef, useMemo } from 'react';
+export { default as React, useState, useEffect, useRef, useMemo, useContext, } from 'react';
 
 
 // MUI Components
@@ -9,6 +9,8 @@ export {
     DialogActions, InputAdornment, Modal, Radio, FormControlLabel,
     RadioGroup, LinearProgress, Stack, Chip, FormControl, Checkbox,
     Input, InputLabel, CardContent, Card, CircularProgress, Popover,
+    AppBar, Drawer, Toolbar, List, ListItemButton, ListItemIcon,
+    ListItemText, Collapse, Tooltip, Divider, Avatar, Menu,
 } from '@mui/material';
 
 // MUI Icons
@@ -39,6 +41,30 @@ export { default as LibraryAddCheckIcon } from '@mui/icons-material/LibraryAddCh
 export { default as SyncIcon } from '@mui/icons-material/Sync';
 export { default as LeakAddIcon } from '@mui/icons-material/LeakAdd';
 export { default as TableViewIcon } from '@mui/icons-material/TableView';
+
+
+export { default as MenuIcon } from "@mui/icons-material/Menu";
+export { default as MenuOpenIcon } from "@mui/icons-material/MenuOpen";
+export { default as DashboardIcon } from "@mui/icons-material/Dashboard";
+export { default as DevicesIcon } from "@mui/icons-material/Devices";
+export { default as SettingsIcon } from "@mui/icons-material/Settings";
+export { default as HistoryIcon } from "@mui/icons-material/History";
+export { default as LabelIcon } from "@mui/icons-material/Label";
+export { default as FunctionsIcon } from "@mui/icons-material/Functions";
+export { default as ExpandLess } from "@mui/icons-material/ExpandLess";
+export { default as ExpandMore } from "@mui/icons-material/ExpandMore";
+export { default as Brightness4Icon } from "@mui/icons-material/Brightness4";
+export { default as Brightness7Icon } from "@mui/icons-material/Brightness7";
+export { default as PersonOutlineIcon } from "@mui/icons-material/PersonOutline";
+export { default as ShieldOutlinedIcon } from "@mui/icons-material/ShieldOutlined";
+export { default as LogoutIcon } from "@mui/icons-material/Logout";
+
+
+// MUI theme hook
+export { useTheme } from "@mui/material/styles";
+
+// React Router hooks
+export { useNavigate, useLocation } from "react-router-dom";
 
 // MUI Date Pickers
 export { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';

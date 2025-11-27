@@ -1,69 +1,15 @@
-// import { useState } from "react";
-// import { Tabs, Tab, Box, Paper } from "@mui/material";
-// import ListDevices from "./Components/ListDevices/ListDevice";
-// import ListCom from "./Components/ListCom/ListCom";
+import {
+    useState,
+    Tabs,
+    Tab,
+    Box,
+    Paper,
+} from "../ImportComponents/Imports";
 
-// const TabPanel = (props) => {
-//     const { children, value, index, ...other } = props;
-
-//     return (
-//         <div
-//             role="tabpanel"
-//             hidden={value !== index}
-//             id={`simple-tabpanel-${index}`}
-//             aria-labelledby={`simple-tab-${index}`}
-//             {...other}
-//             style={{ width: "100%" }}
-//         >
-//             {value === index && <Box sx={{ p: 2 }}>{children}</Box>}
-//         </div>
-//     );
-// };
-
-// const DeviceTab = () => {
-//     const [tabValue, setTabValue] = useState(0);
-
-//     const handleChange = (event, newValue) => {
-//         setTabValue(newValue);
-//     };
-
-//     return (
-//         <div className="container">
-//             <Paper sx={{ width: "100%", p: 2, borderRadius: 2, boxShadow: 2 }}>
-//                 <Box sx={{ height: 20, display: 'flex', alignItems: 'center' }}>
-//                     {/* Tabs */}
-//                     <Tabs
-//                         value={tabValue}
-//                         onChange={handleChange}
-//                         variant="fullWidth"
-//                         sx={{ width: '100%' }}
-//                     >
-//                         <Tab sx={{ textTransform: 'none', fontWeight: 'bold', fontSize: 15, whiteSpace: 'nowrap' }} label="Cấu hình Device" />
-//                         <Tab sx={{ textTransform: 'none', fontWeight: 'bold', fontSize: 15, whiteSpace: 'nowrap' }} label="Cấu hình COM" />
-//                     </Tabs>
-//                 </Box>
-//             </Paper>
-
-
-//             <TabPanel value={tabValue} index={0}>
-//                 <ListDevices />
-//             </TabPanel>
-//             <TabPanel value={tabValue} index={1}>
-//                 <ListCom />
-//             </TabPanel>
-
-//         </div>
-//     );
-// };
-
-// export default DeviceTab;
-
-
-import { useState } from "react";
-import { Tabs, Tab, Box, Paper } from "@mui/material";
 import ListDevices from "./Components/ListDevices/ListDevice";
 import ListCom from "./Components/ListCom/ListCom";
 
+// Panel chung cho từng tab
 const TabPanel = (props) => {
     const { children, value, index, ...other } = props;
 
@@ -71,13 +17,18 @@ const TabPanel = (props) => {
         <div
             role="tabpanel"
             hidden={value !== index}
-            id={`simple-tabpanel-${index}`}
-            aria-labelledby={`simple-tab-${index}`}
+            id={`device-tabpanel-${index}`}
+            aria-labelledby={`device-tab-${index}`}
             {...other}
-            style={{ width: "100%", height: "100%" }}
+            style={{ width: "100%" }}
         >
             {value === index && (
-                <Box sx={{ p: 2 }}>
+                <Box
+                    sx={{
+                        px: 0,   // bỏ padding trái/phải
+                        py: 2,   // giữ chút padding trên/dưới
+                    }}
+                >
                     {children}
                 </Box>
             )}
@@ -88,48 +39,71 @@ const TabPanel = (props) => {
 const DeviceTab = () => {
     const [tabValue, setTabValue] = useState(0);
 
-    const handleChange = (event, newValue) => {
+    const handleChange = (_event, newValue) => {
         setTabValue(newValue);
     };
 
     return (
         <Box
+            // thay cho <div className="container">
             sx={{
-                width: '100%',
-                height: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 1.5,
+                p: 0,                         // ✅ không padding → table sát sidebar
+                m: 0,
+                height: "100%",
+                maxHeight: "100%",
+                display: "flex",
+                flexDirection: "column",
+                boxSizing: "border-box",
             }}
         >
-            <Paper sx={{ width: "100%", p: 1, borderRadius: 2, boxShadow: 2 }}>
-                <Box sx={{ height: 32, display: 'flex', alignItems: 'center' }}>
-                    <Tabs
-                        value={tabValue}
-                        onChange={handleChange}
-                        variant="fullWidth"
-                        sx={{ width: '100%' }}
-                    >
-                        <Tab
-                            sx={{ textTransform: 'none', fontWeight: 'bold', fontSize: 15, whiteSpace: 'nowrap' }}
-                            label="Cấu hình Device"
-                        />
-                        <Tab
-                            sx={{ textTransform: 'none', fontWeight: 'bold', fontSize: 15, whiteSpace: 'nowrap' }}
-                            label="Cấu hình COM"
-                        />
-                    </Tabs>
-                </Box>
+            {/* Thanh tabs phía trên */}
+            <Paper
+                sx={{
+                    px: 0,                      // không padding ngang
+                    py: 0,
+                    borderRadius: 2,
+                    filter: "drop-shadow(0 0 8px rgba(0,0,0,0.25))",
+                    mt: 2,
+                }}
+            >
+                <Tabs
+                    value={tabValue}
+                    onChange={handleChange}
+                    variant="fullWidth"
+                    sx={{ width: "100%" }}
+                >
+                    <Tab
+                        sx={{
+                            textTransform: "none",
+                            fontWeight: "bold",
+                            fontSize: 15,
+                            whiteSpace: "nowrap",
+                        }}
+                        label="Cấu hình Device"
+                        id="device-tab-0"
+                        aria-controls="device-tabpanel-0"
+                    />
+                    <Tab
+                        sx={{
+                            textTransform: "none",
+                            fontWeight: "bold",
+                            fontSize: 15,
+                            whiteSpace: "nowrap",
+                        }}
+                        label="Cấu hình COM"
+                        id="device-tab-1"
+                        aria-controls="device-tabpanel-1"
+                    />
+                </Tabs>
             </Paper>
 
-            <Box sx={{ flex: 1, minHeight: 0 }}>
-                <TabPanel value={tabValue} index={0}>
-                    <ListDevices />
-                </TabPanel>
-                <TabPanel value={tabValue} index={1}>
-                    <ListCom />
-                </TabPanel>
-            </Box>
+            {/* Nội dung từng tab */}
+            <TabPanel value={tabValue} index={0}>
+                <ListDevices />
+            </TabPanel>
+            <TabPanel value={tabValue} index={1}>
+                <ListCom />
+            </TabPanel>
         </Box>
     );
 };
