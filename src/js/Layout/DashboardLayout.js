@@ -56,8 +56,7 @@ export default function DashboardLayout() {
     const dateLabel = `${pad2(now.getDate())}/${pad2(
         now.getMonth() + 1
     )}/${now.getFullYear()}`;
-    // =======================================
-
+    
     useEffect(() => {
         if (currentPage === "tagname" || currentPage === "funcSettings") {
             setConfigOpen(true);
@@ -384,19 +383,25 @@ export default function DashboardLayout() {
             >
                 <Toolbar>
                     {/* Title centered */}
-                    <Box
+                    <Box                      
                         sx={{
-                            position: "absolute",
-                            left: "50%",
-                            transform: "translateX(-50%)",
-                            pointerEvents: "none",
+                            flexGrow: 1,          // chiếm toàn bộ khoảng trống bên trái tới trước cụm bên phải
+                            textAlign: "center",
+                            px: 2,
+                            overflow: "hidden",   // nếu chữ quá dài thì chỉ wrap trong vùng này
                         }}
                     >
                         <Typography
                             variant="h6"
-                            sx={{ fontWeight: 800, color: "primary.main" }}
+                             sx={{
+                                    fontWeight: 800,
+                                    color: "primary.main",
+                                    fontSize: { xs: 14, sm: 18 },
+                                    lineHeight: 1.2,
+                                    wordBreak: "break-word",  // ✅ cho phép xuống dòng
+                                }}
                         >
-                            BỘ GIÁM SÁT THU THẬP DỮ LIỆU - DATALOGER
+                            BỘ GIÁM SÁT THU THẬP DỮ LIỆU - DATALOGER HCM-UTE TP.HCM 
                         </Typography>
                     </Box>
 
@@ -408,6 +413,7 @@ export default function DashboardLayout() {
                             mr: 1,
                             textAlign: "right",
                             display: { xs: "none", sm: "block" },
+                            flexShrink: 0,           // không bị co hẹp khi màn nhỏ
                         }}
                         aria-label="current time"
                     >
