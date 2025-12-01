@@ -20,7 +20,7 @@ const TabPanel = (props) => {
                 height: "100%",
                 display: active ? "block" : "none",
                 boxSizing: "border-box",
-                p: 1.5,
+                p: 0,  // fix padding table  
             }}
         >
             {active && children}

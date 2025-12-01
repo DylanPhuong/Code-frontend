@@ -194,53 +194,53 @@ const ListHistorical = () => {
 
     const columns = [
         {
-            field: "id",
-            headerName: "STT",
-            width: 100,
-            align: "center",
-            headerAlign: "center",
-        },
-        {
-            field: "timestamp",
-            headerName: "Date and Time",
-            width: 250,
-            align: "center",
-            headerAlign: "center",
-        },
-        {
-            field: "tagname",
-            headerName: "Name",
-            width: 200,
-            align: "center",
-            headerAlign: "center",
-        },
-        {
-            field: "symbol",
-            headerName: "Symbol",
-            flex: 1,
-            align: "center",
-            headerAlign: "center",
-        },
-        {
-            field: "value",
-            headerName: "Value",
-            flex: 1,
-            align: "center",
-            headerAlign: "center",
-        },
-        {
-            field: "unit",
-            headerName: "Unit",
-            flex: 1,
-            align: "center",
-            headerAlign: "center",
-        },
-        {
-            field: "status",
-            headerName: "Status",
-            width: 250,
-            headerAlign: "center",
-            align: "center",
+    field: "id",
+    headerName: "STT",
+    whith: 15,
+    align: "center",
+    headerAlign: "center",
+  },
+  {
+    field: "timestamp",
+    headerName: "Date and Time",
+    flex: 1,
+    align: "center",
+    headerAlign: "center",
+  },
+  {
+    field: "tagname",
+    headerName: "Name",
+    flex: 1,
+    align: "center",
+    headerAlign: "center",
+  },
+  {
+    field: "symbol",
+    headerName: "Symbol",
+    flex: 1,
+    align: "center",
+    headerAlign: "center",
+  },
+  {
+    field: "value",
+    headerName: "Value",
+    flex: 1,
+    align: "center",
+    headerAlign: "center",
+  },
+  {
+    field: "unit",
+    headerName: "Unit",
+    flex: 1,
+    align: "center",
+    headerAlign: "center",
+  },
+  {
+    field: "status",
+    headerName: "Status",
+    flex: 1,
+    align: "center",
+    headerAlign: "center",
             renderCell: (params) => {
                 let color = "default";
                 let icon = <HelpOutlineIcon sx={{ fontSize: 18 }} />;
@@ -374,7 +374,7 @@ const ListHistorical = () => {
                             sx={{
                                 textTransform: "none",
                                 height: "fit-content",
-                                minWidth: 120,
+                                minWidth: 100,
                                 whiteSpace: "nowrap",
                             }}
                             disabled={
@@ -394,7 +394,7 @@ const ListHistorical = () => {
                             sx={{
                                 textTransform: "none",
                                 height: "fit-content",
-                                minWidth: 120,
+                                minWidth: 100,
                                 whiteSpace: "nowrap",
                             }}
                         >

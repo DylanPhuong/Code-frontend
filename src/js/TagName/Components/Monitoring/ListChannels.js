@@ -218,22 +218,22 @@ const ListChannels = (props) => {
     };
 
     const columns = [
-        { field: 'channel', headerName: 'Channel', flex: 1, width: 80, headerAlign: 'center', align: 'center' },
+        { field: 'channel', headerName: 'Channel', flex: 1.2, width: 80, headerAlign: 'center', align: 'center' },
         { field: 'name', headerName: 'Name', flex: 1, width: 150, headerAlign: 'center', align: 'center' },
-        { field: 'deviceName', headerName: 'Device', flex: 1, width: 150, headerAlign: 'center', align: 'center' },
+        { field: 'deviceName', headerName: 'Device', flex: 1.2, width: 150, headerAlign: 'center', align: 'center' },
         { field: 'slaveId', headerName: 'Slave Id', flex: 1, width: 80, headerAlign: 'center', align: 'center' },
         { field: 'address', headerName: 'Address', flex: 1, width: 100, headerAlign: 'center', align: 'center' },
         {
             field: 'functionCodeName',
             headerName: 'Function Code',
-            width: 250,
+            width: 230,
             headerAlign: 'center',
             align: 'center',
         },
         {
             field: "acction",
             headerName: "Action",
-            width: 190,
+            width: 170,
             headerAlign: 'center',
             align: 'center',
             sortable: false,

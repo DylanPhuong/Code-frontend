@@ -576,12 +576,8 @@ export default function DashboardLayout() {
                 component="main"
                 sx={{
                     flexGrow: 1,
-                    width: {
-                        sm: `calc(100% - ${drawerOpen ? drawerWidth : miniWidth
-                            }px)`,
-                    },
-                    height: "100%",
-                    maxHeight: "100%",
+                    width: { sm: `calc(100% - ${drawerOpen ? drawerWidth : miniWidth } px)`,},
+                    minHeight: "100vh",
                     display: "flex",
                     flexDirection: "column",
                     transition: theme.transitions.create(["width"], {
@@ -589,7 +585,7 @@ export default function DashboardLayout() {
                         easing: theme.transitions.easing.easeInOut,
                     }),
 
-                    // Background cho toàn bộ trang con
+                    // Background cho toàn bộ trang 
                     backgroundImage: bgImage,
                     backgroundSize: "20px 20px, 40px 40px, 100% 100%",
                     backgroundPosition: "0 0, 10px 10px, 0 0",

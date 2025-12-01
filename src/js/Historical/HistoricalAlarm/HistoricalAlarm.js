@@ -193,7 +193,7 @@ const ListAlarm = () => {
         {
             field: "id",
             headerName: "STT",
-            width: 100,
+            width: 35,
             align: "center",
             headerAlign: "center",
         },
@@ -249,7 +249,7 @@ const ListAlarm = () => {
         {
             field: "type",
             headerName: "Type",
-            width: 250,
+            width: 200,
             headerAlign: "center",
             align: "center",
             renderCell: (params) => {
@@ -379,7 +379,7 @@ const ListAlarm = () => {
                             sx={{
                                 textTransform: "none",
                                 height: "fit-content",
-                                minWidth: 120,
+                                minWidth: 100,
                                 whiteSpace: "nowrap",
                             }}
                             disabled={
@@ -399,7 +399,7 @@ const ListAlarm = () => {
                             sx={{
                                 textTransform: "none",
                                 height: "fit-content",
-                                minWidth: 120,
+                                minWidth: 100,
                                 whiteSpace: "nowrap",
                             }}
                         >
